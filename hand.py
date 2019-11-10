@@ -7,6 +7,7 @@ class Hand(base.Base):
     def __init__(self, prefix, side, id, fingerCount=5):
         base.Base.__init__(self, prefix, side, id)
         self.metaType = 'Hand'
+        self.idPrefix = id
 
         self.constructNameSpace(self.metaType)
         self.setLocAttr()
@@ -50,7 +51,6 @@ class Hand(base.Base):
                      \-------(+)--(+)--(+)--(+)  <--id:Thumb
                      
     (example for left hand)
-    
     '''
     def buildGuide(self):
         grp = cmds.group(em=True, n=self.locGrpName)
@@ -61,30 +61,30 @@ class Hand(base.Base):
         zValue = self.startPos[2]
         offsets = [zValue+2*self.interval, zValue+self.interval, zValue, zValue-self.interval, zValue-2*self.interval]
 
-        thumb = finger.Finger(prefix=self.prefix, side=self.side, id='thumb')
+        thumb = finger.Finger(prefix=self.prefix, side=self.side, id=self.idPrefix+'thumb', type='Thumb')
         thumb.setLocAttr(startPos=[self.startPos[0]-sideFactor*0.7, self.startPos[1], offsets[0]], interval=0.3)  # x offset 0.7
         thumbGrp = thumb.buildGuide()
 
-        index = finger.Finger(prefix=self.prefix, side=self.side, id='index')
+        index = finger.Finger(prefix=self.prefix, side=self.side, id=self.idPrefix+'index')
         index.setLocAttr(startPos=[self.startPos[0], self.startPos[1], offsets[1]], interval=0.5)
         indexGrp = index.buildGuide()
 
-        middle = finger.Finger(prefix=self.prefix, side=self.side, id='middle')
+        middle = finger.Finger(prefix=self.prefix, side=self.side, id=self.idPrefix+'middle')
         middle.setLocAttr(startPos=[self.startPos[0], self.startPos[1], offsets[2]], interval=0.55)
         middleGrp = middle.buildGuide()
 
-        ring = finger.Finger(prefix=self.prefix, side=self.side, id='ring')
+        ring = finger.Finger(prefix=self.prefix, side=self.side, id=self.idPrefix+'ring')
         ring.setLocAttr(startPos=[self.startPos[0], self.startPos[1], offsets[3]], interval=0.5)
         ringGrp = ring.buildGuide()
 
-        pinky = finger.Finger(prefix=self.prefix, side=self.side, id='pinky')
+        pinky = finger.Finger(prefix=self.prefix, side=self.side, id=self.idPrefix+'pinky')
         pinky.setLocAttr(startPos=[self.startPos[0]-sideFactor*0.3, self.startPos[1], offsets[4]], interval=0.4)  # x offset 0.3
         pinkyGrp = pinky.buildGuide()
 
         self.fingerList = [thumb, index, middle, ring, pinky]
 
         # single joint locator
-        self.wrist = base.Base(prefix=self.prefix, side=self.side, id='wrist')
+        self.wrist = base.Base(prefix=self.prefix, side=self.side, id=self.idPrefix+'wrist')
         self.wrist.setLocAttr(startPos=[self.startPos[0]-sideFactor*self.distance, self.startPos[1], self.startPos[2]])
         wrist = self.wrist.buildGuide()
 
@@ -105,28 +105,12 @@ class Hand(base.Base):
         wrist = self.wrist.constructJnt()
 
         misc.batchParent(tempList, wrist)
-        cmds.parent(wrist, self.jntGrp)
+        #cmds.parent(wrist, self.jntGrp)
 
     '''
     Place Hand Controller (Finger Controllers + Whole Hand Controller)
     '''
     def placeCtrl(self):
-        '''
-        # placing hand controller
-        self.setCtrlShape()
-        handCtrl = cmds.duplicate('Hand_tempShape', name=self.ctrlName)[0]
-        handPos = cmds.xform(self.wrist.jntName, q=True, t=True, ws=True)
-        cmds.rotate(0, 0, 0, handCtrl, absolute=True)
-        if self.side == 'L':
-            cmds.move(handPos[0]+1.4, handPos[1], handPos[2], handCtrl, absolute=True)
-        elif self.side == 'R':
-            cmds.move(handPos[0]-1.4, handPos[1], handPos[2], handCtrl, absolute=True)
-            cmds.rotate(0, 180, 0, handCtrl, relative=True)
-        cmds.move(handPos[0], handPos[1], handPos[2], handCtrl + '.scalePivot', handCtrl + '.rotatePivot')
-        cmds.makeIdentity(handCtrl, apply=True, t=1, r=1, s=1)
-
-        self.deleteShape()
-        '''
         self.constraintList = []
         # placing finger controller
         for obj in self.fingerList:
@@ -145,6 +129,10 @@ class Hand(base.Base):
         wristJnt = cmds.ls(self.wrist.jntName)
         for obj in self.constraintList:
             cmds.parentConstraint(wristJnt, obj, mo=True)
+
+    def colorCtrl(self):
+        for obj in self.fingerList:
+            obj.colorCtrl()
 
 
 

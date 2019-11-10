@@ -1,16 +1,16 @@
 import maya.cmds as cmds
 import base
-#reload(base)
 
 class Finger(base.Base):
-    def __init__(self, prefix, side, id):
+    def __init__(self, prefix, side, id, type='Other'):
         base.Base.__init__(self, prefix, side, id)
         self.metaType = 'Finger'
+        self.type = type
 
         self.constructNameSpace(self.metaType)
 
         '''default locator attribute'''
-        self.setLocAttr([0, 0, 0], 0.5, 4)
+        self.setLocAttr()
 
     '''
     Create controller shape
@@ -25,7 +25,7 @@ class Finger(base.Base):
         cmds.scale(0.2, 0.2, 0.4, fingerShape)
         cmds.rotate(90, 0, 0, fingerShape)
 
-        # thumb shape (not in use)
+        # thumb shape
         thumbShape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='Thumb_tempShape')
         cmds.scale(0.2, 0.2, 0.2, thumbShape)
 
@@ -61,11 +61,13 @@ class Finger(base.Base):
             else:
                 cmds.parent(finger, self.locName+str(i-1), relative=True)
                 if self.side == 'L':
-                    cmds.move(self.interval, 0, 0, finger, relative=True)  # move finger joint along +x axis
+                    cmds.move(self.interval, 0, 0, finger, relative=True)  # move finger locator along +x axis
                 elif self.side == 'R':
-                    cmds.move(-self.interval, 0, 0, finger, relative=True)  # move finger joint along -x axis
+                    cmds.move(-self.interval, 0, 0, finger, relative=True)  # move finger locator along -x axis
 
         cmds.parent(grp, self.locGrp)
+        self.colorLoc()
+        cmds.select(clear=True)
         return grp
 
     '''
@@ -78,7 +80,7 @@ class Finger(base.Base):
         for i, loc in enumerate(finger):
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
             jnt = cmds.joint(p=locPos, name=self.jntName+str(i))
-            cmds.setAttr(jnt + '.radius', 1)
+            cmds.setAttr(jnt + '.radius', self.scale)
 
         cmds.parent(self.jntName+'0', self.jntGrp)
         return cmds.ls(self.jntName+'0')
@@ -88,41 +90,53 @@ class Finger(base.Base):
     '''
     def placeCtrl(self):
         self.setCtrlShape()
-        grp = cmds.group(em=True, name=self.ctrlGrpName)
 
-        for i in range(self.segment):
-            ctrl = cmds.duplicate('Finger_tempShape', name=self.ctrlName+str(i))[0]
+        for i in range(self.segment-1):
             jntPos = cmds.xform(self.jntName+str(i), q=True, t=True, ws=True)
-            cmds.move(jntPos[0], jntPos[1]+1, jntPos[2], ctrl)
-            cmds.move(jntPos[0], jntPos[1], jntPos[2], ctrl + '.rotatePivot', ctrl + '.scalePivot')
+            jntRot = cmds.xform(self.locName+str(i), q=True, ro=True, ws=True)
+
+            if self.type != 'Thumb':
+                ctrl = cmds.duplicate('Finger_tempShape', name=self.ctrlName+str(i))[0]
+                cmds.move(jntPos[0], jntPos[1]+1, jntPos[2], ctrl)
+                cmds.move(jntPos[0], jntPos[1], jntPos[2], ctrl+'.rotatePivot', ctrl+'.scalePivot')
+            else:
+                ctrl = cmds.duplicate('Thumb_tempShape', name=self.ctrlName+str(i))[0]
+                cmds.move(jntPos[0], jntPos[1], jntPos[2], ctrl)
+
+            offsetGrp = cmds.group(em=True, name=self.ctrlName+str(i)+'offset')
+            cmds.move(jntPos[0], jntPos[1], jntPos[2], offsetGrp)
+            cmds.parent(ctrl, offsetGrp)
+            cmds.rotate(jntRot[0], jntRot[1], jntRot[2], offsetGrp)
             cmds.makeIdentity(ctrl, apply=True, t=1, r=1, s=1)
             if i == 0:
-                cmds.parent(ctrl, grp)
+                cmds.parent(offsetGrp, self.ctrlGrp)
             elif i != 0:
-                cmds.parent(ctrl, self.ctrlName + str(i))
+                cmds.parent(offsetGrp, self.ctrlName+str(i-1))
 
         self.deleteShape()
-        cmds.parent(grp, self.ctrlGrp)
-        return grp
-
-    '''
-    Lock attribute translate(x,y,z), scale(x,y,z), rotate(x)
-    '''
-    def lockCtrl(self):
-        ctrls = cmds.ls(self.ctrlName+'*', transforms=True)
-        for ctrl in ctrls:
-            for transform in 's':
-                for axis in 'xyz':
-                    cmds.setAttr(ctrl+'.'+transform+axis, l=True, k=0)
-            cmds.setAttr(ctrl+'.rx', l=1, k=0)
+        return cmds.ls(self.ctrlName+str(0)+'offset')
 
     '''
     Build Constraint between controller and joint
     '''
     def addConstraint(self):
-        for i in range(self.segment):
+        for i in range(self.segment-1):
             ctrl = cmds.ls(self.ctrlName+str(i))[0]
             jnt = cmds.ls(self.jntName+str(i))
             cmds.orientConstraint(ctrl, jnt, mo=True)
+
+    '''
+    Lock attribute translate(x,y,z), scale(x,y,z), rotate(x), thumb has full transform ability
+    '''
+    def lockCtrl(self):
+        if self.type != 'Thumb':
+            ctrls = cmds.ls(self.ctrlName+'*', transforms=True)
+            offsetGrp = cmds.ls('*offset')
+            for ctrl in ctrls:
+                if ctrl not in offsetGrp:
+                    for transform in 's':
+                        for axis in 'xyz':
+                            cmds.setAttr(ctrl+'.'+transform+axis, l=True, k=0)
+                    cmds.setAttr(ctrl+'.rx', l=1, k=0)
 
 

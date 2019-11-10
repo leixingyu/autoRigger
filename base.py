@@ -1,7 +1,8 @@
 import maya.cmds as cmds
+import misc
 
 class Base(object):
-    def __init__(self, prefix, side, id='idPlaceHolder'):
+    def __init__(self, prefix, side='NA', id='idPlaceHolder'):
         self.prefix = prefix
         self.side = side
         self.id = id
@@ -48,12 +49,17 @@ class Base(object):
     Create a single locator locator
     '''
     def buildGuide(self):
-        locator = cmds.spaceLocator(n=self.locName)
-        cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], locator, relative=True)
-        cmds.scale(self.scale, self.scale, self.scale, locator)
+        self.loc = cmds.spaceLocator(n=self.locName)
+        grp = cmds.group(em=True, name=self.locGrpName)
 
-        cmds.parent(locator, self.locGrp)
-        return locator
+        cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], self.loc, relative=True)
+        cmds.scale(self.scale, self.scale, self.scale, self.loc)
+
+        cmds.parent(self.loc, grp)
+        cmds.parent(grp, self.locGrp)
+
+        self.colorLoc()
+        return grp
 
     '''
     default functions
@@ -61,15 +67,27 @@ class Base(object):
     def constructJnt(self):
         cmds.select(clear=True)
         locPos = cmds.xform(self.locName, q=True, t=True, ws=True)
-        jnt = cmds.joint(p=locPos, name=self.jntName)
-        cmds.setAttr(jnt + '.radius', 1)
-        return jnt
+        self.jnt = cmds.joint(p=locPos, name=self.jntName)
+        cmds.setAttr(self.jnt + '.radius', 1)
+
+        cmds.parent(self.jnt, self.jntGrp)
+        misc.orientJnt(self.jnt)
+        return self.jnt
 
     def placeCtrl(self):
-        print('default placing controller, needs override')
+        self.ctrl = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.ctrlName)[0]
+        #cmds.scale(2, 2, 2, self.ctrl)
+
+        jntPos = cmds.xform(self.jnt, q=True, t=True, ws=True)
+        locRot = cmds.xform(self.loc, q=True, ro=True, ws=True)
+        cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrl)
+        cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrl)
+        cmds.makeIdentity(self.ctrl, apply=True, t=1, r=1, s=1)
+
+        cmds.parent(self.ctrl, self.ctrlGrp)
 
     def addConstraint(self):
-        print('default adding constraint, needs override')
+        cmds.parentConstraint(self.ctrl, self.jnt)
 
     '''
     Delete the locator group from the scene
@@ -91,13 +109,31 @@ class Base(object):
     def colorCtrl(self):
         ctrls = cmds.ls(self.ctrlName+'*')
         for ctrl in ctrls:
-            cmds.setAttr(ctrl + '.overrideEnabled', 1)
-            if self.side == 'L':
-                cmds.setAttr(ctrl + '.overrideColor', 6)
-            elif self.side == 'R':
-                cmds.setAttr(ctrl + '.overrideColor', 13)
-            else:
-                cmds.setAttr(ctrl + '.overrideColor', 17)
+            if cmds.nodeType(ctrl) in ['nurbsCurve', 'transform']:
+            #print cmds.nodeType(ctrl)
+                cmds.setAttr(ctrl + '.overrideEnabled', 1)
+                if self.side == 'L':
+                    cmds.setAttr(ctrl + '.overrideColor', 6)
+                elif self.side == 'R':
+                    cmds.setAttr(ctrl + '.overrideColor', 13)
+                else:
+                    cmds.setAttr(ctrl + '.overrideColor', 17)
+
+    '''
+    Color-code the controller based on the side
+    '''
+    def colorLoc(self):
+        locs = cmds.ls(self.locName+'*')
+        for loc in locs:
+            if cmds.nodeType(loc) in ['transform']:
+            #print cmds.nodeType(ctrl)
+                cmds.setAttr(loc + '.overrideEnabled', 1)
+                if self.side == 'L':
+                    cmds.setAttr(loc + '.overrideColor', 6)
+                elif self.side == 'R':
+                    cmds.setAttr(loc + '.overrideColor', 13)
+                else:
+                    cmds.setAttr(loc + '.overrideColor', 17)
 
     '''
     lock specific attribute(s) in a controller
@@ -110,11 +146,11 @@ class Base(object):
     '''
     def buildRig(self):
         self.constructJnt()
-        self.deleteGuide()
         self.placeCtrl()
+        self.deleteGuide()
         self.colorCtrl()
-        self.lockCtrl()
         self.addConstraint()
+        self.lockCtrl()
 
 
 
