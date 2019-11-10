@@ -1,9 +1,11 @@
-# autoRigger-Human
-AutoRigger-Human is an auto rigging tool for maya, specifically designed for create fast and functional rigs for human characters
+# autoRigger
+AutoRigger is an auto rigging tool for maya, specifically designed for create fast and functional rigs for human characters
+
+biped rig video demo (1.5 version): https://vimeo.com/372001985
+
+modular rig video demo (1.5 version): https://vimeo.com/367496504
 
 face rig video demo (1.4 version): https://www.youtube.com/watch?v=Vnmq4ok0KUs
-
-body rig video demo (1.0 version): https://vimeo.com/308809558
 
 ## Installation
 create a folder called AutoRigger in your maya system path
@@ -23,6 +25,17 @@ reload(interface)
 currently working on modular rigging system implementation
 
 ## Past Updates
+
+<details>
+  <summary>Update 1.6 (11/08/2019)</summary>
+  <p>*added biped template</p>
+</details>
+
+<details>
+  <summary>Update 1.5 (10/19/2019)</summary>
+  <p>*Modular system online</p>
+  <p>*New interface and functions</p>
+</details>
 
 <details>
   <summary>Update 1.4 (4/21/2019)</summary>
