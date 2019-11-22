@@ -1,24 +1,23 @@
 # autoRigger
 AutoRigger is an auto rigging tool for maya, specifically designed for create fast and functional rigs for human characters
 
-biped rig video demo (1.5 version): https://vimeo.com/372001985
+biped rig video demo (1.6 version): https://vimeo.com/372001985
 
 modular rig video demo (1.5 version): https://vimeo.com/367496504
 
 face rig video demo (1.4 version): https://www.youtube.com/watch?v=Vnmq4ok0KUs
 
 ## Installation
-create a folder called AutoRigger in your maya system path
+create a folder called **autoRigger** in your maya script path
 
-example: C:\Users\Username\Documents\maya\2018(current maya version)\scripts\autoRigger
+example: C:/Users/Username/Documents/maya/(current maya version)/scripts/**autoRigger**
 
-place all .py files in your folder
+place all files in your folder
 
 
 Enter following command in maya script editor(python tab)
 ```python
-from autoRiggerPlus import interface
-reload(interface)
+from autoRigger import autoRigger
 ```
 
 ## Future Development
