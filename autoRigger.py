@@ -352,7 +352,7 @@ class MyWindow(QtWidgets.QDialog):
 
         return id, side, startPos, interval, distance, height
 
-path = r'C:\Users\Lei\Documents\maya\2018\scripts\autoRiggerPlus\ui'
+path = os.path.dirname(os.path.abspath(__file__)) + r'\ui'
 os.chdir(path)
 #currentDir = os.getcwd()
 window = MyWindow()
