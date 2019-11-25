@@ -1,7 +1,7 @@
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 import os
-from autoRiggerPlus import misc, base, finger, foot, spline, limb, hand, arm, leg, biped
+import misc, base, finger, foot, spline, limb, hand, arm, leg, biped
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
