@@ -1,12 +1,12 @@
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 import os
-import misc, base, finger, foot, spline, limb, hand, arm, leg, biped
+from autoRiggerPlus import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MyWindow, self).__init__()
-        _loadUi('a.ui', self)
+        _loadUi('autoRigger.ui', self)
 
         '''init ui variables'''
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
@@ -19,6 +19,7 @@ class MyWindow(QtWidgets.QDialog):
     def connectFunc(self):
         self.setPrefixBtn.clicked.connect(self.setPrefix)
 
+        # biped
         self.baseThumb.clicked.connect(self.baseClick)
         self.fingerThumb.clicked.connect(self.fingerClick)
         self.footThumb.clicked.connect(self.footClick)
@@ -31,6 +32,11 @@ class MyWindow(QtWidgets.QDialog):
         self.armThumb.clicked.connect(self.armClick)
         self.legThumb.clicked.connect(self.legClick)
 
+        # quadruped
+        self.qspineThumb.clicked.connect(self.qspineClick)
+        self.tailThumb.clicked.connect(self.tailClick)
+
+        # utility
         self.buildCurrentBtn.clicked.connect(self.buildCurrent)
         self.buildAllBtn.clicked.connect(self.buildAll)
         self.mirrorBtn.clicked.connect(self.mirrorLoc)
@@ -147,7 +153,7 @@ class MyWindow(QtWidgets.QDialog):
         height = 0.4
         if self.footHghtEdit.text():
             try: height = float(self.footHghtEdit.text())
-            except: print('segment type error, using default foot segment value 4')
+            except: print('segment type error, using default foot segment value 0.4')
 
         return id, side, startPos, interval, height
 
@@ -174,12 +180,12 @@ class MyWindow(QtWidgets.QDialog):
         length = 6.0
         if self.spineLgthEdit.text():
             try: length = float(self.spineLgthEdit.text())
-            except: print('interval type error, using default spine interval value 0.5')
+            except: print('interval type error, using default spine interval value 6.0')
 
         segment = 6
         if self.spineSgmtEdit.text():
             try: segment = int(self.spineSgmtEdit.text())
-            except: print('segment type error, using default spine segment value 4')
+            except: print('segment type error, using default spine segment value 6')
 
         return id, side, startPos, length, segment
     
@@ -212,7 +218,7 @@ class MyWindow(QtWidgets.QDialog):
         interval = 2.0
         if self.limbIntvEdit.text():
             try: interval = float(self.limbIntvEdit.text())
-            except: print('interval type error, using default limb interval value 0.5')
+            except: print('interval type error, using default limb interval value 2.0')
 
         return id, side, type, startPos, interval
 
@@ -270,7 +276,7 @@ class MyWindow(QtWidgets.QDialog):
         distance = 2.0
         if self.handDistEdit.text():
             try: distance = float(self.handDistEdit.text())
-            except: print('interval type error, using default hand interval value 0.5')
+            except: print('interval type error, using default hand interval value 2.0')
 
         return id, side, startPos, interval, distance
 
@@ -304,12 +310,12 @@ class MyWindow(QtWidgets.QDialog):
         distance = 2.0
         if self.armDistEdit.text():
             try: distance = float(self.armDistEdit.text())
-            except: print('interval type error, using default arm interval value 0.5')
+            except: print('interval type error, using default arm interval value 2.0')
 
         gap = 2.0
         if self.armGapEdit.text():
             try: gap = float(self.armGapEdit.text())
-            except: print('interval type error, using default arm interval value 0.5')
+            except: print('interval type error, using default arm interval value 2.0')
 
         return id, side, startPos, interval, distance, gap
     
@@ -343,14 +349,90 @@ class MyWindow(QtWidgets.QDialog):
         distance = 2.0
         if self.legDistEdit.text():
             try: distance = float(self.legDistEdit.text())
-            except: print('interval type error, using default leg interval value 0.5')
+            except: print('interval type error, using default leg interval value 2.0')
 
         height = 2.0
         if self.legHghtEdit.text():
             try: height = float(self.legHghtEdit.text())
-            except: print('interval type error, using default leg interval value 0.5')
+            except: print('interval type error, using default leg interval value 2.0')
 
         return id, side, startPos, interval, distance, height
+
+    def qspineClick(self):
+        id, side, startPos, length, segment = self.setQSpineAttr()
+        s = quadSpine.QuadSpine(prefix=self.prefix, side=side, id=id)
+        self.qspineIDEdit.setText('')
+        self.current = s
+        self.toBuildList.append(s)
+        s.setLocAttr(startPos=startPos, length=length, segment=segment)
+        s.buildGuide()
+
+    def setQSpineAttr(self):
+        id = 'quadSpine_id'
+        if self.qspineIDEdit.text(): id = self.qspineIDEdit.text()
+
+        side = 'NA'
+
+        startPos = [0, 0, 0]
+        if self.qspinePosXEdit.text() and self.qspinePosYEdit.text() and self.qspinePosZEdit.text():
+            try:
+                startPos = [float(self.qspinePosXEdit.text()), float(self.qspinePosYEdit.text()), float(self.qspinePosZEdit.text())]
+            except:
+                print('start position type error, using default spine start position [0, 0, 0]')
+
+        length = 6.0
+        if self.qspineLgthEdit.text():
+            try:
+                length = float(self.qspineLgthEdit.text())
+            except:
+                print('interval type error, using default spine interval value 6.0')
+
+        segment = 7
+        if self.qspineSgmtEdit.text():
+            try:
+                segment = int(self.qspineSgmtEdit.text())
+            except:
+                print('segment type error, using default spine segment value 7')
+
+        return id, side, startPos, length, segment
+
+    def tailClick(self):
+        id, side, startPos, length, segment = self.setTailAttr()
+        t = tail.Tail(prefix=self.prefix, side=side, id=id)
+        self.qspineIDEdit.setText('')
+        self.current = t
+        self.toBuildList.append(t)
+        t.setLocAttr(startPos=startPos, length=length, segment=segment)
+        t.buildGuide()
+
+    def setTailAttr(self):
+        id = 'tail_id'
+        if self.tailIDEdit.text(): id = self.tailIDEdit.text()
+
+        side = 'NA'
+
+        startPos = [0, 0, 0]
+        if self.tailPosXEdit.text() and self.tailPosYEdit.text() and self.tailPosZEdit.text():
+            try:
+                startPos = [float(self.tailPosXEdit.text()), float(self.tailPosYEdit.text()), float(self.tailPosZEdit.text())]
+            except:
+                print('start position type error, using default tail start position [0, 0, 0]')
+
+        length = 4.0
+        if self.tailLgthEdit.text():
+            try:
+                length = float(self.tailLgthEdit.text())
+            except:
+                print('interval type error, using default tail interval value 6.0')
+
+        segment = 6
+        if self.tailSgmtEdit.text():
+            try:
+                segment = int(self.tailSgmtEdit.text())
+            except:
+                print('segment type error, using default tail segment value 7')
+
+        return id, side, startPos, length, segment
 
 path = os.path.dirname(os.path.abspath(__file__)) + r'\ui'
 os.chdir(path)

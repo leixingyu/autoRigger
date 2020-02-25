@@ -10,6 +10,11 @@ def batchParent(list, parent):
     for item in list:
         cmds.parent(item, parent, relative=False)
 
+def hiereParent(list):
+    for i, item in enumerate(list):
+        if list[i] != list[-1]:
+            cmds.parent(list[i], list[i+1])
+
 def makeTextCurve(string, name):
     """
     Make a controller out of text
@@ -49,6 +54,12 @@ def orientJnt(jnt):
     else:
         cmds.select(jnt)
     cmds.joint(e=True, ch=True, oj='xyz', zso=True)
+
+    kids = cmds.listRelatives(jnt, children=True, type="joint", allDescendents=True)
+    for k in kids:
+        if cmds.listRelatives(k, children=True, type="joint") is None:
+            for attr in [".jointOrientX", ".jointOrientY", ".jointOrientZ"]:
+                cmds.setAttr(k+attr, 0)
 
 def mirrorLoc():
     sl = cmds.ls(selection=True)

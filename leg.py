@@ -2,7 +2,6 @@ import maya.cmds as cmds
 import base
 import foot
 import limb
-import misc
 
 class Leg(base.Base):
     def __init__(self, prefix, side, id):

@@ -46,7 +46,7 @@ class Base(object):
         self.scale = scale
 
     '''
-    Create a single locator locator
+    Create a single locator
     '''
     def buildGuide(self):
         self.loc = cmds.spaceLocator(n=self.locName)
@@ -67,6 +67,7 @@ class Base(object):
     def constructJnt(self):
         cmds.select(clear=True)
         locPos = cmds.xform(self.locName, q=True, t=True, ws=True)
+
         self.jnt = cmds.joint(p=locPos, name=self.jntName)
         cmds.setAttr(self.jnt + '.radius', 1)
 
@@ -76,15 +77,17 @@ class Base(object):
 
     def placeCtrl(self):
         self.ctrl = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.ctrlName)[0]
-        #cmds.scale(2, 2, 2, self.ctrl)
 
         jntPos = cmds.xform(self.jnt, q=True, t=True, ws=True)
         locRot = cmds.xform(self.loc, q=True, ro=True, ws=True)
-        cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrl)
-        cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrl)
-        cmds.makeIdentity(self.ctrl, apply=True, t=1, r=1, s=1)
 
-        cmds.parent(self.ctrl, self.ctrlGrp)
+        # use offset group to clear out rotation on ctrl
+        self.ctrlOffsetGrp = cmds.group(em=True, name=self.ctrlOffsetGrpName)
+        cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrlOffsetGrp)
+        cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrlOffsetGrp)
+
+        cmds.parent(self.ctrl, self.ctrlOffsetGrp, relative=True)  # ctrl has transform relative to offset group, which is 0
+        cmds.parent(self.ctrlOffsetGrp, self.ctrlGrp)
 
     def addConstraint(self):
         cmds.parentConstraint(self.ctrl, self.jnt)

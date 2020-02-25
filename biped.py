@@ -123,12 +123,10 @@ class Biped(base.Base):
         cmds.parentConstraint(self.spine.topCtrl, self.leftArm.limb.switchCtrl, mo=True)
         cmds.parentConstraint(self.spine.topCtrl, self.rightArm.limb.switchCtrl, mo=True)
 
-        # constraint head controller to neck controller
-        cmds.parent(self.tip.ctrl, self.head.ctrl)
-        cmds.parent(self.head.ctrl, self.neck.ctrl)
-
-        # constraint neck controller to top spine controller
-        cmds.parent(self.neck.ctrl, self.spine.topCtrl)
+        # use the ctrl offset group as parent for the ctrl
+        cmds.parent(self.tip.ctrlOffsetGrp, self.head.ctrlOffsetGrp)
+        cmds.parent(self.head.ctrlOffsetGrp, self.neck.ctrlOffsetGrp)
+        cmds.parent(self.neck.ctrlOffsetGrp, self.spine.topCtrl)
 
     def colorCtrl(self):
         self.leftArm.colorCtrl()
