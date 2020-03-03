@@ -18,9 +18,7 @@ class Quadruped(base.Base):
         self.metaType = 'Quadruped'
         self.constructNameSpace(self.metaType)
 
-        self.setLocAttr()
-
-    def setLocAttr(self):
+    def setLocAttr(self, startPos=[0, 0, 0]):
         self.leftArm = frontLeg.FrontLeg(prefix=self.prefix, side='L', id='standard')
         self.rightArm = frontLeg.FrontLeg(prefix=self.prefix, side='R', id='standard')
 
@@ -30,17 +28,17 @@ class Quadruped(base.Base):
         self.spine = quadSpine.QuadSpine(prefix=self.prefix, side='NA', id='spine')
         self.tail = tail.Tail(prefix=self.prefix, side='NA', id='tip')
 
-        self.leftArm.setLocAttr(startPos=[2, 5, 3])
+        self.leftArm.setLocAttr(startPos=[2+startPos[0], 5+startPos[1], 3+startPos[2]])
 
-        self.rightArm.setLocAttr(startPos=[-2, 5, 3])
+        self.rightArm.setLocAttr(startPos=[-2+startPos[0], 5+startPos[1], 3+startPos[2]])
 
-        self.leftLeg.setLocAttr(startPos=[2, 5, -3])
+        self.leftLeg.setLocAttr(startPos=[2+startPos[0], 5+startPos[1], -3+startPos[2]])
 
-        self.rightLeg.setLocAttr(startPos=[-2, 5, -3])
+        self.rightLeg.setLocAttr(startPos=[-2+startPos[0], 5+startPos[1], -3+startPos[2]])
 
-        self.spine.setLocAttr(startPos=[0, 6, -3])
+        self.spine.setLocAttr(startPos=[startPos[0], 6+startPos[1], -3+startPos[2]])
 
-        self.tail.setLocAttr(startPos=[0, 6, -4])
+        self.tail.setLocAttr(startPos=[startPos[0], 6+startPos[1], -3+startPos[2]])
 
     def buildGuide(self):
         self.leftArm.buildGuide()

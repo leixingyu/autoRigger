@@ -1,6 +1,7 @@
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 import os
+import math
 from autoRiggerPlus import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
 
 class MyWindow(QtWidgets.QDialog):
@@ -33,6 +34,9 @@ class MyWindow(QtWidgets.QDialog):
         self.legThumb.clicked.connect(self.legClick)
 
         # quadruped
+        #self.quadrupedThumb.clicked.connect(self.quadrupedClick)
+        self.frontLegThumb.clicked.connect(self.frontLegClick)
+        #self.backLegThumb.clicked.connect(self.backLegClick)
         self.qspineThumb.clicked.connect(self.qspineClick)
         self.tailThumb.clicked.connect(self.tailClick)
 
@@ -357,6 +361,107 @@ class MyWindow(QtWidgets.QDialog):
             except: print('interval type error, using default leg interval value 2.0')
 
         return id, side, startPos, interval, distance, height
+
+    '''Quadruped Module'''
+
+    def quadrupedClick(self):
+        id, side, startPos = self.setQuadrupedAttr()
+        q = quadruped.Quadruped(prefix=self.prefix, side=side, id=id)
+        self.quadrupedIDEdit.setText('')
+        self.current = q
+        self.toBuildList.append(q)
+        q.setLocAttr(startPos=startPos)
+        q.buildGuide()
+
+    def setQuadrupedAttr(self):
+        id = 'quadruped_id'
+        if self.quadrupedIDEdit.text(): id = self.quadrupedIDEdit.text()
+
+        side = 'NA'
+
+        startPos = [0, 0, 0]
+        if self.quadrupedPosXEdit.text() and self.quadrupedPosYEdit.text() and self.quadrupedPosZEdit.text():
+            try: startPos = [float(self.quadrupedPosXEdit.text()), float(self.quadrupedPosYEdit.text()), float(self.quadrupedPosZEdit.text())]
+            except: print('start position type error, using default quadruped start position [0, 0, 0]')
+
+        return id, side, startPos
+
+    def frontLegClick(self):
+        id, side, startPos, distance, height = self.setFrontLegAttr()
+        l = frontLeg.FrontLeg(prefix=self.prefix, side=side, id=id)
+        self.frontLegIDEdit.setText('')
+        self.current = l
+        self.toBuildList.append(l)
+        l.setLocAttr(startPos=startPos, distance=distance, height=height)
+        l.buildGuide()
+
+    def setFrontLegAttr(self):
+        id = 'frontLeg_id'
+        if self.frontLegIDEdit.text(): id = self.frontLegIDEdit.text()
+
+        side = 'L'
+        if self.frontLegRBtn.isChecked(): side = 'R'
+        elif self.frontLegNABtn.isChecked(): side = 'NA'
+            
+        distance = 1.5
+        if self.frontLegDistEdit.text():
+            try: distance = float(self.frontLegDistEdit.text())
+            except: print('interval type error, using default frontLeg interval value 1.5')
+
+        height = 0.2
+        if self.frontLegHghtEdit.text():
+            try: height = float(self.frontLegHghtEdit.text())
+            except: print('interval type error, using default frontLeg interval value 0.2')
+
+        startPos = [0, math.ceil(3*distance+height), 0]
+        if self.frontLegPosXEdit.text() and self.frontLegPosYEdit.text() and self.frontLegPosZEdit.text():
+            try: startPos = [float(self.frontLegPosXEdit.text()), float(self.frontLegPosYEdit.text()), float(self.frontLegPosZEdit.text())]
+            except: print('start position type error, using default frontLeg start position [0, 0, 0]')
+
+
+        return id, side, startPos, distance, height
+
+    def backLegClick(self):
+        id, side, startPos, distance, height = self.setBackLegAttr()
+        l = backLeg.BackLeg(prefix=self.prefix, side=side, id=id)
+        self.backLegIDEdit.setText('')
+        self.current = l
+        self.toBuildList.append(l)
+        l.setLocAttr(startPos=startPos, distance=distance, height=height)
+        l.buildGuide()
+
+    def setBackLegAttr(self):
+        id = 'backLeg_id'
+        if self.backLegIDEdit.text(): id = self.backLegIDEdit.text()
+
+        side = 'L'
+        if self.backLegRBtn.isChecked():
+            side = 'R'
+        elif self.backLegNABtn.isChecked():
+            side = 'NA'
+
+        startPos = [0, 0, 0]
+        if self.backLegPosXEdit.text() and self.backLegPosYEdit.text() and self.backLegPosZEdit.text():
+            try:
+                startPos = [float(self.backLegPosXEdit.text()), float(self.backLegPosYEdit.text()), float(self.backLegPosZEdit.text())]
+            except:
+                print('start position type error, using default backLeg start position [0, 0, 0]')
+
+        distance = 1.5
+        if self.backLegDistEdit.text():
+            try:
+                distance = float(self.backLegDistEdit.text())
+            except:
+                print('interval type error, using default backLeg interval value 1.5')
+
+        height = 0.2
+        if self.backLegHghtEdit.text():
+            try:
+                height = float(self.backLegHghtEdit.text())
+            except:
+                print('interval type error, using default backLeg interval value 0.2')
+
+        return id, side, startPos, distance, height
 
     def qspineClick(self):
         id, side, startPos, length, segment = self.setQSpineAttr()
