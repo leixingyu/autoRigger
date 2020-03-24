@@ -28,17 +28,19 @@ class Quadruped(base.Base):
         self.spine = quadSpine.QuadSpine(prefix=self.prefix, side='NA', id='spine')
         self.tail = tail.Tail(prefix=self.prefix, side='NA', id='tip')
 
-        self.leftArm.setLocAttr(startPos=[2+startPos[0], 5+startPos[1], 3+startPos[2]])
+        self.neckRoot = base.Base(prefix=self.prefix, side='NA', id='neckRoot')
+        self.head = base.Base(prefix=self.prefix, side='NA', id='head')
+        self.tip = base.Base(prefix=self.prefix, side='NA', id='tip')
 
-        self.rightArm.setLocAttr(startPos=[-2+startPos[0], 5+startPos[1], 3+startPos[2]])
-
-        self.leftLeg.setLocAttr(startPos=[2+startPos[0], 5+startPos[1], -3+startPos[2]])
-
-        self.rightLeg.setLocAttr(startPos=[-2+startPos[0], 5+startPos[1], -3+startPos[2]])
-
+        self.leftArm.setLocAttr(startPos=[1+startPos[0], 5+startPos[1], 3+startPos[2]])
+        self.rightArm.setLocAttr(startPos=[-1+startPos[0], 5+startPos[1], 3+startPos[2]])
+        self.leftLeg.setLocAttr(startPos=[1+startPos[0], 5+startPos[1], -3+startPos[2]])
+        self.rightLeg.setLocAttr(startPos=[-1+startPos[0], 5+startPos[1], -3+startPos[2]])
         self.spine.setLocAttr(startPos=[startPos[0], 6+startPos[1], -3+startPos[2]])
-
-        self.tail.setLocAttr(startPos=[startPos[0], 6+startPos[1], -3+startPos[2]])
+        self.tail.setLocAttr(startPos=[startPos[0], 6+startPos[1], -4+startPos[2]])
+        self.neckRoot.setLocAttr(startPos=[startPos[0], 6+startPos[1]+0.5, 3+startPos[2]+0.5])
+        self.head.setLocAttr(startPos=[startPos[0], 7.5+startPos[1], 4+startPos[2]])
+        self.tip.setLocAttr(startPos=[startPos[0], 7.5+startPos[1], 6+startPos[2]])
 
     def buildGuide(self):
         self.leftArm.buildGuide()
@@ -47,6 +49,12 @@ class Quadruped(base.Base):
         self.rightLeg.buildGuide()
         self.spine.buildGuide()
         self.tail.buildGuide()
+        self.neckRoot.buildGuide()
+        self.head.buildGuide()
+        self.tip.buildGuide()
+
+        cmds.rotate(90, 0, 0, self.head.loc)
+        cmds.rotate(90, 0, 0, self.tip.loc)
 
     def constructJnt(self):
         leftShoulder = self.leftArm.constructJnt()
@@ -55,6 +63,10 @@ class Quadruped(base.Base):
         rightHip = self.rightLeg.constructJnt()
         spineRoot = self.spine.constructJnt()
         tailRoot = self.tail.constructJnt()
+
+        neckRoot = self.neckRoot.constructJnt()
+        head = self.head.constructJnt()
+        tip = self.tip.constructJnt()
 
         # parent leg root joints to root spline joint
         misc.batchParent([leftShoulder, rightShoulder], self.spine.topSpine)
@@ -65,6 +77,11 @@ class Quadruped(base.Base):
         # parent tail to spine
         cmds.parent(tailRoot, spineRoot)
 
+        # parent neck, head, tip
+        cmds.parent(neckRoot, self.spine.topSpine)
+        cmds.parent(head, neckRoot)
+        cmds.parent(tip, head)
+
     def placeCtrl(self):
         self.leftArm.placeCtrl()
         self.rightArm.placeCtrl()
@@ -72,6 +89,10 @@ class Quadruped(base.Base):
         self.rightLeg.placeCtrl()
         self.spine.placeCtrl()
         self.tail.placeCtrl()
+
+        self.neckRoot.placeCtrl()
+        self.head.placeCtrl()
+        self.tip.placeCtrl()
 
         cmds.addAttr(self.spine.masterCtrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=True)
 
@@ -82,6 +103,9 @@ class Quadruped(base.Base):
         self.rightLeg.addConstraint()
         self.spine.addConstraint()
         self.tail.addConstraint()
+        self.neckRoot.addConstraint()
+        self.head.addConstraint()
+        self.tip.addConstraint()
 
         # parenting the front and back leg and tail under spine ctrl
         misc.batchParent([self.leftArm.shoulderCtrl, self.rightArm.shoulderCtrl], self.spine.topCtrl)
@@ -92,12 +116,21 @@ class Quadruped(base.Base):
         #cmds.setAttr(self.tail.masterCtrl+'.visibility', 0)
         cmds.connectAttr(self.spine.masterCtrl+'.FK_IK', self.tail.masterCtrl+'.FK_IK')
 
+        # parent head up
+        cmds.parent(self.neckRoot.ctrlOffsetGrp, self.spine.topCtrl)
+        cmds.parent(self.head.ctrlOffsetGrp, self.neckRoot.ctrl)
+        cmds.parent(self.tip.ctrlOffsetGrp, self.head.ctrl)
+
     def colorCtrl(self):
         self.leftArm.colorCtrl()
         self.rightArm.colorCtrl()
         self.leftLeg.colorCtrl()
         self.rightLeg.colorCtrl()
         self.spine.colorCtrl()
+        self.tail.colorCtrl()
+        self.neckRoot.colorCtrl()
+        self.head.colorCtrl()
+        self.tip.colorCtrl()
 
     def deleteGuide(self):
         loc = cmds.ls(self.locGrp)

@@ -5709,7 +5709,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-308</y>
+            <y>0</y>
             <width>320</width>
             <height>1032</height>
            </rect>
@@ -5967,7 +5967,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>8.4</string>
+                       <string>0</string>
                       </property>
                      </widget>
                     </item>

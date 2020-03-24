@@ -56,10 +56,11 @@ def orientJnt(jnt):
     cmds.joint(e=True, ch=True, oj='xyz', zso=True)
 
     kids = cmds.listRelatives(jnt, children=True, type="joint", allDescendents=True)
-    for k in kids:
-        if cmds.listRelatives(k, children=True, type="joint") is None:
-            for attr in [".jointOrientX", ".jointOrientY", ".jointOrientZ"]:
-                cmds.setAttr(k+attr, 0)
+    if kids:
+        for k in kids:
+            if cmds.listRelatives(k, children=True, type="joint") is None:
+                for attr in [".jointOrientX", ".jointOrientY", ".jointOrientZ"]:
+                    cmds.setAttr(k+attr, 0)
 
 def mirrorLoc():
     sl = cmds.ls(selection=True)

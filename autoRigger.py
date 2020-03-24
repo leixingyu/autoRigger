@@ -3,6 +3,7 @@ from Qt import _loadUi
 import os
 import math
 from autoRiggerPlus import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
+reload(quadruped)
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
@@ -34,9 +35,9 @@ class MyWindow(QtWidgets.QDialog):
         self.legThumb.clicked.connect(self.legClick)
 
         # quadruped
-        #self.quadrupedThumb.clicked.connect(self.quadrupedClick)
+        self.quadrupedThumb.clicked.connect(self.quadrupedClick)
         self.frontLegThumb.clicked.connect(self.frontLegClick)
-        #self.backLegThumb.clicked.connect(self.backLegClick)
+        self.backLegThumb.clicked.connect(self.backLegClick)
         self.qspineThumb.clicked.connect(self.qspineClick)
         self.tailThumb.clicked.connect(self.tailClick)
 
