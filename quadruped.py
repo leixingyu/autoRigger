@@ -43,11 +43,11 @@ class Quadruped(base.Base):
         self.tip.setLocAttr(startPos=[startPos[0], 7.5+startPos[1], 6+startPos[2]])
 
     def buildGuide(self):
+        self.spine.buildGuide()
         self.leftArm.buildGuide()
         self.rightArm.buildGuide()
         self.leftLeg.buildGuide()
         self.rightLeg.buildGuide()
-        self.spine.buildGuide()
         self.tail.buildGuide()
         self.neckRoot.buildGuide()
         self.head.buildGuide()
@@ -101,19 +101,19 @@ class Quadruped(base.Base):
         self.rightArm.addConstraint()
         self.leftLeg.addConstraint()
         self.rightLeg.addConstraint()
-        self.spine.addConstraint()
+
         self.tail.addConstraint()
         self.neckRoot.addConstraint()
         self.head.addConstraint()
         self.tip.addConstraint()
+        self.spine.addConstraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        misc.batchParent([self.leftArm.shoulderCtrl, self.rightArm.shoulderCtrl], self.spine.topCtrl)
-        misc.batchParent([self.leftLeg.hipCtrl, self.rightLeg.hipCtrl], self.spine.rootCtrl)
+        misc.batchParent([self.leftArm.shoulderCtrlOffset, self.rightArm.shoulderCtrlOffset], self.spine.topCtrl)
+        misc.batchParent([self.leftLeg.hipCtrlOffset, self.rightLeg.hipCtrlOffset], self.spine.rootCtrl)
         cmds.parentConstraint(self.spine.rootCtrl, self.tail.masterCtrl, mo=True)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
-        #cmds.setAttr(self.tail.masterCtrl+'.visibility', 0)
         cmds.connectAttr(self.spine.masterCtrl+'.FK_IK', self.tail.masterCtrl+'.FK_IK')
 
         # parent head up

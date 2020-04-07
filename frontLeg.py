@@ -83,10 +83,10 @@ class FrontLeg(base.Base):
         shoulderPos = cmds.xform(shoulder, q=True, ws=True, t=True)
         shoulderRot = cmds.xform(shoulder, q=True, ws=True, ro=True)
 
-        shoulderCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'shoulder')
-        cmds.move(shoulderPos[0], shoulderPos[1], shoulderPos[2], shoulderCtrlOffset)
-        cmds.rotate(shoulderRot[0], shoulderRot[1], shoulderRot[2], shoulderCtrlOffset)
-        cmds.parent(self.shoulderCtrl, shoulderCtrlOffset, relative=True)
+        self.shoulderCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'shoulder')
+        cmds.move(shoulderPos[0], shoulderPos[1], shoulderPos[2], self.shoulderCtrlOffset)
+        cmds.rotate(shoulderRot[0], shoulderRot[1], shoulderRot[2], self.shoulderCtrlOffset)
+        cmds.parent(self.shoulderCtrl, self.shoulderCtrlOffset, relative=True)
 
         # front foot
         paw = cmds.ls(self.jntName+'paw')
@@ -99,16 +99,18 @@ class FrontLeg(base.Base):
         cmds.addAttr(self.pawCtrl, longName='Toe_Tap', attributeType='double', keyable=True)
         cmds.addAttr(self.pawCtrl, longName='Toe_Tip', attributeType='double', keyable=True)
         cmds.addAttr(self.pawCtrl, longName='Wrist', attributeType='double', keyable=True)
+        cmds.makeIdentity(self.pawCtrl, apply=True, t=1, r=1, s=1)
 
         # pole vector
         elbow = cmds.ls(self.jntName+'elbow')
         self.poleCtrl = cmds.duplicate('Pole_tempShape', name=self.ctrlName+'poleVector')[0]
+        poleCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'poleVector')
         elbowPos = cmds.xform(elbow, q=True, ws=True, t=True)
-        cmds.move(elbowPos[0], elbowPos[1], elbowPos[2]-self.distance, self.poleCtrl)
-        cmds.makeIdentity(self.poleCtrl, apply=True, t=1, r=1, s=1)
-        cmds.parent(self.poleCtrl, self.pawCtrl)
+        cmds.move(elbowPos[0], elbowPos[1], elbowPos[2]-self.distance, poleCtrlOffset)
+        cmds.parent(self.poleCtrl, poleCtrlOffset, relative=True)
+        cmds.parent(poleCtrlOffset, self.pawCtrl)
         
-        misc.batchParent([shoulderCtrlOffset, self.pawCtrl], self.ctrlGrp)
+        misc.batchParent([self.shoulderCtrlOffset, self.pawCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def buildIK(self):

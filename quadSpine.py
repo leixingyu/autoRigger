@@ -55,6 +55,7 @@ class QuadSpine(base.Base):
         self.rootSpine = self.jntName+'0'  # needs to be accessed later for parenting back leg
         cmds.parent(self.rootSpine, self.jntGrp)
         misc.orientJnt(self.rootSpine)
+
         return self.rootSpine
 
     def placeCtrl(self):
@@ -67,7 +68,9 @@ class QuadSpine(base.Base):
 
         # master ctrl is positioned on top of root ctrl
         self.masterCtrl = cmds.duplicate('Master_tempShape', name=self.ctrlName+'_master')[0]  # master ctrl needs to be acessed outside
-        cmds.move(rootPos[0], rootPos[1]+2, rootPos[2], self.masterCtrl)
+        masterCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'_master')
+        cmds.move(rootPos[0], rootPos[1]+2, rootPos[2], masterCtrlOffset)
+        cmds.parent(self.masterCtrl, masterCtrlOffset, relative=True)
 
         # root ctrl is positioned at the root joint
         self.rootCtrl = cmds.duplicate('Spine_tempShape', name=self.ctrlName+'_root')[0]  # root ctrl needs to be accessed outside for parenting
@@ -108,7 +111,7 @@ class QuadSpine(base.Base):
             cmds.parent(midCtrl, midCtrlOffset, relative=True)
 
         misc.batchParent([midCtrlOffset, rootCtrlOffset, topCtrlOffset], self.masterCtrl)
-        cmds.parent(self.masterCtrl, self.ctrlGrp)
+        cmds.parent(masterCtrlOffset, self.ctrlGrp)
         self.deleteShape()
         return self.masterCtrl
 

@@ -53,14 +53,17 @@ def orientJnt(jnt):
             cmds.select(j, add=True)
     else:
         cmds.select(jnt)
-    cmds.joint(e=True, ch=True, oj='xyz', zso=True)
 
     kids = cmds.listRelatives(jnt, children=True, type="joint", allDescendents=True)
+    # whether selected is a joint chain?
     if kids:
+        cmds.joint(e=True, ch=True, oj='xyz', sao='zup')
         for k in kids:
             if cmds.listRelatives(k, children=True, type="joint") is None:
                 for attr in [".jointOrientX", ".jointOrientY", ".jointOrientZ"]:
                     cmds.setAttr(k+attr, 0)
+    else:
+        cmds.joint(e=True, oj='xyz', zso=True)  # cannot figure out why zso matters
 
 def mirrorLoc():
     sl = cmds.ls(selection=True)

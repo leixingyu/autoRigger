@@ -96,16 +96,17 @@ class BackLeg(base.Base):
         hipPos = cmds.xform(hip, q=True, ws=True, t=True)
         hipRot = cmds.xform(hip, q=True, ws=True, ro=True)
 
-        hipCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'hip')
-        cmds.move(hipPos[0], hipPos[1], hipPos[2], hipCtrlOffset)
-        cmds.rotate(hipRot[0], hipRot[1], hipRot[2], hipCtrlOffset)
-        cmds.parent(self.hipCtrl, hipCtrlOffset, relative=True)
+        self.hipCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'hip')
+        cmds.move(hipPos[0], hipPos[1], hipPos[2], self.hipCtrlOffset)
+        cmds.rotate(hipRot[0], hipRot[1], hipRot[2], self.hipCtrlOffset)
+        cmds.parent(self.hipCtrl, self.hipCtrlOffset, relative=True)
 
         # back foot
         foot = cmds.ls(self.jntName+'foot')
         self.footCtrl = cmds.duplicate('Foot_tempShape', name=self.ctrlName+'foot')[0]
         footPos = cmds.xform(foot, q=True, ws=True, t=True)
         cmds.move(footPos[0], 0, footPos[2], self.footCtrl)
+        cmds.makeIdentity(self.footCtrl, apply=True, t=1, r=1, s=1)
         # custom attribute for later pivot group access
         cmds.addAttr(self.footCtrl, longName='Flex', attributeType='double', keyable=True)
         cmds.addAttr(self.footCtrl, longName='Swivel', attributeType='double', keyable=True)
@@ -115,12 +116,13 @@ class BackLeg(base.Base):
         # pole vector
         ankle = cmds.ls(self.jntName+'ankle')
         self.poleCtrl = cmds.duplicate('Pole_tempShape', name=self.ctrlName+'poleVector')[0]
+        poleCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetGrpName+'poleVector')
         anklePos = cmds.xform(ankle, q=True, ws=True, t=True)
-        cmds.move(anklePos[0], anklePos[1], anklePos[2]+self.distance, self.poleCtrl)
-        cmds.makeIdentity(self.poleCtrl, apply=True, t=1, r=1, s=1)
-        cmds.parent(self.poleCtrl, self.footCtrl)
+        cmds.move(anklePos[0], anklePos[1], anklePos[2]+self.distance, poleCtrlOffset)
+        cmds.parent(self.poleCtrl, poleCtrlOffset, relative=True)
+        cmds.parent(poleCtrlOffset, self.footCtrl)
 
-        misc.batchParent([hipCtrlOffset, self.footCtrl], self.ctrlGrp)
+        misc.batchParent([self.hipCtrlOffset, self.footCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def buildIK(self):
@@ -219,7 +221,7 @@ class BackLeg(base.Base):
         # pole vector constraint
         cmds.poleVectorConstraint(self.poleCtrl, self.legIK)
         cmds.poleVectorConstraint(self.poleCtrl, self.helperIK)
-        cmds.parent(self.poleCtrl, swivelPivotGrp)
+        cmds.parent(self.ctrlOffsetGrpName+'poleVector', swivelPivotGrp)
 
         # scalable
         self.addMeasurement()
