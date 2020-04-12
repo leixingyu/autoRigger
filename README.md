@@ -8,22 +8,24 @@ modular rig video demo (1.5 version): https://vimeo.com/367496504
 face rig video demo (1.4 version): https://www.youtube.com/watch?v=Vnmq4ok0KUs
 
 ## Installation
-create a folder called **autoRigger** in your maya script path
 
-example: C:/Users/Username/Documents/maya/(current maya version)/scripts/**autoRigger**
+Unzip everything to your maya script directory
 
-place all files in your folder
+(example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**autoRigger**)
 
+Alternatively, you can unzip to your custom directory, but make sure its added to your PYTHONPATH system variable 
 
-Enter following command in maya script editor(python tab)
+Enter following command in maya script editor (python tab)
 ```python
 from autoRigger import autoRigger
 ```
 
-## Future Development
-currently working on modular rigging system implementation
-
 ## Past Updates
+
+<details>
+  <summary>Update 1.7 (04/08/2020)</summary>
+  <p>*added quadruped template</p>
+</details>
 
 <details>
   <summary>Update 1.6 (11/08/2019)</summary>
