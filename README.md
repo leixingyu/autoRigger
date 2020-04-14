@@ -20,6 +20,7 @@ Alternatively, you can unzip to your custom directory, but make sure its added t
 Enter following command in maya script editor (python tab)
 ```python
 from autoRigger import autoRigger
+autoRigger.show()
 ```
 
 ## Past Updates
