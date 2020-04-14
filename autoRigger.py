@@ -540,8 +540,9 @@ class MyWindow(QtWidgets.QDialog):
 
         return id, side, startPos, length, segment
 
-path = os.path.dirname(os.path.abspath(__file__)) + r'\ui'
-os.chdir(path)
-#currentDir = os.getcwd()
-window = MyWindow()
-window.show()
+def show():
+    path = os.path.dirname(os.path.abspath(__file__)) + r'\ui'
+    os.chdir(path)
+    #currentDir = os.getcwd()
+    window = MyWindow()
+    window.show()
