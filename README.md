@@ -1,6 +1,8 @@
 # autoRigger
 AutoRigger is an auto rigging tool for maya, specifically designed for create fast and functional rigs for human characters
 
+quadruped rig video demo (1.7 version): https://youtu.be/GT15B_x8R9w
+
 biped rig video demo (1.6 version): https://vimeo.com/372001985
 
 modular rig video demo (1.5 version): https://vimeo.com/367496504
