@@ -2,7 +2,7 @@ from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 import os
 import math
-from autoRiggerPlus import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
+import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
 reload(quadruped)
 
 class MyWindow(QtWidgets.QDialog):
