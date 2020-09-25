@@ -15,20 +15,21 @@ def hiereParent(list):
         if list[i] != list[-1]:
             cmds.parent(list[i], list[i+1])
 
-def makeTextCurve(string, name):
+def makeTextCurve(string, name, font='MS Gothic'):
     """
     Make a controller out of text
     Args:
         string(string): input text for the controller shape
+        font(string): input font
         name(string): name of the controller
 
     Returns:
-        transform group of the controller
+        transform of the controller
     """
     temp = cmds.group(em=True)
     ctrl = cmds.group(em=True, name=name)
 
-    text = cmds.textCurves(text=string)
+    text = cmds.textCurves(text=string, font=font)
     textShape = cmds.listRelatives(text, ad=True)
     for shape in textShape:
         if cmds.nodeType(shape) == 'nurbsCurve':
@@ -48,6 +49,13 @@ def makeTextCurve(string, name):
     return ctrl
 
 def orientJnt(jnt):
+    """
+    Orient Joint exceeding Maya's default behaviour
+    Args:
+        jnt(list): list of joints
+            or
+        jnt(obj): single joint - try to find child joints and orient them as well
+    """
     if type(jnt) == 'list':
         for j in jnt:
             cmds.select(j, add=True)
@@ -55,8 +63,7 @@ def orientJnt(jnt):
         cmds.select(jnt)
 
     kids = cmds.listRelatives(jnt, children=True, type="joint", allDescendents=True)
-    # whether selected is a joint chain?
-    if kids:
+    if kids:     # selected are joint chains
         cmds.joint(e=True, ch=True, oj='xyz', sao='zup')
         for k in kids:
             if cmds.listRelatives(k, children=True, type="joint") is None:
@@ -66,6 +73,10 @@ def orientJnt(jnt):
         cmds.joint(e=True, oj='xyz', zso=True)  # cannot figure out why zso matters
 
 def mirrorLoc():
+    """
+    Mirror Locators from Left side to Right side
+    Needs to select locators first, works for parent locator
+    """
     sl = cmds.ls(selection=True)
     if not sl:
         print('no locator selected')

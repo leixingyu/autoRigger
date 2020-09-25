@@ -2,8 +2,8 @@ import maya.cmds as cmds
 import base
 
 class Head(base.Base):
-    def __init__(self, prefix, id, side='NA'):
-        base.Base.__init__(self, prefix, side, id)
+    def __init__(self, id, side='NA'):
+        base.Base.__init__(self, side, id)
         self.metaType = 'Face'
 
         self.constructNameSpace(self.metaType)

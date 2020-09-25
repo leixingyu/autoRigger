@@ -1,54 +1,40 @@
 import maya.cmds as cmds
 import maya.OpenMaya as om
-import base
-import misc
+import util, base
 
 class Limb(base.Base):
-    def __init__(self, prefix, side, id, type='Null'):
-        base.Base.__init__(self, prefix, side, id)
+    def __init__(self, side, id, type='Null'):
+        base.Base.__init__(self, side, id)
         self.metaType = 'Limb'
-
         self.setArmLeg(type)
-        self.constructNameSpace(self.metaType)
-        self.constructSecNameSpace()
-
-        '''default locator attribute'''
+        self.createNaming()
+        self.createSecondaryNaming()
         self.setLocAttr([0, 0, 0], 2)
 
-    '''
-    Identify the limb type ('Arm' or 'Leg')
-    '''
-    def setArmLeg(self, limb):
-        self.horizontal = True
-        self.vertical = False
-        if limb == 'Arm':
-            self.limbNameSpace = ['Shoulder', 'Elbow', 'Wrist']
-        elif limb == 'Leg':
-            self.limbNameSpace = ['Clavicle', 'Knee', 'Ankle']
-            self.vertical = True
-            self.horizontal = False
-        else:
-            self.limbNameSpace = ['Root', 'Middle', 'Top']
+    def setArmLeg(self, type):
+        self.limbType = ['Root', 'Middle', 'Top']
+        if type == 'Arm':
+            self.limbType = ['Shoulder', 'Elbow', 'Wrist']
+            self.direction = 'Horizontal'
+        elif type == 'Leg':
+            self.limbType = ['Clavicle', 'Knee', 'Ankle']
+            self.direction = 'Vertical'
 
-    '''
-    Construct secondary namespace to further simplify naming
-    '''
-    def constructSecNameSpace(self):
-        self.rootLocName = self.locName+self.limbNameSpace[0]
-        self.midLocName = self.locName+self.limbNameSpace[1]
-        self.topLocName = self.locName+self.limbNameSpace[2]
-        
-        self.rootJntName = self.jntName + self.limbNameSpace[0]
-        self.midJntName = self.jntName + self.limbNameSpace[1]
-        self.topJntName = self.jntName + self.limbNameSpace[2]
+    def createSecondaryNaming(self):
+        self.locList, self.jntList, self.ikJntList, self.fkJntList, self.ctrlList, self.fkCtrlList, self.fkOffsetList = ([] for i in range(7))  # ik has different ctrl name
+        for type in self.limbType:
+            self.locList.append     ('{}{}_loc'.format(self.name, type))
+            self.jntList.append     ('{}{}_jnt'.format(self.name, type))
+            self.ikJntList.append   ('{}{}_ik_jnt'.format(self.name, type))
+            self.fkJntList.append   ('{}{}_fk_jnt'.format(self.name, type))
+            self.ctrlList.append    ('{}{}_ctrl'.format(self.name, type))
+            self.fkCtrlList.append  ('{}{}_fk_ctrl'.format(self.name, type))
+            self.fkOffsetList.append('{}{}_fk_offset'.format(self.name, type))
 
-        self.rootCtrlName = self.ctrlName + self.limbNameSpace[0]
-        self.midCtrlName = self.ctrlName + self.limbNameSpace[1]
-        self.topCtrlName = self.ctrlName + self.limbNameSpace[2]
+        self.ikCtrlName =   '{}_ik_ctrl'.format(self.name)
+        self.ikPoleName =   '{}_ikpole_ctrl'.format(self.name)
+        self.ikOffsetName = '{}_ik_offset'.format(self.name)
 
-    '''
-    Set locator attribute
-    '''
     def setLocAttr(self, startPos=[0, 0, 0], interval=2, scale=0.4):
         self.startPos = startPos
         self.interval = interval
@@ -66,123 +52,102 @@ class Limb(base.Base):
         cmds.move(-0.5, 0, 0, selection)
         cmds.rotate(0, 90, 0, limbIKPoleShape)
 
-        arrorPtList = [[2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0], [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0], [2.0, 0.0, -1.0],
+        arrowPtList = [[2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0], [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0], [2.0, 0.0, -1.0],
                        [2.0, 0.0, -2.0], [1.0, 0.0, -2.0], [1.0, 0.0, -3.0], [2.0, 0.0, -3.0], [0.0, 0.0, -5.0], [-2.0, 0.0, -3.0], [-1.0, 0.0, -3.0], [-1.0, 0.0, -2.0],
                        [-2.0, 0.0, -2.0], [-2.0, 0.0, -1.0], [-3.0, 0.0, -1.0], [-3.0, 0.0, -2.0], [-5.0, 0.0, 0.0], [-3.0, 0.0, 2.0], [-3.0, 0.0, 1.0], [-2.0, 0.0, 1.0],
                        [-2.0, 0.0, 2.0], [-1.0, 0.0, 2.0], [-1.0, 0.0, 3.0], [-2.0, 0.0, 3.0], [0.0, 0.0, 5.0], [2.0, 0.0, 3.0], [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]]
-        switchShape = cmds.curve(p=arrorPtList, degree=1, name='Switch_tempShape')
+        switchShape = cmds.curve(p=arrowPtList, degree=1, name='Switch_tempShape')
         cmds.scale(0.3, 0.3, 0.3, switchShape)
 
-    '''
-    Create locators
-    '''
     def buildGuide(self):
         grp = cmds.group(em=True, n=self.locGrpName)
 
-        sideFactor = 1
-        hFactor, vFactor = 1, 0
+        sideFactor, hFactor, vFactor = 1, 1, 0
+        if self.side == 'R':             sideFactor = -1
+        if self.direction == 'Vertical': hFactor, vFactor = 0, 1
 
-        if self.side == 'R': sideFactor = -1
-        if self.vertical == True:
-            hFactor, vFactor = 0, 1
-
-        # root
-        limbRoot = cmds.spaceLocator(n=self.rootLocName)
+        #--- Root ---#
+        limbRoot = cmds.spaceLocator(n=self.locList[0])
         cmds.parent(limbRoot, grp, relative=True)
         cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], limbRoot, relative=True)
         cmds.scale(self.scale, self.scale, self.scale, limbRoot)
 
-        # middle
-        limbMid = cmds.spaceLocator(n=self.midLocName)
+        #--- Middle ---#
+        limbMid = cmds.spaceLocator(n=self.locList[1])
         cmds.parent(limbMid, limbRoot, relative=True)
         cmds.move(self.interval*sideFactor*hFactor, -self.interval*vFactor, 0, limbMid, relative=True)  # move limb joint along +x axis
 
-        # top
-        limbTop = cmds.spaceLocator(n=self.topLocName)
+        #--- Top ---#
+        limbTop = cmds.spaceLocator(n=self.locList[2])
         cmds.parent(limbTop, limbMid, relative=True)
-        cmds.move(self.interval * sideFactor * hFactor, -self.interval * vFactor, 0, limbTop, relative=True)  # move limb joint along +x axis
+        cmds.move(self.interval*sideFactor*hFactor, -self.interval*vFactor, 0, limbTop, relative=True)  # move limb joint along +x axis
 
+        #--- Cleanup ---#
         self.colorLoc()
         cmds.parent(grp, self.locGrp)
         return grp
 
-    '''
-    Create joint based on the locators
-    
-    TODO: simplify this, seems redundant
-    '''
     def constructJnt(self):
-        # create result joint
+        #--- Result joint ---#
         cmds.select(clear=True)
-        for name in self.limbNameSpace:
-            loc = cmds.ls(self.locName+name, transforms=True)
+        for i, type in enumerate(self.limbType):
+            loc = cmds.ls(self.locList[i], transforms=True)
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            jnt = cmds.joint(p=locPos, name=self.jntName+name)
+            jnt = cmds.joint(p=locPos, name=self.jntList[i])
             cmds.setAttr(jnt+'.radius', 1)
 
-        # create fk joint
+        #--- FK Joint ---#
         cmds.select(clear=True)
-        for name in self.limbNameSpace:
-            loc = cmds.ls(self.locName + name, transforms=True)
+        for i, type in enumerate(self.limbType):
+            loc = cmds.ls(self.locList[i], transforms=True)
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            fkJnt = cmds.joint(p=locPos, name=self.jntName+name+'FK')
+            fkJnt = cmds.joint(p=locPos, name=self.fkJntList[i])
             cmds.setAttr(fkJnt+'.radius', 1)
 
-        # create ik joint
+        #--- IK Joint ---#
         cmds.select(clear=True)
-        for name in self.limbNameSpace:
-            loc = cmds.ls(self.locName + name, transforms=True)
+        for i, type in enumerate(self.limbType):
+            loc = cmds.ls(self.locList[i], transforms=True)
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            ikJnt = cmds.joint(p=locPos, name=self.jntName+name+'IK')
+            ikJnt = cmds.joint(p=locPos, name=self.ikJntList[i])
             cmds.setAttr(ikJnt+'.radius', 1)
 
-        misc.batchParent([self.rootJntName, self.rootJntName+'IK', self.rootJntName+'FK'], self.jntGrp)
-        misc.orientJnt([self.rootJntName, self.rootJntName+'IK', self.rootJntName+'FK'])
-        return cmds.ls(self.rootJntName)
+        #--- Cleanup ---#
+        util.batchParent([self.jntList[0], self.ikJntList[0], self.fkJntList[0]], self.jntGrp)
+        util.orientJnt([self.jntList[0], self.ikJntList[0], self.fkJntList[0]])
+        return cmds.ls(self.jntList[0])
 
     def placeCtrl(self):
         self.setCtrlShape()
+        rootPos, midPos, topPos = [cmds.xform(self.jntList[i], q=True, t=True, ws=True) for i in range(len(self.limbType))]
+        rootRot, midRot, topRot = [cmds.xform(self.jntList[i], q=True, ro=True, ws=True) for i in range(len(self.limbType))]
 
-        # getting locators' position
-        rootPos = cmds.xform(self.rootJntName, q=True, t=True, ws=True)
-        midPos = cmds.xform(self.midJntName, q=True, t=True, ws=True)
-        topPos = cmds.xform(self.topJntName, q=True, t=True, ws=True)
-
-        # getting locators' rotation
-        rootRot = cmds.xform(self.rootLocName, q=True, ro=True, ws=True)
-        midRot = cmds.xform(self.midLocName, q=True, ro=True, ws=True)
-        topRot = cmds.xform(self.topLocName, q=True, ro=True, ws=True)
-
-        '''FK Setup'''
-        # placing ctrls to the locators' position
-        rootFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.rootCtrlName+'FK')[0]
+        #--- FK Setup ---#
+        rootFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.fkCtrlList[0])[0]
         cmds.move(rootPos[0], rootPos[1], rootPos[2], rootFkCtrl, absolute=True)
-        if self.vertical:  # rotate ctrl if vertical
-            cmds.rotate(0, 0, 90, rootFkCtrl)
+        #if self.direction == 'Vertical': cmds.rotate(0, 0, 90, rootFkCtrl)
             
-        rootOffset = cmds.group(em=True, name=self.rootCtrlName+'FKoffset')
+        rootOffset = cmds.group(em=True, name=self.fkOffsetList[0])
         cmds.move(rootPos[0], rootPos[1], rootPos[2], rootOffset)
         cmds.parent(rootFkCtrl, rootOffset)
         cmds.rotate(rootRot[0], rootRot[1], rootRot[2], rootOffset)
         cmds.makeIdentity(rootFkCtrl, apply=True, t=1, r=1, s=1)
 
-        midFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.midCtrlName+'FK')[0]
+        midFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.fkCtrlList[1])[0]
         cmds.move(midPos[0], midPos[1], midPos[2], midFkCtrl, absolute=True)
-        if self.vertical:
-            cmds.rotate(0, 0, 90, midFkCtrl)
+        #if self.direction == 'Vertical': cmds.rotate(0, 0, 90, midFkCtrl)
             
-        midOffset = cmds.group(em=True, name=self.midCtrlName+'FKoffset')
+        midOffset = cmds.group(em=True, name=self.fkOffsetList[1])
         cmds.move(midPos[0], midPos[1], midPos[2], midOffset)
         cmds.parent(midFkCtrl, midOffset)
         cmds.rotate(midRot[0], midRot[1], midRot[2], midOffset)
         cmds.makeIdentity(midFkCtrl, apply=True, t=1, r=1, s=1)
 
-        topFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.topCtrlName+'FK')[0]
+        topFkCtrl = cmds.duplicate('LimbFK_tempShape', name=self.fkCtrlList[2])[0]
         cmds.move(topPos[0], topPos[1], topPos[2], topFkCtrl, absolute=True)
-        if self.vertical:
-            cmds.rotate(0, 0, 90, topFkCtrl)
+        #if self.direction == 'Vertical': cmds.rotate(0, 0, 90, topFkCtrl)
 
-        topOffset = cmds.group(em=True, name=self.topCtrlName+'FKoffset')
+        topOffset = cmds.group(em=True, name=self.fkOffsetList[2])
         cmds.move(topPos[0], topPos[1], topPos[2], topOffset)
         cmds.parent(topFkCtrl, topOffset)
         cmds.rotate(topRot[0], topRot[1], topRot[2], topOffset)
@@ -191,161 +156,141 @@ class Limb(base.Base):
         cmds.parent(topOffset, midFkCtrl)
         cmds.parent(midOffset, rootFkCtrl)
 
-        '''IK Setup'''
-        ikCtrl = cmds.duplicate('LimbIK_tempShape', name=self.ctrlName+'IK')[0]
+        #--- IK Setup ---#
+        ikCtrl = cmds.duplicate('LimbIK_tempShape', name=self.ikCtrlName)[0]
         cmds.move(topPos[0], topPos[1], topPos[2], ikCtrl, absolute=True)
-        if self.vertical: cmds.rotate(0, 0, 90, ikCtrl)
+        #if self.direction == 'Vertical': cmds.rotate(0, 0, 90, ikCtrl)
 
-        offsetGrp = cmds.group(em=True, name=self.ctrlName+'IKoffset')
+        offsetGrp = cmds.group(em=True, name=self.ikOffsetName)
         cmds.move(topPos[0], topPos[1], topPos[2], offsetGrp)
         cmds.parent(ikCtrl, offsetGrp)
         cmds.rotate(topRot[0], topRot[1], topRot[2], offsetGrp)
         cmds.makeIdentity(ikCtrl, apply=True, t=1, r=1, s=1)
 
-        poleVCtrl = cmds.duplicate('LimbIKPole_tempShape', name=self.ctrlName+'PoleVector')
-        if self.vertical: cmds.move(midPos[0], midPos[1], midPos[2]+3, poleVCtrl, absolute=True)
-        elif self.horizontal:
-            cmds.move(midPos[0], midPos[1], midPos[2]-3, poleVCtrl, absolute=True)
-            cmds.rotate(0, 180, 0, poleVCtrl, relative=True)
-        cmds.makeIdentity(poleVCtrl, apply=True, t=1, r=1, s=1)
+        poleCtrl = cmds.duplicate('LimbIKPole_tempShape', name=self.ikPoleName)
+        if self.direction == 'Vertical':
+            cmds.move(midPos[0], midPos[1], midPos[2]+3, poleCtrl, absolute=True)
+        elif self.direction == 'Horizontal':
+            cmds.move(midPos[0], midPos[1], midPos[2]-3, poleCtrl, absolute=True)
+            cmds.rotate(0, 180, 0, poleCtrl, relative=True)
+        cmds.makeIdentity(poleCtrl, apply=True, t=1, r=1, s=1)
 
-        '''IK/FK Switch Setup'''
-        self.switchCtrl = cmds.duplicate('Switch_tempShape', name=self.ctrlName+'IKFK_Switch')[0]
-        if self.vertical: cmds.move(rootPos[0], rootPos[1], rootPos[2], self.switchCtrl, absolute=True)
-        elif self.horizontal:
-            cmds.move(rootPos[0], rootPos[1], rootPos[2], self.switchCtrl, absolute=True)
-            cmds.rotate(0, 0, 90, self.switchCtrl, relative=True)
+        #--- IK/FK Switch Setup ---#
+        self.switchCtrl = cmds.duplicate('Switch_tempShape', name='{}_switch_ctrl'.format(self.name))[0]
+        #if self.direction == 'Vertical':
+        #    cmds.move(rootPos[0], rootPos[1], rootPos[2], self.switchCtrl, absolute=True)
+        #elif self.direction == 'Horizontal':
+        cmds.move(rootPos[0], rootPos[1], rootPos[2], self.switchCtrl, absolute=True)
+        cmds.rotate(0, 0, 90, self.switchCtrl, relative=True)
         cmds.addAttr(self.switchCtrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=True)
 
-        offsetGrp = cmds.group(em=True, name=self.ctrlName+'IKFK_Switchoffset')
+        offsetGrp = cmds.group(em=True, name='{}_switch_offset'.format(self.name))
         cmds.move(rootPos[0], rootPos[1], rootPos[2], offsetGrp)
         cmds.parent(self.switchCtrl, offsetGrp)
         cmds.rotate(rootRot[0], rootRot[1], rootRot[2], offsetGrp)
         cmds.makeIdentity(self.switchCtrl, apply=True, t=1, r=1, s=1)
 
+        #--- Cleanup ---#
         self.deleteShape()
         cmds.parent(offsetGrp, self.ctrlGrp)
 
     def addConstraint(self):
+        #--- Result Joint + IK/FK Switch ---#
+        for i, type in enumerate(self.limbType):
+            if i == 0:
+                cmds.parentConstraint(self.ikJntList[i], self.fkJntList[i], self.jntList[i])
+                cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jntList[i], self.ikJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=1, value=1)
+                cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jntList[i], self.fkJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=1, value=0)
+                cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jntList[i], self.ikJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=0, value=0)
+                cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jntList[i], self.fkJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=0, value=1)
+            else:
+                cmds.orientConstraint(self.ikJntList[i], self.fkJntList[i], self.jntList[i])
+                cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jntList[i], self.ikJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=1, value=1)
+                cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jntList[i], self.fkJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=1, value=0)
+                cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jntList[i], self.ikJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=0, value=0)
+                cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jntList[i], self.fkJntList[i]), currentDriver='{}.FK_IK'.format(self.switchCtrl), driverValue=0, value=1)
 
-        '''Result Joint'''
-        cmds.parentConstraint(self.rootJntName+'IK', self.rootJntName+'FK', self.rootJntName)
-        cmds.orientConstraint(self.midJntName+'IK', self.midJntName+'FK', self.midJntName)
-        cmds.orientConstraint(self.topJntName+'IK', self.topJntName+'FK', self.topJntName)
+        for i, type in enumerate(self.limbType):
+            cmds.setDrivenKeyframe(self.fkCtrlList[i]+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=0, value=1)
+            cmds.setDrivenKeyframe(self.fkCtrlList[i]+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=1, value=0)
 
-        cmds.setDrivenKeyframe(self.rootJntName+'_parentConstraint1.'+self.rootJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.rootJntName+'_parentConstraint1.'+self.rootJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.rootJntName+'_parentConstraint1.'+self.rootJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.rootJntName+'_parentConstraint1.'+self.rootJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe(self.ikCtrlName+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.ikCtrlName+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.ikPoleName+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.ikPoleName+'.visibility', currentDriver=self.switchCtrl+'.FK_IK', driverValue=0, value=0)
 
-        cmds.setDrivenKeyframe(self.midJntName+'_orientConstraint1.'+self.midJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.midJntName+'_orientConstraint1.'+self.midJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.midJntName+'_orientConstraint1.'+self.midJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.midJntName+'_orientConstraint1.'+self.midJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
+        #--- FK Setup ---#
+        for i, type in enumerate(self.limbType): cmds.orientConstraint(self.fkCtrlList[i], self.fkJntList[i], mo=True)
+        cmds.setAttr(self.fkJntList[0]+'.visibility', 0)
 
-        cmds.setDrivenKeyframe(self.topJntName+'_orientConstraint1.'+self.topJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.topJntName+'_orientConstraint1.'+self.topJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.topJntName+'_orientConstraint1.'+self.topJntName+'IKW0', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.topJntName+'_orientConstraint1.'+self.topJntName+'FKW1', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
-
-        '''FK Setup'''
-        cmds.orientConstraint(self.rootCtrlName+'FK', self.rootJntName+'FK', mo=True)
-        cmds.orientConstraint(self.midCtrlName+'FK', self.midJntName+'FK', mo=True)
-        cmds.orientConstraint(self.topCtrlName+'FK', self.topJntName+'FK', mo=True)
-
-        '''IK Setup'''
-        if self.vertical:
-            cmds.rotate(0, 0, -20, self.midJntName+'IK', relative=True)
-            cmds.joint(self.midJntName+'IK', edit=True, ch=True, setPreferredAngles=True)
-            cmds.rotate(0, 0, 20, self.midJntName+'IK', relative=True)
+        #--- IK Setup ---#
+        # Set Preferred Angles #
+        middleIkJnt = self.ikJntList[1]
+        if self.direction == 'Vertical':
+            cmds.rotate(0, 0, -20, middleIkJnt, relative=True)
+            cmds.joint(middleIkJnt, edit=True, ch=True, setPreferredAngles=True)
+            cmds.rotate(0, 0, 20, middleIkJnt, relative=True)
         else:
             if self.side == 'L':
-                cmds.rotate(0, 0, 20, self.midJntName+'IK', relative=True)
-                cmds.joint(self.midJntName+'IK', edit=True, ch=True, setPreferredAngles=True)
-                cmds.rotate(0, 0, -20, self.midJntName+'IK', relative=True)
+                cmds.rotate(0, 0, 20, middleIkJnt, relative=True)
+                cmds.joint(middleIkJnt, edit=True, ch=True, setPreferredAngles=True)
+                cmds.rotate(0, 0, -20, middleIkJnt, relative=True)
             elif self.side == 'R':
-                cmds.rotate(0, 0, 20, self.midJntName+'IK', relative=True)
-                cmds.joint(self.midJntName+'IK', edit=True, ch=True, setPreferredAngles=True)
-                cmds.rotate(0, 0, -20, self.midJntName+'IK', relative=True)
+                cmds.rotate(0, 0, 20, middleIkJnt, relative=True)
+                cmds.joint(middleIkJnt, edit=True, ch=True, setPreferredAngles=True)
+                cmds.rotate(0, 0, -20, middleIkJnt, relative=True)
+        cmds.setAttr(self.ikJntList[0]+'.visibility', 0)
 
-        # build IK
-        ikHandle = cmds.ikHandle(startJoint=self.rootJntName+'IK', endEffector=self.topJntName+'IK', name=self.prefix+'_IK'+self.name, solver='ikRPsolver')[0]
-
-        cmds.pointConstraint(self.ctrlName+'IK', ikHandle, mo=True)
-        cmds.orientConstraint(self.ctrlName+'IK', self.topJntName+'IK', mo=True)
-        cmds.poleVectorConstraint(self.ctrlName+'PoleVector', ikHandle)
-        cmds.aimConstraint(self.midJntName+'IK', self.ctrlName+'PoleVector', mo=True)
-
-        '''IK/FK Switch'''
-
-        # IK visiblity
-        cmds.setDrivenKeyframe(self.ctrlName+'IK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.ctrlName+'PoleVector.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.ctrlName+'IK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.ctrlName+'PoleVector.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=0)
-
-        # FK visiblity
-        cmds.setDrivenKeyframe(self.rootCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe(self.midCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe(self.topCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe(self.rootCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.midCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.topCtrlName+'FK.visibility', currentDriver=self.ctrlName+'IKFK_Switch.FK_IK', driverValue=1, value=0)
-
-        '''Other constraints'''
-
-        # parent controller
-        cmds.pointConstraint(self.ctrlName+'IKFK_Switch', self.rootJntName+'FK', mo=True)
-        cmds.pointConstraint(self.ctrlName+'IKFK_Switch', self.rootJntName+'IK', mo=True)
-
-        misc.batchParent([self.ctrlName+'IKoffset', self.ctrlName+'PoleVector', self.rootCtrlName+'FKoffset', self.prefix+'_IK'+self.name], self.ctrlName+'IKFK_Switch')
-
-        # set visibility
-        cmds.setAttr(self.rootJntName+'FK.visibility', 0)
-        cmds.setAttr(self.rootJntName+'IK.visibility', 0)
+        # IK Handle #
+        ikHandle = cmds.ikHandle(startJoint=self.ikJntList[0], endEffector=self.ikJntList[-1], name='{}_ikhandle'.format(self.name), solver='ikRPsolver')[0]
+        cmds.pointConstraint(self.ikCtrlName, ikHandle, mo=True)
+        cmds.orientConstraint(self.ikCtrlName, self.ikJntList[-1], mo=True)
+        cmds.poleVectorConstraint(self.ikPoleName, ikHandle)
+        cmds.aimConstraint(middleIkJnt, self.ikPoleName, mo=True)
         cmds.setAttr(ikHandle+'.visibility', 0)
 
+        #--- Cleanup ---#
+        cmds.pointConstraint(self.switchCtrl, self.ikJntList[0], mo=True)
+        cmds.pointConstraint(self.switchCtrl, self.fkJntList[0], mo=True)
+        util.batchParent([self.ikOffsetName, self.ikPoleName, self.fkOffsetList[0], ikHandle], self.switchCtrl)
+
     def lockCtrl(self):
-        fkMidCtrl = cmds.ls(self.midCtrlName+'FK', transforms=True)[0]
-        if self.horizontal:
+        fkMidCtrl = cmds.ls(self.fkCtrlList[1], transforms=True)[0]
+        if self.direction == 'Horizontal':
             cmds.setAttr(fkMidCtrl+'.rz', l=True, k=0)
             cmds.setAttr(fkMidCtrl+'.rx', l=True, k=0)
         else:
             cmds.setAttr(fkMidCtrl+'.rz', l=True, k=0)
             cmds.setAttr(fkMidCtrl+'.ry', l=True, k=0)
 
-    '''
-    Snap IK joints to FK joints
-    '''
     def ikSnap(self):
-        fkRootPos = cmds.xform(self.rootJntName+'FK', ws=True, q=True, t=True)
-        fkMidPos = cmds.xform(self.midJntName+'FK', ws=True, q=True, t=True)
-        fkTopPos = cmds.xform(self.topJntName+'FK', ws=True, q=True, t=True)
-        fkTopRot = cmds.xform(self.topJntName+'FK', ws=True, q=True, ro=True)
+        """ Snap IK joint to FK joint"""
+        fkRootPos = cmds.xform(self.fkJntList[0], ws=True, q=True, t=True)
+        fkMidPos = cmds.xform(self.fkJntList[1], ws=True, q=True, t=True)
+        fkTopPos = cmds.xform(self.fkJntList[-1], ws=True, q=True, t=True)
+        fkTopRot = cmds.xform(self.fkJntList[-1], ws=True, q=True, ro=True)
 
         fkRootVec = om.MVector(fkRootPos[0], fkRootPos[1], fkRootPos[2])
         fkMidVec = om.MVector(fkMidPos[0], fkMidPos[1], fkMidPos[2])
         fkTopVec = om.MVector(fkTopPos[0], fkTopPos[1], fkTopPos[2])
 
-        midPointVect = (fkRootVec + fkTopVec)/2
-        poleDir = fkMidVec - midPointVect
+        midPointVec = (fkRootVec + fkTopVec) / 2
+        poleDir = fkMidVec - midPointVec
         polePos = fkMidVec + poleDir
 
-        ikCtrlPos = cmds.xform(self.ctrlName+'IK', ws=True, q=True, sp=True)
-        pvCtrlPos = cmds.xform(self.ctrlName+'PoleVector', ws=True, q=True, sp=True)
+        ikCtrlPos = cmds.xform(self.ikCtrlName, ws=True, q=True, sp=True)
+        pvCtrlPos = cmds.xform(self.ikPoleName, ws=True, q=True, sp=True)
 
-        cmds.rotate(fkTopRot[0], fkTopRot[1], fkTopRot[2], self.ctrlName+'IK')
-        cmds.move(fkTopPos[0]-ikCtrlPos[0], fkTopPos[1]-ikCtrlPos[1], fkTopPos[2]-ikCtrlPos[2], self.ctrlName+'IK', relative=True)
-        cmds.move(polePos[0]-pvCtrlPos[0], polePos[1]-pvCtrlPos[1], polePos[2]-pvCtrlPos[2], self.ctrlName+'PoleVector', relative=True)
+        cmds.rotate(fkTopRot[0], fkTopRot[1], fkTopRot[2], self.ikCtrlName)
+        cmds.move(fkTopPos[0]-ikCtrlPos[0], fkTopPos[1]-ikCtrlPos[1], fkTopPos[2]-ikCtrlPos[2], self.ikCtrlName, relative=True)
+        cmds.move(polePos[0]-pvCtrlPos[0], polePos[1]-pvCtrlPos[1], polePos[2]-pvCtrlPos[2], self.ikPoleName, relative=True)
 
-    '''
-    Snap FK joints to IK joints
-    '''
     def fkSnap(self):
-        ikRootRot = cmds.xform(self.rootJntName+'IK', os=True, q=True, ro=True)
-        ikMidRot = cmds.xform(self.midJntName+'IK', os=True, q=True, ro=True)
-        ikTopRot = cmds.xform(self.topJntName+'IK', os=True, q=True, ro=True)
+        """ Snap FK joint to IK joint"""
+        ikRootRot = cmds.xform(self.ikJntList[0], os=True, q=True, ro=True)
+        ikMidRot = cmds.xform(self.ikJntList[1], os=True, q=True, ro=True)
+        ikTopRot = cmds.xform(self.ikJntList[-1], os=True, q=True, ro=True)
 
-        cmds.rotate(ikRootRot[0], ikRootRot[1], ikRootRot[2], self.rootCtrlName+'FK')
-        cmds.rotate(ikMidRot[0], ikMidRot[1], ikMidRot[2], self.midCtrlName+'FK')
-        cmds.rotate(ikTopRot[0], ikTopRot[1], ikTopRot[2], self.topCtrlName+'FK')
+        cmds.rotate(ikRootRot[0], ikRootRot[1], ikRootRot[2], self.fkCtrlList[0])
+        cmds.rotate(ikMidRot[0], ikMidRot[1], ikMidRot[2], self.fkCtrlList[1])
+        cmds.rotate(ikTopRot[0], ikTopRot[1], ikTopRot[2], self.fkCtrlList[-1])

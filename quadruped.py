@@ -1,16 +1,5 @@
 import maya.cmds as cmds
-import base
-import quadSpine
-import backLeg
-import frontLeg
-import tail
-import misc
-
-reload(base)
-reload(quadSpine)
-reload(backLeg)
-reload(frontLeg)
-reload(tail)
+import util, base, quadSpine, backLeg, frontLeg, tail
 
 class Quadruped(base.Base):
     def __init__(self, prefix, side='NA', id='standard'):
@@ -69,10 +58,10 @@ class Quadruped(base.Base):
         tip = self.tip.constructJnt()
 
         # parent leg root joints to root spline joint
-        misc.batchParent([leftShoulder, rightShoulder], self.spine.topSpine)
+        util.batchParent([leftShoulder, rightShoulder], self.spine.topSpine)
 
         # parent arm root joints to top spline joint
-        misc.batchParent([leftHip, rightHip], spineRoot)
+        util.batchParent([leftHip, rightHip], spineRoot)
 
         # parent tail to spine
         cmds.parent(tailRoot, spineRoot)

@@ -45,10 +45,17 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLineEdit" name="prefixEdit"/>
+       <widget class="QLineEdit" name="prefixEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="setPrefixBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Confirm</string>
         </property>
@@ -78,7 +85,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -127,7 +134,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
+            <y>-514</y>
             <width>320</width>
             <height>1238</height>
            </rect>
@@ -304,7 +311,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>base_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -444,7 +451,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -742,7 +749,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>finger_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -882,7 +889,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -1448,7 +1455,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>foot_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -1588,7 +1595,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -2033,7 +2040,7 @@
                        <string/>
                       </property>
                       <property name="placeholderText">
-                       <string>spine_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -2456,7 +2463,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>limb_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -2596,7 +2603,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -3031,6 +3038,9 @@
                  </property>
                  <item>
                   <widget class="QPushButton" name="headThumb">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -3049,6 +3059,15 @@
                      <width>145</width>
                      <height>145</height>
                     </size>
+                   </property>
+                   <property name="checkable">
+                    <bool>false</bool>
+                   </property>
+                   <property name="default">
+                    <bool>false</bool>
+                   </property>
+                   <property name="flat">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -3607,7 +3626,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>biped_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -3880,7 +3899,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>hand_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -4020,7 +4039,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -4465,7 +4484,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>arm_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -4605,7 +4624,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -5143,7 +5162,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>leg_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -5283,7 +5302,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -5709,7 +5728,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
+            <y>-308</y>
             <width>320</width>
             <height>1032</height>
            </rect>
@@ -5886,7 +5905,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>quadruped_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -6159,7 +6178,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>frontLeg_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -6299,7 +6318,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -6744,7 +6763,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>backLeg_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -6884,7 +6903,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -7341,7 +7360,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>spine_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -7481,7 +7500,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>
@@ -7941,7 +7960,7 @@
                        </size>
                       </property>
                       <property name="placeholderText">
-                       <string>tail_id</string>
+                       <string>null</string>
                       </property>
                      </widget>
                     </item>
@@ -8084,7 +8103,7 @@
                        </size>
                       </property>
                       <property name="text">
-                       <string>NA</string>
+                       <string>M</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>

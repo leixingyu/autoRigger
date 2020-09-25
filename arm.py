@@ -1,17 +1,15 @@
 import maya.cmds as cmds
-import base
-import hand
-import limb
+import base, hand, limb
 
 class Arm(base.Base):
-    def __init__(self, prefix, side, id):
-        base.Base.__init__(self, prefix, side, id)
+    def __init__(self, side, id):
+        base.Base.__init__(self, side, id)
         self.metaType = 'Arm'
 
-        self.constructNameSpace(self.metaType)
+        self.createNaming()
         self.setLocAttr(startPos=[0, 10, 0])
-        self.limb = limb.Limb(prefix=self.prefix, side=self.side, id=id, type='Arm')
-        self.hand = hand.Hand(prefix=self.prefix, side=self.side, id=id)
+        self.limb = limb.Limb(side=self.side, id=id, type='Arm')
+        self.hand = hand.Hand(side=self.side, id=id)
 
     def setLocAttr(self, startPos=[0, 0, 0], distance=2, interval=0.5, gap=2, scale=0.2):
         self.startPos = startPos
@@ -21,23 +19,21 @@ class Arm(base.Base):
         self.scale = scale
 
     def buildGuide(self):
+        #--- Limb ---#
         self.limb.setLocAttr(startPos=self.startPos, interval=self.distance)
         self.limb.buildGuide()
-        # leftArm
+
+        #--- Hand ---#
         if self.side == 'L':
-            self.hand.setLocAttr(startPos=[self.startPos[0]+2*self.distance+self.gap,
-                                           self.startPos[1],
-                                           self.startPos[2]],
+            self.hand.setLocAttr(startPos=[self.startPos[0] + 2 * self.distance + self.gap, self.startPos[1], self.startPos[2]],
                                  interval=self.interval, distance=self.gap)
         elif self.side == 'R':
-            self.hand.setLocAttr(startPos=[self.startPos[0]-2*self.distance-self.gap,
-                                           self.startPos[1],
-                                           self.startPos[2]],
+            self.hand.setLocAttr(startPos=[self.startPos[0] - 2 * self.distance - self.gap, self.startPos[1], self.startPos[2]],
                                  interval=self.interval, distance=self.gap)
         wristLoc = self.hand.buildGuide()
 
-        # parent wrist to the end of limb
-        cmds.parent(wristLoc, self.limb.topLocName)
+        #--- Connect ---#
+        cmds.parent(wristLoc, self.limb.locList[-1])  # parent wrist to the tip of limb
 
     def constructJnt(self):
         self.limb.constructJnt()
@@ -50,8 +46,8 @@ class Arm(base.Base):
     def addConstraint(self):
         self.limb.addConstraint()
         self.hand.addConstraint()
-
-        cmds.parentConstraint(self.limb.topJntName, self.hand.wrist.jntName, mo=True)
+        #--- Connect ---#
+        cmds.parentConstraint(self.limb.jntList[-1], self.hand.wrist.jntName, mo=True)
 
     def lockCtrl(self):
         self.limb.lockCtrl()

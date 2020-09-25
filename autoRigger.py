@@ -1,9 +1,173 @@
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
+import maya.OpenMayaUI
 import os
 import math
-import misc, base, finger, foot, spline, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
-reload(quadruped)
+from shiboken2 import wrapInstance
+import util, base, finger, foot, spine, limb, hand, arm, leg, biped, backLeg, frontLeg, tail, quadSpine, quadruped
+
+PATH = os.path.dirname(os.path.abspath(__file__))+r'\ui'
+
+def getMayaMainWindow():
+    main_window_ptr = maya.OpenMayaUI.MQtUtil.mainWindow()
+    return wrapInstance(long(main_window_ptr), QtWidgets.QMainWindow)
+
+class AutoRigger(QtWidgets.QDialog):
+    def __init__(self, parent=getMayaMainWindow()):
+        super(AutoRigger, self).__init__(parent)
+        _loadUi('new.ui', self)
+
+        self.setWindowFlags(QtCore.Qt.Window)
+
+        #--- Connect signals and slots ---#
+        self.ui_tabWidget.currentChanged.connect(lambda:self.refreshList())
+        self.ui_listWidget.itemClicked.connect(self.itemClicked)
+        self.ui_guideBtn.clicked.connect(self.createGuide)
+        self.ui_buildBtn.clicked.connect(self.createModule)
+
+        self.generateIcon()
+        self.generateItem()
+
+        self.toBuild = []
+
+        # position could be numeric value
+        intOnly = QtGui.QIntValidator()
+        self.ui_worldX.setValidator(intOnly)
+        self.ui_worldY.setValidator(intOnly)
+        self.ui_worldZ.setValidator(intOnly)
+
+        #--- Reset tab position and populate list ---#
+        self.ui_tabWidget.setCurrentIndex(0)
+        self.refreshList()
+
+    def generateIcon(self):
+        self.ui_baseIcon = QtGui.QIcon()
+        self.ui_baseIcon.addFile(os.path.join(PATH, 'base.png'))
+
+        self.ui_fingerIcon = QtGui.QIcon()
+        self.ui_fingerIcon.addFile(os.path.join(PATH, 'finger.png'))
+
+        self.ui_handIcon = QtGui.QIcon()
+        self.ui_handIcon.addFile(os.path.join(PATH, 'hand.png'))
+
+        self.ui_limbIcon = QtGui.QIcon()
+        self.ui_limbIcon.addFile(os.path.join(PATH, 'limb.png'))
+
+        self.ui_armIcon = QtGui.QIcon()
+        self.ui_armIcon.addFile(os.path.join(PATH, 'arm.png'))
+
+        self.ui_footIcon = QtGui.QIcon()
+        self.ui_footIcon.addFile(os.path.join(PATH, 'foot.png'))
+
+        self.ui_legIcon = QtGui.QIcon()
+        self.ui_legIcon.addFile(os.path.join(PATH, 'leg.png'))
+
+        self.ui_headIcon = QtGui.QIcon()
+        self.ui_headIcon.addFile(os.path.join(PATH, 'head.png'))
+
+        self.ui_bipedIcon = QtGui.QIcon()
+        self.ui_bipedIcon.addFile(os.path.join(PATH, 'body.png'))
+
+        self.ui_spineIcon = QtGui.QIcon()
+        self.ui_spineIcon.addFile(os.path.join(PATH, 'spine.png'))
+
+    def generateItem(self):
+        self.ui_base = QtWidgets.QListWidgetItem('base')
+        self.ui_base.setIcon(self.ui_baseIcon)
+
+        self.ui_finger = QtWidgets.QListWidgetItem('finger')
+        self.ui_finger.setIcon(self.ui_fingerIcon)
+
+        self.ui_hand = QtWidgets.QListWidgetItem('hand')
+        self.ui_hand.setIcon(self.ui_handIcon)
+
+        self.ui_limb = QtWidgets.QListWidgetItem('limb')
+        self.ui_limb.setIcon(self.ui_limbIcon)
+
+        self.ui_arm = QtWidgets.QListWidgetItem('arm')
+        self.ui_arm.setIcon(self.ui_armIcon)
+
+        self.ui_foot = QtWidgets.QListWidgetItem('foot')
+        self.ui_foot.setIcon(self.ui_footIcon)
+
+        self.ui_leg = QtWidgets.QListWidgetItem('leg')
+        self.ui_leg.setIcon(self.ui_legIcon)
+
+        self.ui_head = QtWidgets.QListWidgetItem('head')
+        self.ui_head.setIcon(self.ui_headIcon)
+
+        self.ui_biped = QtWidgets.QListWidgetItem('full-biped')
+        self.ui_biped.setIcon(self.ui_bipedIcon)
+
+        self.ui_spine = QtWidgets.QListWidgetItem('spine')
+        self.ui_spine.setIcon(self.ui_spineIcon)
+
+    def refreshList(self):
+        self.clearList(self.ui_listWidget)
+        index = self.ui_tabWidget.currentIndex()
+        if index == 0: list = [self.ui_biped, self.ui_spine, self.ui_arm, self.ui_leg, self.ui_head]
+        elif index == 1: list = []
+        elif index == 2: list = []
+        elif index == 3: list = [self.ui_base, self.ui_finger, self.ui_hand, self.ui_limb, self.ui_foot, self.ui_spine, self.ui_arm, self.ui_leg, self.ui_head]
+        else:
+            print "list not created"
+            return
+
+        for item in list: self.ui_listWidget.addItem(item)
+
+    def itemClicked(self):
+        self.clearField()
+        itemName = self.ui_listWidget.currentItem().text()
+        #--- Also set field lock ---#
+
+        print itemName
+
+    def createGuide(self):
+        #--- Fetch all field info ---#
+        if not self.ui_nameEdit.text(): id = 'null'
+        else: id = self.ui_nameEdit.text()
+
+        side = ['L', 'R', 'M'][self.ui_sideCBox.currentIndex()]
+
+        pos = [0, 0, 0]
+        if self.ui_worldX.text(): pos[0] = int(self.ui_worldX.text())
+        if self.ui_worldY.text(): pos[1] = int(self.ui_worldY.text())
+        if self.ui_worldZ.text(): pos[2] = int(self.ui_worldZ.text())
+
+        #--- Identify the item type and build it ---#
+        itemName = self.ui_listWidget.currentItem().text()
+        if itemName == 'finger':        obj = finger.Finger(side, id)
+        elif itemName == 'hand':        obj = hand.Hand(side, id, 5)
+        elif itemName == 'limb':        obj = limb.Limb(side, id)
+        elif itemName == 'arm':         obj = arm.Arm(side, id)
+        elif itemName == 'foot':        obj = foot.Foot(side, id)
+        elif itemName == 'leg':         obj = leg.Leg(side, id)
+        elif itemName == 'spine':       obj = spine.Spine(side, id)
+        elif itemName == 'full-biped':  obj = biped.Biped(side, id)
+        else: obj = base.Base(side, id)
+
+        obj.setLocAttr(pos)
+        obj.buildGuide()
+        self.toBuild.append(obj)
+        self.clearField()
+        #print id, side, pos
+
+    def createModule(self):
+        for item in self.toBuild:
+            item.buildRig()
+
+    def clearList(self, widget):
+        """ This clears all items in the list but not deleting them """
+        while widget.takeItem(0):
+            widget.takeItem(0)
+        self.clearField()
+
+    def clearField(self):
+        self.ui_nameEdit.setText('')
+        self.ui_sideCBox.setCurrentIndex(0)
+        self.ui_worldX.setText('')
+        self.ui_worldY.setText('')
+        self.ui_worldZ.setText('')
 
 class MyWindow(QtWidgets.QDialog):
     def __init__(self):
@@ -63,13 +227,13 @@ class MyWindow(QtWidgets.QDialog):
         self.toBuildList = []
 
     def mirrorLoc(self):
-        misc.mirrorLoc()
+        util.mirrorLoc()
 
     '''Module'''
 
     def baseClick(self):
         id, side, startPos, = self.setBaseAttr()
-        b = base.Base(prefix=self.prefix, side=side, id=id)
+        b = base.Base(side=side, id=id)
         self.baseIDEdit.setText('')
         self.current = b
         self.toBuildList.append(b)
@@ -77,7 +241,7 @@ class MyWindow(QtWidgets.QDialog):
         b.buildGuide()
 
     def setBaseAttr(self):
-        id = 'base_id'
+        id = 'null'
         if self.baseIDEdit.text(): id = self.baseIDEdit.text()
 
         side = 'L'
@@ -93,7 +257,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def fingerClick(self):
         id, side, type, startPos, interval, segment = self.setFingerAttr()
-        f = finger.Finger(prefix=self.prefix, side=side, id=id, type=type)
+        f = finger.Finger(side=side, id=id, type=type)
         self.fingerIDEdit.setText('')
         self.current = f
         self.toBuildList.append(f)
@@ -101,7 +265,7 @@ class MyWindow(QtWidgets.QDialog):
         f.buildGuide()
 
     def setFingerAttr(self):
-        id = 'finger_id'
+        id = 'null'
         if self.fingerIDEdit.text(): id = self.fingerIDEdit.text()
 
         side = 'L'
@@ -130,7 +294,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def footClick(self):
         id, side, startPos, interval, height = self.setFootAttr()
-        f = foot.Foot(prefix=self.prefix, side=side, id=id)
+        f = foot.Foot(side=side, id=id)
         self.footIDEdit.setText('')
         self.current = f
         self.toBuildList.append(f)
@@ -138,7 +302,7 @@ class MyWindow(QtWidgets.QDialog):
         f.buildGuide()
 
     def setFootAttr(self):
-        id = 'foot_id'
+        id = 'null'
         if self.footIDEdit.text(): id = self.footIDEdit.text()
 
         side = 'L'
@@ -164,7 +328,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def spineClick(self):
         id, side, startPos, length, segment = self.setSpineAttr()
-        s = spline.Spline(prefix=self.prefix, side=side, id=id)
+        s = spine.Spine(side=side, id=id)
         self.spineIDEdit.setText('')
         self.current = s
         self.toBuildList.append(s)
@@ -172,7 +336,7 @@ class MyWindow(QtWidgets.QDialog):
         s.buildGuide()
 
     def setSpineAttr(self):
-        id = 'spine_id'
+        id = 'null'
         if self.spineIDEdit.text(): id = self.spineIDEdit.text()
 
         side = 'NA'
@@ -196,7 +360,7 @@ class MyWindow(QtWidgets.QDialog):
     
     def limbClick(self):
         id, side, type, startPos, interval = self.setLimbAttr()
-        l = limb.Limb(prefix=self.prefix, side=side, id=id, type=type)
+        l = limb.Limb(side=side, id=id, type=type)
         self.limbIDEdit.setText('')
         self.current = l
         self.toBuildList.append(l)
@@ -204,12 +368,12 @@ class MyWindow(QtWidgets.QDialog):
         l.buildGuide()
 
     def setLimbAttr(self):
-        id = 'limb_id'
+        id = 'null'
         if self.limbIDEdit.text(): id = self.limbIDEdit.text()
 
         side = 'L'
         if self.limbRBtn.isChecked(): side = 'R'
-        elif self.limbNABtn.isChecked(): side = 'NA'
+        elif self.limbNABtn.isChecked(): side = 'M'
 
         type = 'NA'
         if self.limbArmBtn.isChecked(): type = 'Arm'
@@ -231,7 +395,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def bipedClick(self):
         id, side, startPos = self.setBipedAttr()
-        b = biped.Biped(prefix=self.prefix, side=side, id=id)
+        b = biped.Biped(side=side, id=id)
         self.bipedIDEdit.setText('')
         self.current = b
         self.toBuildList.append(b)
@@ -239,7 +403,7 @@ class MyWindow(QtWidgets.QDialog):
         b.buildGuide()
 
     def setBipedAttr(self):
-        id = 'biped_id'
+        id = 'null'
         if self.bipedIDEdit.text(): id = self.bipedIDEdit.text()
 
         side = 'NA'
@@ -253,7 +417,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def handClick(self):
         id, side, startPos, interval, distance = self.setHandAttr()
-        h = hand.Hand(prefix=self.prefix, side=side, id=id)
+        h = hand.Hand(side=side, id=id)
         self.handIDEdit.setText('')
         self.current = h
         self.toBuildList.append(h)
@@ -261,7 +425,7 @@ class MyWindow(QtWidgets.QDialog):
         h.buildGuide()
 
     def setHandAttr(self):
-        id = 'hand_id'
+        id = 'null'
         if self.handIDEdit.text(): id = self.handIDEdit.text()
 
         side = 'L'
@@ -287,7 +451,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def armClick(self):
         id, side, startPos, interval, distance, gap = self.setArmAttr()
-        a = arm.Arm(prefix=self.prefix, side=side, id=id)
+        a = arm.Arm(side=side, id=id)
         self.armIDEdit.setText('')
         self.current = a
         self.toBuildList.append(a)
@@ -295,7 +459,7 @@ class MyWindow(QtWidgets.QDialog):
         a.buildGuide()
 
     def setArmAttr(self):
-        id = 'arm_id'
+        id = 'null'
         if self.armIDEdit.text(): id = self.armIDEdit.text()
 
         side = 'L'
@@ -326,7 +490,7 @@ class MyWindow(QtWidgets.QDialog):
     
     def legClick(self):
         id, side, startPos, interval, distance, height = self.setLegAttr()
-        l = leg.Leg(prefix=self.prefix, side=side, id=id)
+        l = leg.Leg(side=side, id=id)
         self.legIDEdit.setText('')
         self.current = l
         self.toBuildList.append(l)
@@ -334,7 +498,7 @@ class MyWindow(QtWidgets.QDialog):
         l.buildGuide()
 
     def setLegAttr(self):
-        id = 'leg_id'
+        id = 'null'
         if self.legIDEdit.text(): id = self.legIDEdit.text()
 
         side = 'L'
@@ -367,7 +531,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def quadrupedClick(self):
         id, side, startPos = self.setQuadrupedAttr()
-        q = quadruped.Quadruped(prefix=self.prefix, side=side, id=id)
+        q = quadruped.Quadruped(side=side, id=id)
         self.quadrupedIDEdit.setText('')
         self.current = q
         self.toBuildList.append(q)
@@ -375,7 +539,7 @@ class MyWindow(QtWidgets.QDialog):
         q.buildGuide()
 
     def setQuadrupedAttr(self):
-        id = 'quadruped_id'
+        id = 'null'
         if self.quadrupedIDEdit.text(): id = self.quadrupedIDEdit.text()
 
         side = 'NA'
@@ -389,7 +553,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def frontLegClick(self):
         id, side, startPos, distance, height = self.setFrontLegAttr()
-        l = frontLeg.FrontLeg(prefix=self.prefix, side=side, id=id)
+        l = frontLeg.FrontLeg(side=side, id=id)
         self.frontLegIDEdit.setText('')
         self.current = l
         self.toBuildList.append(l)
@@ -397,7 +561,7 @@ class MyWindow(QtWidgets.QDialog):
         l.buildGuide()
 
     def setFrontLegAttr(self):
-        id = 'frontLeg_id'
+        id = 'null'
         if self.frontLegIDEdit.text(): id = self.frontLegIDEdit.text()
 
         side = 'L'
@@ -424,7 +588,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def backLegClick(self):
         id, side, startPos, distance, height = self.setBackLegAttr()
-        l = backLeg.BackLeg(prefix=self.prefix, side=side, id=id)
+        l = backLeg.BackLeg(side=side, id=id)
         self.backLegIDEdit.setText('')
         self.current = l
         self.toBuildList.append(l)
@@ -432,7 +596,7 @@ class MyWindow(QtWidgets.QDialog):
         l.buildGuide()
 
     def setBackLegAttr(self):
-        id = 'backLeg_id'
+        id = 'null'
         if self.backLegIDEdit.text(): id = self.backLegIDEdit.text()
 
         side = 'L'
@@ -466,7 +630,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def qspineClick(self):
         id, side, startPos, length, segment = self.setQSpineAttr()
-        s = quadSpine.QuadSpine(prefix=self.prefix, side=side, id=id)
+        s = quadSpine.QuadSpine(side=side, id=id)
         self.qspineIDEdit.setText('')
         self.current = s
         self.toBuildList.append(s)
@@ -474,7 +638,7 @@ class MyWindow(QtWidgets.QDialog):
         s.buildGuide()
 
     def setQSpineAttr(self):
-        id = 'quadSpine_id'
+        id = 'null'
         if self.qspineIDEdit.text(): id = self.qspineIDEdit.text()
 
         side = 'NA'
@@ -504,7 +668,7 @@ class MyWindow(QtWidgets.QDialog):
 
     def tailClick(self):
         id, side, startPos, length, segment = self.setTailAttr()
-        t = tail.Tail(prefix=self.prefix, side=side, id=id)
+        t = tail.Tail(side=side, id=id)
         self.qspineIDEdit.setText('')
         self.current = t
         self.toBuildList.append(t)
@@ -512,7 +676,7 @@ class MyWindow(QtWidgets.QDialog):
         t.buildGuide()
 
     def setTailAttr(self):
-        id = 'tail_id'
+        id = 'null'
         if self.tailIDEdit.text(): id = self.tailIDEdit.text()
 
         side = 'NA'
@@ -546,3 +710,11 @@ def show():
     #currentDir = os.getcwd()
     window = MyWindow()
     window.show()
+    return window
+
+def showNew():
+    os.chdir(PATH)
+    #currentDir = os.getcwd()
+    window = AutoRigger()
+    window.show()
+    return window

@@ -1,7 +1,5 @@
 import maya.cmds as cmds
 import base
-import misc
-
 
 class BackLeg(base.Base):
     def __init__(self, prefix, side, id):

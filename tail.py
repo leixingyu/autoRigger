@@ -1,6 +1,5 @@
 import maya.cmds as cmds
-import base, misc
-reload(misc)
+import base, util
 
 class Tail(base.Base):
     def __init__(self, prefix, side, id):

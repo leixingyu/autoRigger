@@ -1,16 +1,39 @@
 import maya.cmds as cmds
-import base
-import misc
+import base, util
 
 class Foot(base.Base):
-    def __init__(self, prefix, side, id):
-        base.Base.__init__(self, prefix, side, id)
+    def __init__(self, side, id):
+        base.Base.__init__(self, side, id)
         self.metaType = 'Foot'
-
-        self.constructNameSpace(self.metaType)
-
-        '''default locator attribute'''
+        self.createNaming()
+        self.createSecondaryNaming()
         self.setLocAttr()
+
+    def createSecondaryNaming(self):
+        self.ankleLocName = '{}{}_loc'.format(self.name, 'ankle')
+        self.ballLocName  = '{}{}_loc'.format(self.name, 'ball')
+        self.toeLocName   = '{}{}_loc'.format(self.name, 'toe')
+        self.innerLocName = '{}{}_loc'.format(self.name, 'inner')
+        self.outerLocName = '{}{}_loc'.format(self.name, 'outer')
+        self.heelLocName  = '{}{}_loc'.format(self.name, 'heel')
+
+        self.ankleJntName = '{}{}_jnt'.format(self.name, 'ankle')
+        self.ballJntName  = '{}{}_jnt'.format(self.name, 'ball')
+        self.toeJntName   = '{}{}_jnt'.format(self.name, 'toe')
+        self.innerJntName = '{}{}_jnt'.format(self.name, 'inner')
+        self.outerJntName = '{}{}_jnt'.format(self.name, 'outer')
+        self.heelJntName  = '{}{}_jnt'.format(self.name, 'heel')
+
+        self.revAnkleJntName = '{}{}_jnt'.format(self.name, 'reverseankle')
+        self.revBallJntName  = '{}{}_jnt'.format(self.name, 'reverseball')
+        self.revToeJntName   = '{}{}_jnt'.format(self.name, 'reversetoe')
+
+        self.fkAnkleJntName = '{}{}_jnt'.format(self.name, 'fkankle')
+        self.fkBallJntName  = '{}{}_jnt'.format(self.name, 'fkball')
+        self.fkToeJntName   = '{}{}_jnt'.format(self.name, 'fktoe')
+
+        self.fkCtrlName     = '{}{}_ctrl'.format(self.name, 'fk')
+        self.switchCtrlName = '{}{}_ctrl'.format(self.name, 'switch')
 
     def setLocAttr(self, startPos=[0, 0, 0], interval=0.5, height=0.4, scale=0.2):
         self.startPos = startPos
@@ -28,183 +51,180 @@ class Foot(base.Base):
         cmds.rotate(0, 90, 0, footFKShape, relative=True)
         cmds.scale(0.4, 0.4, 0.4, footFKShape)
 
-        footSwitchShape = misc.makeTextCurve(string='FK/IK', name='FootSwitch_tempShape')
+        footSwitchShape = util.makeTextCurve(string='FK/IK', name='FootSwitch_tempShape')
         cmds.rotate(-90, 0, 0, footSwitchShape, relative=True)
 
     def buildGuide(self):
         grp = cmds.group(em=True, n=self.locGrpName)
 
-        '''Result Foot'''
-        ankle = cmds.spaceLocator(n=self.locName+'ankle')
+        #--- Result Foot ---#
+        ankle = cmds.spaceLocator(n=self.ankleLocName)
         cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], ankle, absolute=True)
         cmds.scale(self.scale, self.scale, self.scale, ankle)
 
-        ball = cmds.spaceLocator(n=self.locName+'ball')
+        ball = cmds.spaceLocator(n=self.ballLocName)
         cmds.parent(ball, ankle, relative=True)
         cmds.move(0, -self.height, self.interval, ball, relative=True)
 
-        toe = cmds.spaceLocator(n=self.locName+'toe')
+        toe = cmds.spaceLocator(n=self.toeLocName)
         cmds.parent(toe, ball, relative=True)
         cmds.move(0, 0, 2*self.interval, toe, relative=True)
 
-        '''Reverse Foot'''
-        inner = cmds.spaceLocator(n=self.locName+'inner')
+        #--- Reverse Foot ---#
+        inner = cmds.spaceLocator(n=self.innerLocName)
         cmds.parent(inner, ball, relative=True)
         if self.side == 'L': cmds.move( -self.interval, 0, 0, inner, relative=True)
         else: cmds.move(self.interval, 0, 0, inner, relative=True)
 
-        outer = cmds.spaceLocator(n=self.locName+'outer')
+        outer = cmds.spaceLocator(n=self.outerLocName)
         cmds.parent(outer, ball, relative=True)
         if self.side is 'L': cmds.move(self.interval, 0, 0, outer, relative=True)
         else: cmds.move(-self.interval, 0, 0, outer, relative=True)
 
-        heel = cmds.spaceLocator(n=self.locName+'heel')
+        heel = cmds.spaceLocator(n=self.heelLocName)
         cmds.parent(heel, ball, relative=True)
         cmds.move(0, 0, -1.5*self.interval, heel, relative=True)
 
+        #--- Cleanup ---#
         self.colorLoc()
         cmds.parent(ankle, grp)
         cmds.parent(grp, self.locGrp)
         return grp
         
     def constructJnt(self):
-        '''Result Foot'''
-        ankle = cmds.ls(self.locName+'ankle')
+        #--- Result Foot Joint ---#
+        ankle = cmds.ls(self.ankleLocName)
         cmds.select(clear=True)
         anklePos = cmds.xform(ankle, q=True, t=True, ws=True)
-        ankleJnt = cmds.joint(p=anklePos, name=self.jntName+'ankle')
+        ankleJnt = cmds.joint(p=anklePos, name=self.ankleJntName)
 
-        ball = cmds.ls(self.locName+'ball')
+        ball = cmds.ls(self.ballLocName)
         ballPos = cmds.xform(ball, q=True, t=True, ws=True)
-        ballJnt = cmds.joint(p=ballPos, name=self.jntName+'ball')
+        ballJnt = cmds.joint(p=ballPos, name=self.ballJntName)
 
-        toe = cmds.ls(self.locName+'toe')
+        toe = cmds.ls(self.toeLocName)
         toePos = cmds.xform(toe, q=True, t=True, ws=True)
-        toeJnt = cmds.joint(p=toePos, name=self.jntName+'toe')
+        toeJnt = cmds.joint(p=toePos, name=self.toeJntName)
 
-        '''Reverse Foot'''
-        inner = cmds.ls(self.locName+'inner')
+        #--- Reverse Foot Joint ---#
+        inner = cmds.ls(self.innerLocName)
         cmds.select(clear=True)
         innerPos = cmds.xform(inner, q=True, t=True, ws=True)
-        innerJoint = cmds.joint(p=innerPos, name=self.jntName+'inner')
+        innerJoint = cmds.joint(p=innerPos, name=self.innerJntName)
 
-        outer = cmds.ls(self.locName+'outer')
+        outer = cmds.ls(self.outerLocName)
         outerPos = cmds.xform(outer, q=True, t=True, ws=True)
-        outerJoint = cmds.joint(p=outerPos, name=self.jntName+'outer')
+        outerJoint = cmds.joint(p=outerPos, name=self.outerJntName)
 
-        heel = cmds.ls(self.locName+'heel')
+        heel = cmds.ls(self.heelLocName)
         heelPos = cmds.xform(heel, q=True, t=True, ws=True)
-        heelJoint = cmds.joint(p=heelPos, name=self.jntName+'heel')
+        heelJoint = cmds.joint(p=heelPos, name=self.heelJntName)
 
-        reverseToeJoint = cmds.joint(p=toePos, radius=0.8, name=self.jntName+'reverseToe')
-        reverseBallJoint = cmds.joint(p=ballPos, radius=0.8, name=self.jntName+'reverseBall')
-        reverseAnkleJoint = cmds.joint(p=anklePos, radius=0.8, name=self.jntName+'reverseAnkle')
+        reverseToeJoint = cmds.joint(p=toePos, radius=0.8, name=self.revToeJntName)
+        reverseBallJoint = cmds.joint(p=ballPos, radius=0.8, name=self.revBallJntName)
+        reverseAnkleJoint = cmds.joint(p=anklePos, radius=0.8, name=self.revAnkleJntName)
 
-        '''FK Foot'''
-        cmds.select(clear=True)
-        ankleJntFK = cmds.joint(p=anklePos, name=self.jntName+'ankleFK')
-        ballJntFK = cmds.joint(p=ballPos, name=self.jntName+'ballFK')
-        toeJntFK = cmds.joint(p=toePos, name=self.jntName+'toeFK')
-
-        cmds.setAttr(ankleJntFK+'.visibility', 0)
         cmds.setAttr(innerJoint+'.visibility', 0)
-        misc.batchParent([ankleJntFK, innerJoint, ankleJnt], self.jntGrp)
+
+        #--- FK Foot Joint ---#
+        cmds.select(clear=True)
+        ankleJntFK = cmds.joint(p=anklePos, name=self.fkAnkleJntName)
+        ballJntFK = cmds.joint(p=ballPos, name=self.fkBallJntName)
+        toeJntFK = cmds.joint(p=toePos, name=self.fkToeJntName)
+        cmds.setAttr(ankleJntFK+'.visibility', 0)
+
+        #--- Cleanup ---#
+        util.batchParent([ankleJntFK, innerJoint, ankleJnt], self.jntGrp)
 
     def placeCtrl(self):
         self.setCtrlShape()
 
-        '''IK Foot'''
+        #--- IK Setup ---#
         footCtrl = cmds.duplicate('Foot_tempShape', name=self.ctrlName)[0]
         cmds.addAttr(footCtrl, longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=True)
         cmds.addAttr(footCtrl, longName='foot_Bank', attributeType='double', defaultValue=0, minValue=-20, maxValue=20, keyable=True)
 
-        footPos = cmds.xform(self.jntName+'ball', q=True, t=True, ws=True)
+        footPos = cmds.xform(self.ballJntName, q=True, t=True, ws=True)
         cmds.move(footPos[0], footPos[1], footPos[2]+1, footCtrl)
         cmds.makeIdentity(footCtrl, apply=True, t=1, r=1, s=1)
 
-        heelLoc = cmds.xform(self.jntName+'heel', q=True, t=True, ws=True)
+        heelLoc = cmds.xform(self.heelJntName, q=True, t=True, ws=True)
         cmds.move(heelLoc[0], heelLoc[1], heelLoc[2], '%s.scalePivot' % footCtrl, '%s.rotatePivot' % footCtrl, absolute=True)
 
-        '''FK Foot'''
-        footFKCtrl = cmds.duplicate('FootFK_tempShape', name=self.ctrlName+'FK')[0]
+        #--- FK Setup ---#
+        footFKCtrl = cmds.duplicate('FootFK_tempShape', name=self.fkCtrlName)[0]
         cmds.move(footPos[0], footPos[1], footPos[2], footFKCtrl)
         cmds.makeIdentity(footFKCtrl, apply=True, t=1, r=1, s=1)
 
-        '''Switch'''
-        switch = cmds.duplicate('FootSwitch_tempShape', name=self.ctrlName+'Switch')[0]
-        cmds.move(footPos[0], footPos[1], footPos[2]+3, switch)
+        #--- IK/FK Switch Setup ---#
+        switch = cmds.duplicate('FootSwitch_tempShape', name=self.switchCtrlName)[0]
+        if self.side == "L":   cmds.move(footPos[0]+2, footPos[1], footPos[2], switch)
+        elif self.side == "R": cmds.move(footPos[0]-3, footPos[1], footPos[2], switch)
+        cmds.scale(0.5, 0.5, 0.5, switch)
         cmds.addAttr(switch, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=True)
         cmds.makeIdentity(switch, apply=True, t=1, r=1, s=1)
 
-        misc.batchParent([switch, footCtrl, footFKCtrl], self.ctrlGrp)
+        #--- Cleanup ---#
+        util.batchParent([switch, footCtrl, footFKCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def addConstraint(self):
-        '''FK Foot'''
-        cmds.orientConstraint(self.ctrlName+'FK', self.jntName+'ballFK', mo=True)
+        #--- FK Setup ---#
+        cmds.orientConstraint(self.fkCtrlName, self.fkBallJntName, mo=True)
+        cmds.pointConstraint(self.fkAnkleJntName, self.ankleJntName)
+        cmds.orientConstraint(self.fkAnkleJntName, self.ankleJntName, mo=True)
+        cmds.orientConstraint(self.fkBallJntName, self.ballJntName)
+        cmds.orientConstraint(self.fkToeJntName, self.toeJntName)
 
-        cmds.pointConstraint(self.jntName+'ankleFK', self.jntName+'ankle')
-        cmds.orientConstraint(self.jntName+'ankleFK', self.jntName+'ankle', mo=True)
-        cmds.orientConstraint(self.jntName+'ballFK', self.jntName+'ball')
-        cmds.orientConstraint(self.jntName+'toeFK', self.jntName+'toe')
+        #--- IK Setup ---#
+        cmds.parentConstraint(self.ctrlName, self.innerJntName, sr='z', mo=True)
+        cmds.orientConstraint(self.revBallJntName, self.ankleJntName, mo=True)
+        cmds.orientConstraint(self.revToeJntName, self.ballJntName, mo=True)
+        cmds.pointConstraint(self.revAnkleJntName, self.ankleJntName, mo=True)
 
-        '''IK Foot'''
-        # Foot Constraint
-        innerJnt = cmds.ls(self.jntName+'inner')[0]
-        outerJnt = cmds.ls(self.jntName+'outer')[0]
-        reverseBall = cmds.ls(self.jntName+'reverseBall')[0]
-        reverseToe = cmds.ls(self.jntName+'reverseToe')[0]
+        # Foot Roll
+        cmds.setDrivenKeyframe(self.heelJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.heelJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=-10, value=-25)
 
-        cmds.parentConstraint(self.ctrlName, innerJnt, sr='z', mo=True)
+        cmds.setDrivenKeyframe(self.revBallJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.revBallJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=20, value=25)
 
-        cmds.orientConstraint(reverseBall, self.jntName+'ankle', mo=True)
-        cmds.orientConstraint(reverseToe, self.jntName+'ball', mo=True)
-        cmds.pointConstraint(self.jntName+'reverseAnkle', self.jntName+'ankle', mo=True)
+        cmds.setDrivenKeyframe(self.revToeJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=20, value=0)
+        cmds.setDrivenKeyframe(self.revToeJntName+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=40, value=25)
 
-        # Set Foot Roll
-        cmds.setDrivenKeyframe(self.jntName+'heel.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'heel.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=-10, value=-25)
-
-        cmds.setDrivenKeyframe(reverseBall+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(reverseBall+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=20, value=25)
-
-        cmds.setDrivenKeyframe(reverseToe+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=20, value=0)
-        cmds.setDrivenKeyframe(reverseToe+'.rotateX', currentDriver=self.ctrlName+'.foot_Roll', driverValue=40, value=25)
-
-        # Set Foot Bank
-        cmds.setDrivenKeyframe(innerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(outerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=0, value=0)
+        # Foot Bank
+        cmds.setDrivenKeyframe(self.innerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.outerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=0, value=0)
         if self.side == 'R':
-            cmds.setDrivenKeyframe(innerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=-20, value=-30)
-            cmds.setDrivenKeyframe(outerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=20, value=30)
+            cmds.setDrivenKeyframe(self.innerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=-20, value=-30)
+            cmds.setDrivenKeyframe(self.outerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=20, value=30)
         else:
-            cmds.setDrivenKeyframe(innerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=-20, value=30)
-            cmds.setDrivenKeyframe(outerJnt+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=20, value=-30)
+            cmds.setDrivenKeyframe(self.innerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=-20, value=30)
+            cmds.setDrivenKeyframe(self.outerJntName+'.rotateZ', currentDriver=self.ctrlName+'.foot_Bank', driverValue=20, value=-30)
 
-        '''Result Foot'''
-        cmds.setDrivenKeyframe(self.jntName+'ankle_orientConstraint1.'+self.jntName+'reverseBallW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_orientConstraint1.'+self.jntName+'reverseBallW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_pointConstraint1.'+self.jntName+'reverseAnkleW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_pointConstraint1.'+self.jntName+'reverseAnkleW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=0)
+        #--- Result Foot Setup ---#
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.ankleJntName, self.revBallJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.ankleJntName, self.revBallJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W1'.format(self.ankleJntName, self.revAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W1'.format(self.ankleJntName, self.revAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=0)
 
-        cmds.setDrivenKeyframe(self.jntName+'ankle_pointConstraint1.'+self.jntName+'ankleFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_pointConstraint1.'+self.jntName+'ankleFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_orientConstraint1.'+self.jntName+'ankleFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'ankle_orientConstraint1.'+self.jntName+'ankleFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W0'.format(self.ankleJntName, self.fkAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W0'.format(self.ankleJntName, self.fkAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.ankleJntName, self.fkAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.ankleJntName, self.fkAnkleJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=1)
 
-        cmds.setDrivenKeyframe(self.jntName+'ball_orientConstraint1.'+self.jntName+'ballFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'ball_orientConstraint1.'+self.jntName+'ballFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe(self.jntName+'ball_orientConstraint1.'+self.jntName+'reverseToeW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.jntName+'ball_orientConstraint1.'+self.jntName+'reverseToeW1', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.ballJntName, self.fkBallJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.ballJntName, self.fkBallJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.ballJntName, self.revToeJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.ballJntName, self.revToeJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=0)
 
-        cmds.setDrivenKeyframe(self.jntName+'toe_orientConstraint1.'+self.jntName+'toeFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.jntName+'toe_orientConstraint1.'+self.jntName+'toeFKW0', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.toeJntName, self.fkToeJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.toeJntName, self.fkToeJntName), currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=1)
 
-        '''IK/FK Switch'''
-        # IK visiblity
-        cmds.setDrivenKeyframe(self.ctrlName+'.visibility', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.ctrlName+'.visibility', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=0)
+        #--- IK/FK Switch Setup ---#
+        cmds.parentConstraint(self.ankleJntName, self.switchCtrlName, mo=True)          # switch will follow ankle movement
 
-        # FK visiblity
-        cmds.setDrivenKeyframe(self.ctrlName+'FK.visibility', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.ctrlName+'FK.visibility', currentDriver=self.ctrlName+'Switch.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe(self.ctrlName+'.visibility', currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.ctrlName+'.visibility', currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.fkCtrlName+'.visibility', currentDriver=self.switchCtrlName+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe(self.fkCtrlName+'.visibility', currentDriver=self.switchCtrlName+'.FK_IK', driverValue=0, value=1)

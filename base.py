@@ -1,54 +1,53 @@
 import maya.cmds as cmds
-import misc
+import util
 
 class Base(object):
-    def __init__(self, prefix, side='NA', id='idPlaceHolder'):
-        self.prefix = prefix
+    def __init__(self, side='M', id='idPlaceHolder'):
         self.side = side
         self.id = id
-        metaType = 'Base'
-        self.constructNameSpace(metaType)
-        self.createOutlierGrp()
+        self.metaType = 'Base'
+        self.createNaming()
+        self.createOutlinerGrp()
         self.setLocAttr()
 
-    '''
-    Create the name space formatting for current module
-    '''
-    def constructNameSpace(self, metaType):
+    def createNaming(self):
+        """ Create primary naming convention """
         self.locGrp = '_Locators'
         self.ctrlGrp = '_Controllers'
         self.jntGrp = '_Joints'
         self.meshGrp = '_Meshes'
 
-        self.name = '_' + self.side + '_' + metaType + '_' + self.id
+        self.name = '{}_{}_{}'.format(self.metaType, self.side, self.id)
 
-        self.locName = self.prefix + '_Loc' + self.name
-        self.locGrpName = self.prefix + '_LocGrp' + self.name
-        self.jntName = self.prefix + '_Jnt' + self.name
-        self.jntGrpName = self.prefix + '_JntGrp' + self.name
-        self.ctrlName = self.prefix + '_Ctrl' + self.name
-        self.ctrlGrpName = self.prefix + '_CtrlGrp' + self.name
-        self.ctrlOffsetGrpName = self.prefix + '_CtrlOffsetGrp' + self.name
+        self.locName = '{}_loc'.format(self.name)
+        self.locGrpName = '{}_locGrp'.format(self.name)
+        self.jntName = '{}_jnt'.format(self.name)
+        self.jntGrpName = '{}_jntGrp'.format(self.name)
+        self.ctrlName = '{}_ctrl'.format(self.name)
+        self.ctrlGrpName = '{}_ctrlGrp'.format(self.name)
+        self.ctrlOffsetGrpName = '{}_offset'.format(self.name)
 
-    '''
-    Create the different parent groups in outlier
-    '''
-    def createOutlierGrp(self):
+    def createSecondaryNaming(self):
+        """ Create secondary naming convention for complex module """
+        pass
+
+    def createOutlinerGrp(self):
+        """ Create different groups in the outliner """
         for grp in [self.locGrp, self.ctrlGrp, self.jntGrp, self.meshGrp]:
             if not cmds.ls(grp):
                 cmds.group(em=True, name=grp)
 
-    '''
-    Set locator attribute
-    '''
+    def setCtrlShape(self):
+        """ Setting up controller curve shapes as templates """
+        pass
+
     def setLocAttr(self, startPos=[0, 0, 0], scale=0.2):
+        """ Setup Locator initial position and size as guide """
         self.startPos = startPos
         self.scale = scale
 
-    '''
-    Create a single locator
-    '''
     def buildGuide(self):
+        """ Create the rig guides for placement purpose """
         self.loc = cmds.spaceLocator(n=self.locName)
         grp = cmds.group(em=True, name=self.locGrpName)
 
@@ -61,10 +60,21 @@ class Base(object):
         self.colorLoc()
         return grp
 
-    '''
-    default functions
-    '''
+    def colorLoc(self):
+        """ Color-code the guide locators based on left, right, middle side """
+        locs = cmds.ls('{}*_loc'.format(self.name))
+        for loc in locs:
+            if cmds.nodeType(loc) in ['transform']:
+                cmds.setAttr(loc + '.overrideEnabled', 1)
+                if self.side == 'L':
+                    cmds.setAttr(loc + '.overrideColor', 6)
+                elif self.side == 'R':
+                    cmds.setAttr(loc + '.overrideColor', 13)
+                else:
+                    cmds.setAttr(loc + '.overrideColor', 17)
+
     def constructJnt(self):
+        """ Create the rig joints based on the guide's transform """
         cmds.select(clear=True)
         locPos = cmds.xform(self.locName, q=True, t=True, ws=True)
 
@@ -72,10 +82,11 @@ class Base(object):
         cmds.setAttr(self.jnt + '.radius', 1)
 
         cmds.parent(self.jnt, self.jntGrp)
-        misc.orientJnt(self.jnt)
+        util.orientJnt(self.jnt)
         return self.jnt
 
     def placeCtrl(self):
+        """ Duplicate control shapes and place them based on guide's and joint's transform """
         self.ctrl = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.ctrlName)[0]
 
         jntPos = cmds.xform(self.jnt, q=True, t=True, ws=True)
@@ -90,30 +101,24 @@ class Base(object):
         cmds.parent(self.ctrlOffsetGrp, self.ctrlGrp)
 
     def addConstraint(self):
+        """ Add all necessary constraints for the controller to control the rig """
         cmds.parentConstraint(self.ctrl, self.jnt)
 
-    '''
-    Delete the locator group from the scene
-    '''
     def deleteGuide(self):
+        """ Clear out locator guides to de-clutter the scene """
         grp = cmds.ls(self.locGrpName)
         cmds.delete(grp)
 
-    '''
-    Delete temporary controller shape in the scene
-    '''
     def deleteShape(self):
+        """ Delete control template shape to de-clutter the scene"""
         shapes = cmds.ls('*_tempShape*')
         cmds.delete(shapes)
 
-    '''
-    Color-code the controller based on the side
-    '''
     def colorCtrl(self):
-        ctrls = cmds.ls(self.ctrlName+'*')
+        """ Color-code the controller based on left, right, middle side """
+        ctrls = cmds.ls('{}*_ctrl'.format(self.name))
         for ctrl in ctrls:
             if cmds.nodeType(ctrl) in ['nurbsCurve', 'transform']:
-            #print cmds.nodeType(ctrl)
                 cmds.setAttr(ctrl + '.overrideEnabled', 1)
                 if self.side == 'L':
                     cmds.setAttr(ctrl + '.overrideColor', 6)
@@ -122,32 +127,12 @@ class Base(object):
                 else:
                     cmds.setAttr(ctrl + '.overrideColor', 17)
 
-    '''
-    Color-code the controller based on the side
-    '''
-    def colorLoc(self):
-        locs = cmds.ls(self.locName+'*')
-        for loc in locs:
-            if cmds.nodeType(loc) in ['transform']:
-            #print cmds.nodeType(ctrl)
-                cmds.setAttr(loc + '.overrideEnabled', 1)
-                if self.side == 'L':
-                    cmds.setAttr(loc + '.overrideColor', 6)
-                elif self.side == 'R':
-                    cmds.setAttr(loc + '.overrideColor', 13)
-                else:
-                    cmds.setAttr(loc + '.overrideColor', 17)
-
-    '''
-    lock specific attribute(s) in a controller
-    '''
     def lockCtrl(self):
+        """ Lock or hide specific channels of a controller from the animator """
         pass
 
-    '''
-    Build the skeleton, add controller and constraints
-    '''
     def buildRig(self):
+        """ Build the full rig based on the guide, mesh not skinned """
         self.constructJnt()
         self.placeCtrl()
         self.deleteGuide()

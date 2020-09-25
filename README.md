@@ -1,5 +1,5 @@
 # autoRigger
-AutoRigger is an auto rigging tool for maya, specifically designed for create fast and functional rigs for human characters
+AutoRigger is a rig builder in Maya. It supports modular procedural rig build as well as pre-made template for Biped, Quadruped & Bird.
 
 quadruped rig video demo (1.7 version): https://youtu.be/GT15B_x8R9w
 
@@ -11,19 +11,24 @@ face rig video demo (1.4 version): https://www.youtube.com/watch?v=Vnmq4ok0KUs
 
 ## Installation
 
-Unzip everything to your maya script directory
+1. Unzip to maya script directory
 
-(example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**autoRigger**)
+    (Example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**autoRigger**)
 
-Alternatively, you can unzip to your custom directory, but make sure its added to your PYTHONPATH system variable 
+    Or, unzip to custom directory, and add to PYTHONPATH system variable 
 
-Enter following command in maya script editor (python tab)
+2. Execute the following command in script editor (python tab)
 ```python
 from autoRigger import autoRigger
 autoRigger.show()
 ```
 
 ## Past Updates
+
+<details>
+  <summary>Update 2.0 (09/20/2020)</summary>
+  <p>*improved naming convention</p>
+</details>
 
 <details>
   <summary>Update 1.7 (04/08/2020)</summary>

@@ -1,6 +1,5 @@
 import maya.cmds as cmds
-import base, misc
-reload(misc)
+import base, util
 
 class QuadSpine(base.Base):
     def __init__(self, prefix, side, id):
@@ -54,7 +53,7 @@ class QuadSpine(base.Base):
 
         self.rootSpine = self.jntName+'0'  # needs to be accessed later for parenting back leg
         cmds.parent(self.rootSpine, self.jntGrp)
-        misc.orientJnt(self.rootSpine)
+        util.orientJnt(self.rootSpine)
 
         return self.rootSpine
 
@@ -110,7 +109,7 @@ class QuadSpine(base.Base):
             cmds.rotate(midRot[0], midRot[1], midRot[2], midCtrlOffset)
             cmds.parent(midCtrl, midCtrlOffset, relative=True)
 
-        misc.batchParent([midCtrlOffset, rootCtrlOffset, topCtrlOffset], self.masterCtrl)
+        util.batchParent([midCtrlOffset, rootCtrlOffset, topCtrlOffset], self.masterCtrl)
         cmds.parent(masterCtrlOffset, self.ctrlGrp)
         self.deleteShape()
         return self.masterCtrl
