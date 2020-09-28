@@ -7,7 +7,6 @@ class Foot(base.Base):
         self.metaType = 'Foot'
         self.createNaming()
         self.createSecondaryNaming()
-        self.setLocAttr()
 
     def createSecondaryNaming(self):
         self.ankleLocName = '{}{}_loc'.format(self.name, 'ankle')

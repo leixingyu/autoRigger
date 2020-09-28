@@ -5,7 +5,6 @@ class Biped(base.Base):
     def __init__(self, side, id):
         base.Base.__init__(self, side, id)
         self.metaType = 'Biped'
-        self.createNaming()
         self.setLocAttr(startPos=[0, 8.4, 0], spineL=5.0)
 
         self.leftArm = arm.Arm(side='L', id='arm')
@@ -55,13 +54,13 @@ class Biped(base.Base):
         # Leg root to spine root #
         leftLegJnt = cmds.ls(self.leftLeg.limb.jntList[0])
         rightLegJnt = cmds.ls(self.rightLeg.limb.jntList[0])
-        rootSpineJnt = cmds.ls(self.spine.rootSpine)
+        rootSpineJnt = cmds.ls(self.spine.jntList[0])
         util.batchParent([leftLegJnt, rightLegJnt], rootSpineJnt)
 
         # Arm root spine root #
         leftArmJnt = cmds.ls(self.leftArm.limb.jntList[0])
         rightArmJnt = cmds.ls(self.rightArm.limb.jntList[0])
-        topSpineJnt = cmds.ls(self.spine.topSpine)
+        topSpineJnt = cmds.ls(self.spine.jntList[-1])
         util.batchParent([leftArmJnt, rightArmJnt], topSpineJnt)
 
         # Neck to spine tip, head to neck #
@@ -95,13 +94,13 @@ class Biped(base.Base):
         cmds.parentConstraint(self.spine.globalCtrl, self.rightLeg.limb.switchCtrl, mo=True)
 
         # Arm driven by top spine control #
-        cmds.parentConstraint(self.spine.topCtrl, self.leftArm.limb.switchCtrl, mo=True)
-        cmds.parentConstraint(self.spine.topCtrl, self.rightArm.limb.switchCtrl, mo=True)
+        cmds.parentConstraint(self.spine.ctrlList[-1], self.leftArm.limb.switchCtrl, mo=True)
+        cmds.parentConstraint(self.spine.ctrlList[-1], self.rightArm.limb.switchCtrl, mo=True)
 
         # Neck to Head chain #
         cmds.parent(self.tip.ctrlOffsetGrp, self.head.ctrlOffsetGrp)
         cmds.parent(self.head.ctrlOffsetGrp, self.neck.ctrlOffsetGrp)
-        cmds.parent(self.neck.ctrlOffsetGrp, self.spine.topCtrl)
+        cmds.parent(self.neck.ctrlOffsetGrp, self.spine.ctrlList[-1])
 
     def colorCtrl(self):
         self.leftArm.colorCtrl()

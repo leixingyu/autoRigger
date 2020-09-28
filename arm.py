@@ -5,7 +5,6 @@ class Arm(base.Base):
     def __init__(self, side, id):
         base.Base.__init__(self, side, id)
         self.metaType = 'Arm'
-
         self.createNaming()
         self.setLocAttr(startPos=[0, 10, 0])
         self.limb = limb.Limb(side=self.side, id=id, type='Arm')

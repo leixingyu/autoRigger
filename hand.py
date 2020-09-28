@@ -7,8 +7,6 @@ class Hand(base.Base):
         self.metaType = 'Hand'
         self.id = id
         self.createNaming()
-        self.setLocAttr()
-
         self.fingerCount = fingerCount
         self.fingerList = []
 

@@ -14,10 +14,10 @@ class Limb(base.Base):
     def setArmLeg(self, type):
         self.limbType = ['Root', 'Middle', 'Top']
         if type == 'Arm':
-            self.limbType = ['Shoulder', 'Elbow', 'Wrist']
+            self.limbType = ['shoulder', 'elbow', 'wrist']
             self.direction = 'Horizontal'
         elif type == 'Leg':
-            self.limbType = ['Clavicle', 'Knee', 'Ankle']
+            self.limbType = ['clavicle', 'knee', 'ankle']
             self.direction = 'Vertical'
 
     def createSecondaryNaming(self):
