@@ -1,5 +1,6 @@
 import maya.cmds as cmds
-import util, base, arm, leg, spine
+from utility import outliner
+import base, arm, leg, spine
 
 class Biped(base.Base):
     def __init__(self, side, id):
@@ -55,13 +56,13 @@ class Biped(base.Base):
         leftLegJnt = cmds.ls(self.leftLeg.limb.jntList[0])
         rightLegJnt = cmds.ls(self.rightLeg.limb.jntList[0])
         rootSpineJnt = cmds.ls(self.spine.jntList[0])
-        util.batchParent([leftLegJnt, rightLegJnt], rootSpineJnt)
+        outliner.batch_parent([leftLegJnt, rightLegJnt], rootSpineJnt)
 
         # Arm root spine root #
         leftArmJnt = cmds.ls(self.leftArm.limb.jntList[0])
         rightArmJnt = cmds.ls(self.rightArm.limb.jntList[0])
         topSpineJnt = cmds.ls(self.spine.jntList[-1])
-        util.batchParent([leftArmJnt, rightArmJnt], topSpineJnt)
+        outliner.batch_parent([leftArmJnt, rightArmJnt], topSpineJnt)
 
         # Neck to spine tip, head to neck #
         cmds.parent(self.neck.jnt, topSpineJnt)

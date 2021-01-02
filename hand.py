@@ -1,5 +1,9 @@
 import maya.cmds as cmds
-import util, base, finger
+import base
+import finger
+from utility import outliner
+
+
 
 class Hand(base.Base):
     def __init__(self, side, id, fingerCount=5):
@@ -27,7 +31,7 @@ class Hand(base.Base):
         sideFactor = 1
         if self.side == 'R': sideFactor = -1
 
-        #--- Finger Locator ---#
+        # --- Finger Locator --- #
         zValue = self.startPos[2]
         offsets = [zValue+2*self.interval, zValue+self.interval, zValue, zValue-self.interval, zValue-2*self.interval]
 
@@ -53,22 +57,22 @@ class Hand(base.Base):
 
         self.fingerList = [thumb, index, middle, ring, pinky]
 
-        #--- Single Wrist Locator ---#
+        # --- Single Wrist Locator --- #
         self.wrist = base.Base(side=self.side, id='wrist')
         self.wrist.setLocAttr(startPos=[self.startPos[0]-sideFactor*self.distance, self.startPos[1], self.startPos[2]])
         wrist = self.wrist.buildGuide()
 
-        #--- Cleanup ---#
-        util.batchParent([thumbGrp, indexGrp, middleGrp, ringGrp, pinkyGrp], wrist)
+        # --- Cleanup --- #
+        outliner.batch_parent([thumbGrp, indexGrp, middleGrp, ringGrp, pinkyGrp], wrist)
         cmds.parent(wrist, grp)
         cmds.parent(grp, self.locGrp)
         return wrist
 
     def constructJnt(self):
-        tempList = [] # list for parenting
+        tempList = []  # list for parenting
         for obj in self.fingerList: tempList.append(obj.constructJnt())
         wrist = self.wrist.constructJnt()
-        util.batchParent(tempList, wrist)
+        outliner.batch_parent(tempList, wrist)
 
     def placeCtrl(self):
         self.constraintList = []

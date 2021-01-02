@@ -1,5 +1,7 @@
 import maya.cmds as cmds
-import base, util
+import base
+from utility import joint, outliner
+
 
 class Tail(base.Base):
     def __init__(self, side, id):
@@ -85,8 +87,8 @@ class Tail(base.Base):
         #--- Cleanup ---#
         cmds.setAttr(self.fkJntList[0]+'.visibility', 0)
         cmds.setAttr(self.ikJntList[0]+'.visibility', 0)
-        util.batchParent([self.jntList[0], self.fkJntList[0], self.ikJntList[0]], self.jntGrp)
-        util.orientJnt([self.jntList[0], self.fkJntList[0], self.ikJntList[0]])
+        outliner.batch_parent([self.jntList[0], self.fkJntList[0], self.ikJntList[0]], self.jntGrp)
+        joint.orient_joint([self.jntList[0], self.fkJntList[0], self.ikJntList[0]])
         return self.jntList[0]
 
     def placeCtrl(self):
@@ -119,9 +121,9 @@ class Tail(base.Base):
                 cmds.parent(self.ikOffsetList[i], self.ikCtrlList[i-1])
                 cmds.parent(self.fkOffsetList[i], self.fkCtrlList[i-1])
             else:
-                util.batchParent([self.ikOffsetList[i], self.fkOffsetList[i]], self.masterCtrl)
+                outliner.batch_parent([self.ikOffsetList[i], self.fkOffsetList[i]], self.masterCtrl)
 
-        #--- Cleanup ---#
+        # --- Cleanup ---#
         cmds.parent(self.masterCtrl, self.ctrlGrp)
         self.deleteShape()
         return self.masterCtrl

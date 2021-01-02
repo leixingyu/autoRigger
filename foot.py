@@ -1,5 +1,6 @@
 import maya.cmds as cmds
-import base, util
+import base
+from utility import outliner, other
 
 class Foot(base.Base):
     def __init__(self, side, id):
@@ -50,7 +51,7 @@ class Foot(base.Base):
         cmds.rotate(0, 90, 0, footFKShape, relative=True)
         cmds.scale(0.4, 0.4, 0.4, footFKShape)
 
-        footSwitchShape = util.makeTextCurve(string='FK/IK', name='FootSwitch_tempShape')
+        footSwitchShape = other.make_curve_by_text(text='FK/IK', name='FootSwitch_tempShape')
         cmds.rotate(-90, 0, 0, footSwitchShape, relative=True)
 
     def buildGuide(self):
@@ -133,7 +134,7 @@ class Foot(base.Base):
         cmds.setAttr(ankleJntFK+'.visibility', 0)
 
         #--- Cleanup ---#
-        util.batchParent([ankleJntFK, innerJoint, ankleJnt], self.jntGrp)
+        outliner.batch_parent([ankleJntFK, innerJoint, ankleJnt], self.jntGrp)
 
     def placeCtrl(self):
         self.setCtrlShape()
@@ -164,7 +165,7 @@ class Foot(base.Base):
         cmds.makeIdentity(switch, apply=True, t=1, r=1, s=1)
 
         #--- Cleanup ---#
-        util.batchParent([switch, footCtrl, footFKCtrl], self.ctrlGrp)
+        outliner.batch_parent([switch, footCtrl, footFKCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def addConstraint(self):

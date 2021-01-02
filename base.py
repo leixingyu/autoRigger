@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-import util
+from utility import joint
 
 class Base(object):
     def __init__(self, side='M', id='idPlaceHolder'):
@@ -82,7 +82,7 @@ class Base(object):
         cmds.setAttr(self.jnt + '.radius', 1)
 
         cmds.parent(self.jnt, self.jntGrp)
-        util.orientJnt(self.jnt)
+        joint.orient_joint(self.jnt)
         return self.jnt
 
     def placeCtrl(self):
@@ -97,7 +97,8 @@ class Base(object):
         cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrlOffsetGrp)
         cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrlOffsetGrp)
 
-        cmds.parent(self.ctrl, self.ctrlOffsetGrp, relative=True)  # ctrl has transform relative to offset group, which is 0
+        # ctrl has transform relative to offset group, which is 0
+        cmds.parent(self.ctrl, self.ctrlOffsetGrp, relative=True)
         cmds.parent(self.ctrlOffsetGrp, self.ctrlGrp)
 
     def addConstraint(self):

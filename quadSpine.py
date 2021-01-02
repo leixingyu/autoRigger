@@ -1,5 +1,7 @@
 import maya.cmds as cmds
-import base, util
+import base
+from utility import joint, outliner
+
 
 class QuadSpine(base.Base):
     def __init__(self, side, id):
@@ -65,7 +67,7 @@ class QuadSpine(base.Base):
             cmds.setAttr(jnt+'.radius', self.scale)
 
         cmds.parent(self.jntList[0], self.jntGrp)
-        util.orientJnt(self.jntList[0])
+        joint.orient_joint(self.jntList[0])
         return self.jntList[0]
 
     def placeCtrl(self):
@@ -113,8 +115,8 @@ class QuadSpine(base.Base):
         cmds.rotate(midRot[0], midRot[1], midRot[2], self.ctrlOffsetList[1])
         cmds.parent(self.ctrlList[1], self.ctrlOffsetList[1], relative=True)
 
-        #--- Cleanup ---#
-        util.batchParent([self.ctrlOffsetList[0], self.ctrlOffsetList[1], self.ctrlOffsetList[-1]], self.masterCtrl)
+        # --- Cleanup ---#
+        outliner.batch_parent([self.ctrlOffsetList[0], self.ctrlOffsetList[1], self.ctrlOffsetList[-1]], self.masterCtrl)
         cmds.parent(self.masterOffset, self.ctrlGrp)
         self.deleteShape()
         return self.masterCtrl

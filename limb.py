@@ -1,6 +1,8 @@
 import maya.cmds as cmds
 import maya.OpenMaya as om
-import util, base
+import base
+from utility import joint, outliner
+
 
 class Limb(base.Base):
     def __init__(self, side, id, type='Null'):
@@ -113,8 +115,8 @@ class Limb(base.Base):
             cmds.setAttr(ikJnt+'.radius', 1)
 
         #--- Cleanup ---#
-        util.batchParent([self.jntList[0], self.ikJntList[0], self.fkJntList[0]], self.jntGrp)
-        util.orientJnt([self.jntList[0], self.ikJntList[0], self.fkJntList[0]])
+        outliner.batch_parent([self.jntList[0], self.ikJntList[0], self.fkJntList[0]], self.jntGrp)
+        joint.orient_joint([self.jntList[0], self.ikJntList[0], self.fkJntList[0]])
         return cmds.ls(self.jntList[0])
 
     def placeCtrl(self):
@@ -252,7 +254,7 @@ class Limb(base.Base):
         #--- Cleanup ---#
         cmds.pointConstraint(self.switchCtrl, self.ikJntList[0], mo=True)
         cmds.pointConstraint(self.switchCtrl, self.fkJntList[0], mo=True)
-        util.batchParent([self.ikOffsetName, self.ikPoleName, self.fkOffsetList[0], ikHandle], self.switchCtrl)
+        outliner.batch_parent([self.ikOffsetName, self.ikPoleName, self.fkOffsetList[0], ikHandle], self.switchCtrl)
 
     def lockCtrl(self):
         fkMidCtrl = cmds.ls(self.fkCtrlList[1], transforms=True)[0]

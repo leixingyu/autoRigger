@@ -1,6 +1,8 @@
 import maya.cmds as cmds
-import util, base, quadSpine, tail
+import base, quadSpine, tail
 import leg
+from utility import outliner
+
 
 class Quadruped(base.Base):
     def __init__(self, side='NA', id='standard'):
@@ -59,10 +61,10 @@ class Quadruped(base.Base):
         tip = self.tip.constructJnt()
 
         # parent leg root joints to root spline joint
-        util.batchParent([leftShoulder, rightShoulder], self.spine.jntList[-1])
+        outliner.batch_parent([leftShoulder, rightShoulder], self.spine.jntList[-1])
 
         # parent arm root joints to top spline joint
-        util.batchParent([leftHip, rightHip], spineRoot)
+        outliner.batch_parent([leftHip, rightHip], spineRoot)
 
         # parent tail to spine
         cmds.parent(tailRoot, spineRoot)
@@ -99,8 +101,8 @@ class Quadruped(base.Base):
         self.spine.addConstraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        util.batchParent([self.leftArm.ctrlOffsetList[0], self.rightArm.ctrlOffsetList[0]], self.spine.ctrlList[-1])
-        util.batchParent([self.leftLeg.ctrlOffsetList[0], self.rightLeg.ctrlOffsetList[0]], self.spine.ctrlList[0])
+        outliner.batch_parent([self.leftArm.ctrlOffsetList[0], self.rightArm.ctrlOffsetList[0]], self.spine.ctrlList[-1])
+        outliner.batch_parent([self.leftLeg.ctrlOffsetList[0], self.rightLeg.ctrlOffsetList[0]], self.spine.ctrlList[0])
         cmds.parentConstraint(self.spine.ctrlList[0], self.tail.masterCtrl, mo=True)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl

@@ -1,5 +1,5 @@
-from Qt import QtCore, QtGui, QtWidgets
-from Qt import _loadUi
+from utility.Qt import QtCore, QtGui, QtWidgets
+from utility.Qt import _loadUi
 import maya.OpenMayaUI
 import os
 import warnings

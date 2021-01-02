@@ -1,5 +1,7 @@
 import maya.cmds as cmds
-import util, base, foot, limb
+import base, foot, limb
+from utility import joint, outliner
+
 
 class Leg(base.Base):
     def __init__(self, side, id):
@@ -148,7 +150,7 @@ class LegFront(base.Base):
             cmds.setAttr(jnt+'.radius', self.scale)
 
         cmds.parent(self.jntList[0], self.jntGrp)
-        util.orientJnt(self.jntList[0])
+        joint.orient_joint(self.jntList[0])
         return self.jntList[0]
 
     def placeCtrl(self):
@@ -187,7 +189,7 @@ class LegFront(base.Base):
         cmds.parent(poleCtrl, poleCtrlOffset, relative=True)
         cmds.parent(poleCtrlOffset, pawCtrl)
 
-        util.batchParent([shoulderCtrlOffset, pawCtrl], self.ctrlGrp)
+        outliner.batch_parent([shoulderCtrlOffset, pawCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def buildIK(self):
@@ -235,7 +237,7 @@ class LegFront(base.Base):
         cmds.setAttr(lengthNode+'.visibility', 0)
         cmds.setAttr(shoulderLoc+'.visibility', 0)
         cmds.setAttr(elbowLoc+'.visibility', 0)
-        util.batchParent([lengthNode, shoulderLoc, elbowLoc], self.ctrlGrp)
+        outliner.batch_parent([lengthNode, shoulderLoc, elbowLoc], self.ctrlGrp)
 
         cmds.parentConstraint(self.ctrlList[0], shoulderLoc)
         cmds.parentConstraint(self.ctrlList[3], elbowLoc, mo=True)
@@ -262,8 +264,8 @@ class LegFront(base.Base):
         cmds.move(wristPos[0], wristPos[1], wristPos[2], wristPivotGrp)
 
         cmds.parent(self.toeIKName, toeTapPivotGrp)
-        util.batchParent([self.legIKName, self.footIKName], flexPivotGrp)
-        util.batchParent([toeTapPivotGrp, flexPivotGrp], swivelPivotGrp)
+        outliner.batch_parent([self.legIKName, self.footIKName], flexPivotGrp)
+        outliner.batch_parent([toeTapPivotGrp, flexPivotGrp], swivelPivotGrp)
         cmds.parent(swivelPivotGrp, toeTipPivotGrp)
         cmds.parent(toeTipPivotGrp, wristPivotGrp)
         cmds.parent(wristPivotGrp, self.ctrlList[3])
@@ -361,7 +363,7 @@ class LegBack(base.Base):
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
             jnt = cmds.joint(p=locPos, name=self.jntList[index])
             cmds.setAttr(jnt+'.radius', self.scale)
-        util.orientJnt(self.jntList[0])
+        joint.orient_joint(self.jntList[0])
         cmds.parent(self.jntList[0], self.jntGrp)
 
         # helper jnt chain
@@ -371,7 +373,7 @@ class LegBack(base.Base):
             locPos = cmds.xform(loc, q=True, t=True, ws=True)
             jnt = cmds.joint(p=locPos, name=self.jntHelperList[index])
             cmds.setAttr(jnt+'.radius', 1)
-        util.orientJnt(self.jntHelperList[0])
+        joint.orient_joint(self.jntHelperList[0])
         cmds.parent(self.jntHelperList[0], self.jntGrp)
         cmds.setAttr(self.jntHelperList[0]+'.visibility', 0)
 
@@ -412,7 +414,7 @@ class LegBack(base.Base):
         cmds.parent(poleCtrl, poleCtrlOffset, relative=True)
         cmds.parent(poleCtrlOffset, footCtrl)
 
-        util.batchParent([hipCtrlOffset, footCtrl], self.ctrlGrp)
+        outliner.batch_parent([hipCtrlOffset, footCtrl], self.ctrlGrp)
         self.deleteShape()
 
     def buildIK(self):
@@ -465,7 +467,7 @@ class LegBack(base.Base):
         cmds.setAttr(lengthNode+'.visibility', 0)
         cmds.setAttr(hipLoc+'.visibility', 0)
         cmds.setAttr(ankleLoc+'.visibility', 0)
-        util.batchParent([lengthNode, hipLoc, ankleLoc], self.ctrlGrp)
+        outliner.batch_parent([lengthNode, hipLoc, ankleLoc], self.ctrlGrp)
 
         cmds.parentConstraint(self.ctrlList[0], hipLoc)
         cmds.parentConstraint(self.ctrlList[3], ankleLoc, mo=True)
@@ -492,11 +494,11 @@ class LegBack(base.Base):
         cmds.move(footPos[0], footPos[1], footPos[2], swivelPivotGrp)
         cmds.move(toePos[0], toePos[1], toePos[2], toeTipPivotGrp)
 
-        util.batchParent([self.legIKName, self.footIKName], flexPivotGrp)
+        outliner.batch_parent([self.legIKName, self.footIKName], flexPivotGrp)
         cmds.parent(flexPivotGrp, flexOffsetGrp)
         cmds.parentConstraint(self.jntHelperList[3], flexOffsetGrp, mo=True)
-        util.batchParent([self.toeIKName, self.helperIKName], toeTapPivotGrp)
-        util.batchParent([toeTapPivotGrp, flexOffsetGrp], toeTipPivotGrp)
+        outliner.batch_parent([self.toeIKName, self.helperIKName], toeTapPivotGrp)
+        outliner.batch_parent([toeTapPivotGrp, flexOffsetGrp], toeTipPivotGrp)
         cmds.parent(toeTipPivotGrp, swivelPivotGrp)
         cmds.parent(swivelPivotGrp, self.ctrlList[3])
 
