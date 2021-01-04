@@ -27,11 +27,20 @@ from autoRigger import autoRigger
 autoRigger.show()
 ```
 
+## Current Version
+
+<details>
+  <summary>Update 1.1.2 (01/05/2021)</summary>
+  <p>*updated code format to better adhere with PEP8</p>
+</details>
+
+
 ## Past Updates
 
 <details>
   <summary>Update 1.1.1 (09/20/2020)</summary>
   <p>*improved naming convention</p>
+  <p>*updated user-interface
 </details>
 
 <details>
@@ -46,44 +55,44 @@ autoRigger.show()
 
 <details>
   <summary>Update 0.5.0 (10/19/2019)</summary>
-  <p>*Modular system online</p>
-  <p>*New interface and functions</p>
+  <p>*added modular system</p>
+  <p>*updated new interface and functions</p>
 </details>
 
 <details>
   <summary>Update 0.4.0 (4/21/2019)</summary>
-  <p>*Integrated Body and Facial Rigging System</p>
-  <p>*Added Face Picker</p>
+  <p>*integrated Body and Facial Rigging System</p>
+  <p>*added Face Picker</p>
 </details>
 
 <details>
   <summary>Update 0.3.0 (3/24/2019)</summary>
-  <p>*Included Beta Facial Rigging System</p>
+  <p>*included Beta Facial Rigging System</p>
 </details>
 
 <details>
   <summary>Update 0.2.2 (3/22/2019)</summary>
-  <p>*Fixed IK/FK Arm bugs</p>
-  <p>*Updated Foot Roll and Foot Bank</p>
-  <p>*Included Flexible Spine Control</p>
+  <p>*fixed IK/FK Arm bugs</p>
+  <p>*updated Foot Roll and Foot Bank</p>
+  <p>*included Flexible Spine Control</p>
 </details>
 
 <details>
   <summary>Update 0.2.1 (3/17/2019)</summary>
-  <p>*Fixed Bugs on Arm Result Joint</p>
+  <p>*fixed Bugs on Arm Result Joint</p>
 </details>
 
 <details>
   <summary>Update 0.2.0 (2/25/2019)</summary>
-  <p>*Now support Non-Tpose/Tpose Character Model</p>
-  <p>*Included IK/FK switch for Character arm</p>
-  <p>*Included Foot Bank attribute</p>
+  <p>*now support Non-Tpose/Tpose Character Model</p>
+  <p>*included IK/FK switch for Character arm</p>
+  <p>*included Foot Bank attribute</p>
 </details>
 
 <details>
   <summary>Update 0.1.0 (12/29/2018)</summary>
-  <p>*Included adjustable spine and finger number</p>
-  <p>*Included one-click controller + constraint + default weightpaint</p>
-  <p>*Included Fore-arm twist and Foot roll</p>
+  <p>*included adjustable spine and finger number</p>
+  <p>*included one-click controller + constraint + default weightpaint</p>
+  <p>*included Fore-arm twist and Foot roll</p>
 </details>
 

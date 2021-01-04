@@ -1,120 +1,139 @@
 import maya.cmds as cmds
 from utility import outliner
-import base, arm, leg, spine
+import base
+import arm
+import leg
+import spine
+
 
 class Biped(base.Base):
-    def __init__(self, side, id):
-        base.Base.__init__(self, side, id)
+    """ This module creates a biped template rig
+
+    The biped template consists of:
+    one head
+    two arms
+    one spine &
+    two legs
+    """
+
+    def __init__(self, side, base_name):
+        """ Initialize Biped class with side and name
+
+        :param side: str
+        :param base_name: str
+        """
+
+        base.Base.__init__(self, side, base_name)
         self.metaType = 'Biped'
-        self.setLocAttr(startPos=[0, 8.4, 0], spineL=5.0)
+        self.set_locator_attr(start_pos=[0, 8.4, 0], spine_len=5.0)
 
-        self.leftArm = arm.Arm(side='L', id='arm')
-        self.rightArm = arm.Arm(side='R', id='arm')
-        self.leftLeg = leg.Leg(side='L', id='leg')
-        self.rightLeg = leg.Leg(side='R', id='leg')
-        self.spine = spine.Spine(side='M', id='spine')
-        self.neck = base.Base(side='M', id='neck')
-        self.head = base.Base(side='M', id='head')
-        self.tip = base.Base(side='M', id='tip')
+        self.left_arm = arm.Arm(side='L', base_name='arm')
+        self.right_arm = arm.Arm(side='R', base_name='arm')
+        self.left_leg = leg.Leg(side='L', base_name='leg')
+        self.right_leg = leg.Leg(side='R', base_name='leg')
+        self.spine = spine.Spine(side='M', base_name='spine')
+        self.neck = base.Base(side='M', base_name='neck')
+        self.head = base.Base(side='M', base_name='head')
+        self.tip = base.Base(side='M', base_name='tip')
 
-    def setLocAttr(self, startPos=[0, 0, 0], spineL=6.0, scale=0.2):
-        self.startPos = startPos
-        self.spineL = spineL
+    def set_locator_attr(self, start_pos=[0, 0, 0], spine_len=6.0, scale=0.2):
+        self.start_pos = start_pos
+        self.spine_len = spine_len
         self.scale = scale
 
-    def buildGuide(self):
-        self.leftArm.setLocAttr(startPos=[self.startPos[0]+2, self.startPos[1]+self.spineL, self.startPos[2]])
-        self.rightArm.setLocAttr(startPos=[self.startPos[0]-2, self.startPos[1]+self.spineL, self.startPos[2]])
-        self.leftLeg.setLocAttr(startPos=[self.startPos[0]+1, self.startPos[1], self.startPos[2]])
-        self.rightLeg.setLocAttr(startPos=[self.startPos[0]-1, self.startPos[1], self.startPos[2]])
-        self.spine.setLocAttr(startPos=self.startPos, length=self.spineL)
-        self.neck.setLocAttr(startPos=[self.startPos[0], self.startPos[1]+self.spineL+1, self.startPos[2]])
-        self.head.setLocAttr(startPos=[self.startPos[0], self.startPos[1]+self.spineL+1.5, self.startPos[2]])
-        self.tip.setLocAttr(startPos=[self.startPos[0], self.startPos[1]+self.spineL+2, self.startPos[2]])
+    def build_guide(self):
+        self.left_arm.set_locator_attr(start_pos=[self.start_pos[0]+2, self.start_pos[1]+self.spine_len, self.start_pos[2]])
+        self.right_arm.set_locator_attr(start_pos=[self.start_pos[0]-2, self.start_pos[1]+self.spine_len, self.start_pos[2]])
+        self.left_leg.set_locator_attr(start_pos=[self.start_pos[0]+1, self.start_pos[1], self.start_pos[2]])
+        self.right_leg.set_locator_attr(start_pos=[self.start_pos[0]-1, self.start_pos[1], self.start_pos[2]])
+        self.spine.set_locator_attr(start_pos=self.start_pos, length=self.spine_len)
+        self.neck.set_locator_attr(start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+1, self.start_pos[2]])
+        self.head.set_locator_attr(start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+1.5, self.start_pos[2]])
+        self.tip.set_locator_attr(start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+2, self.start_pos[2]])
 
-        self.leftArm.buildGuide()
-        self.rightArm.buildGuide()
-        self.leftLeg.buildGuide()
-        self.rightLeg.buildGuide()
-        self.spine.buildGuide()
-        self.neck.buildGuide()
-        self.head.buildGuide()
-        self.tip.buildGuide()
+        self.left_arm.build_guide()
+        self.right_arm.build_guide()
+        self.left_leg.build_guide()
+        self.right_leg.build_guide()
+        self.spine.build_guide()
+        self.neck.build_guide()
+        self.head.build_guide()
+        self.tip.build_guide()
 
-    def constructJnt(self):
-        self.leftArm.constructJnt()
-        self.rightArm.constructJnt()
-        self.leftLeg.constructJnt()
-        self.rightLeg.constructJnt()
-        self.spine.constructJnt()
-        self.neck.constructJnt()
-        self.head.constructJnt()
-        self.tip.constructJnt()
+    def construct_joint(self):
+        self.left_arm.construct_joint()
+        self.right_arm.construct_joint()
+        self.left_leg.construct_joint()
+        self.right_leg.construct_joint()
+        self.spine.construct_joint()
+        self.neck.construct_joint()
+        self.head.construct_joint()
+        self.tip.construct_joint()
 
-        #--- Connect ---#
-        # Leg root to spine root #
-        leftLegJnt = cmds.ls(self.leftLeg.limb.jntList[0])
-        rightLegJnt = cmds.ls(self.rightLeg.limb.jntList[0])
-        rootSpineJnt = cmds.ls(self.spine.jntList[0])
-        outliner.batch_parent([leftLegJnt, rightLegJnt], rootSpineJnt)
+        # Connect
+        # Leg root to spine root
+        left_leg_jnt = cmds.ls(self.left_leg.limb.jnt_list[0])
+        right_leg_jnt = cmds.ls(self.right_leg.limb.jnt_list[0])
+        root_spine_jnt = cmds.ls(self.spine.jnt_list[0])
+        outliner.batch_parent([left_leg_jnt, right_leg_jnt], root_spine_jnt)
 
-        # Arm root spine root #
-        leftArmJnt = cmds.ls(self.leftArm.limb.jntList[0])
-        rightArmJnt = cmds.ls(self.rightArm.limb.jntList[0])
-        topSpineJnt = cmds.ls(self.spine.jntList[-1])
-        outliner.batch_parent([leftArmJnt, rightArmJnt], topSpineJnt)
+        # Arm root spine root
+        left_arm_jnt = cmds.ls(self.left_arm.limb.jnt_list[0])
+        right_arm_jnt = cmds.ls(self.right_arm.limb.jnt_list[0])
+        top_spine_jnt = cmds.ls(self.spine.jnt_list[-1])
+        outliner.batch_parent([left_arm_jnt, right_arm_jnt], top_spine_jnt)
 
-        # Neck to spine tip, head to neck #
-        cmds.parent(self.neck.jnt, topSpineJnt)
+        # Neck to spine tip, head to neck
+        cmds.parent(self.neck.jnt, top_spine_jnt)
         cmds.parent(self.head.jnt, self.neck.jnt)
         cmds.parent(self.tip.jnt, self.head.jnt)
 
-    def placeCtrl(self):
-        self.leftArm.placeCtrl()
-        self.rightArm.placeCtrl()
-        self.leftLeg.placeCtrl()
-        self.rightLeg.placeCtrl()
-        self.spine.placeCtrl()
-        self.neck.placeCtrl()
-        self.head.placeCtrl()
-        self.tip.placeCtrl()
+    def place_controller(self):
+        self.left_arm.place_controller()
+        self.right_arm.place_controller()
+        self.left_leg.place_controller()
+        self.right_leg.place_controller()
+        self.spine.place_controller()
+        self.neck.place_controller()
+        self.head.place_controller()
+        self.tip.place_controller()
 
-    def addConstraint(self):
-        self.leftArm.addConstraint()
-        self.rightArm.addConstraint()
-        self.leftLeg.addConstraint()
-        self.rightLeg.addConstraint()
-        self.spine.addConstraint()
-        self.neck.addConstraint()
-        self.head.addConstraint()
-        self.tip.addConstraint()
+    def add_constraint(self):
+        self.left_arm.add_constraint()
+        self.right_arm.add_constraint()
+        self.left_leg.add_constraint()
+        self.right_leg.add_constraint()
+        self.spine.add_constraint()
+        self.neck.add_constraint()
+        self.head.add_constraint()
+        self.tip.add_constraint()
 
-        #--- Connect ---#
+        # Connect
         # Leg driven by root spine control #
-        cmds.parentConstraint(self.spine.globalCtrl, self.leftLeg.limb.switchCtrl, mo=True)
-        cmds.parentConstraint(self.spine.globalCtrl, self.rightLeg.limb.switchCtrl, mo=True)
+        cmds.parentConstraint(self.spine.global_ctrl, self.left_leg.limb.switch_ctrl, mo=True)
+        cmds.parentConstraint(self.spine.global_ctrl, self.right_leg.limb.switch_ctrl, mo=True)
 
         # Arm driven by top spine control #
-        cmds.parentConstraint(self.spine.ctrlList[-1], self.leftArm.limb.switchCtrl, mo=True)
-        cmds.parentConstraint(self.spine.ctrlList[-1], self.rightArm.limb.switchCtrl, mo=True)
+        cmds.parentConstraint(self.spine.ctrl_list[-1], self.left_arm.limb.switch_ctrl, mo=True)
+        cmds.parentConstraint(self.spine.ctrl_list[-1], self.right_arm.limb.switch_ctrl, mo=True)
 
         # Neck to Head chain #
-        cmds.parent(self.tip.ctrlOffsetGrp, self.head.ctrlOffsetGrp)
-        cmds.parent(self.head.ctrlOffsetGrp, self.neck.ctrlOffsetGrp)
-        cmds.parent(self.neck.ctrlOffsetGrp, self.spine.ctrlList[-1])
+        cmds.parent(self.tip.ctrl_offset_grp, self.head.ctrl_offset_grp)
+        cmds.parent(self.head.ctrl_offset_grp, self.neck.ctrl_offset_grp)
+        cmds.parent(self.neck.ctrl_offset_grp, self.spine.ctrl_list[-1])
 
-    def colorCtrl(self):
-        self.leftArm.colorCtrl()
-        self.rightArm.colorCtrl()
-        self.leftLeg.colorCtrl()
-        self.rightLeg.colorCtrl()
-        self.spine.colorCtrl()
-        self.neck.colorCtrl()
-        self.head.colorCtrl()
-        self.tip.colorCtrl()
+    def color_controller(self):
+        self.left_arm.color_controller()
+        self.right_arm.color_controller()
+        self.left_leg.color_controller()
+        self.right_leg.color_controller()
+        self.spine.color_controller()
+        self.neck.color_controller()
+        self.head.color_controller()
+        self.tip.color_controller()
 
-    def deleteGuide(self):
-        loc = cmds.ls(self.locGrp)
+    def delete_guide(self):
+        loc = cmds.ls(self.loc_grp)
         cmds.delete(loc)
 
 

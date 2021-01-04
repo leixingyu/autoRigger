@@ -1,516 +1,551 @@
 import maya.cmds as cmds
-import base, foot, limb
+import base
+import foot
+import limb
 from utility import joint, outliner
 
 
 class Leg(base.Base):
-    def __init__(self, side, id):
-        base.Base.__init__(self, side, id)
-        self.metaType = 'Leg'
-        self.createNaming()
-        self.setLocAttr(startPos=[0, 8.4, 0])
-        self.limb = limb.Limb(side=self.side, id=id, type='Leg')
-        self.foot = foot.Foot(side=self.side, id=id)
+    """ This module create a biped leg rig"""
 
-    def setLocAttr(self, startPos=[0, 0, 0], distance=4, interval=0.5, height=0.4, scale=0.2):
-        self.startPos = startPos
+    def __init__(self, side, base_name):
+        """ Initialize Leg class with side and name
+
+        :param side: str
+        :param base_name: str
+        """
+
+        base.Base.__init__(self, side, base_name)
+        self.meta_type = 'Leg'
+        self.assign_naming()
+        self.set_locator_attr(start_pos=[0, 8.4, 0])
+        self.limb = limb.Limb(side=self.side, base_name=base_name, limb_type='Leg')
+        self.foot = foot.Foot(side=self.side, base_name=base_name)
+
+    def set_locator_attr(self, start_pos=[0, 0, 0], distance=4, interval=0.5, height=0.4, scale=0.2):
+        self.start_pos = start_pos
         self.distance = distance
         self.interval = interval
         self.height = height
         self.scale = scale
 
-    def buildGuide(self):
-        #--- Limb ---#
-        self.limb.setLocAttr(startPos=self.startPos, interval=self.distance)
-        self.limb.buildGuide()
+    def build_guide(self):
+        # Limb
+        self.limb.set_locator_attr(start_pos=self.start_pos, interval=self.distance)
+        self.limb.build_guide()
 
-        #--- Foot ---#
-        self.foot.setLocAttr(startPos=[self.startPos[0], self.startPos[1]-2*self.distance, self.startPos[2]],
-                             interval=self.interval, height=self.height)
-        footGrp = self.foot.buildGuide()
+        # Foot
+        self.foot.set_locator_attr(start_pos=[self.start_pos[0], self.start_pos[1]-2*self.distance, self.start_pos[2]], interval=self.interval, height=self.height)
+        foot_grp = self.foot.build_guide()
 
-        #--- Connect ---#
-        cmds.parent(footGrp, self.limb.locList[-1])
+        # Connect
+        cmds.parent(foot_grp, self.limb.loc_list[-1])
 
-    def constructJnt(self):
-        self.limb.constructJnt()
-        self.foot.constructJnt()
+    def construct_joint(self):
+        self.limb.construct_joint()
+        self.foot.construct_joint()
 
-    def placeCtrl(self):
-        self.limb.placeCtrl()
-        self.foot.placeCtrl()
+    def place_controller(self):
+        self.limb.place_controller()
+        self.foot.place_controller()
 
-    def addConstraint(self):
-        self.limb.addConstraint()
-        self.foot.addConstraint()
+    def add_constraint(self):
+        self.limb.add_constraint()
+        self.foot.add_constraint()
 
-        #--- Connect ---#
+        # Connect
         # IK constraint #
-        cmds.parentConstraint(self.foot.revAnkleJntName, self.limb.ikCtrlName, mo=True)
-        cmds.setAttr(self.limb.ikCtrlName+'.visibility', 0)
+        cmds.parentConstraint(self.foot.rev_ankle_jnt_name, self.limb.ik_ctrl_name, mo=True)
+        cmds.setAttr(self.limb.ik_ctrl_name+'.visibility', 0)
 
         # FK constraint #
-        cmds.parentConstraint(self.limb.jntList[-1], self.foot.fkAnkleJntName, mo=True)
-        cmds.parent(self.foot.fkCtrlName, self.limb.fkCtrlList[-1])
+        cmds.parentConstraint(self.limb.jnt_list[-1], self.foot.fk_ankle_jnt_name, mo=True)
+        cmds.parent(self.foot.fk_ctrl_name, self.limb.fk_ctrl_list[-1])
 
         # IK/FK switch #
-        cmds.setDrivenKeyframe(self.limb.switchCtrl+'.FK_IK', currentDriver=self.foot.switchCtrlName+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.limb.switchCtrl+'.FK_IK', currentDriver=self.foot.switchCtrlName+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.limb.switch_ctrl+'.FK_IK', currentDriver=self.foot.switch_ctrl_name+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.limb.switch_ctrl+'.FK_IK', currentDriver=self.foot.switch_ctrl_name+'.FK_IK', driverValue=0, value=0)
 
         # Sub controller visibility and channel hide #
-        cmds.setDrivenKeyframe(self.limb.ikCtrlName+'.visibility', currentDriver=self.limb.switchCtrl+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.limb.ikCtrlName+'.visibility', currentDriver=self.limb.switchCtrl+'.FK_IK', driverValue=0, value=0)
-        cmds.setAttr(self.limb.switchCtrl+'.FK_IK', l=1, k=0)
+        cmds.setDrivenKeyframe(self.limb.ik_ctrl_name+'.visibility', currentDriver=self.limb.switch_ctrl+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe(self.limb.ik_ctrl_name+'.visibility', currentDriver=self.limb.switch_ctrl+'.FK_IK', driverValue=0, value=0)
+        cmds.setAttr(self.limb.switch_ctrl+'.FK_IK', l=1, k=0)
 
-    def deleteGuide(self):
-        self.foot.deleteGuide()
-        self.limb.deleteGuide()
+    def delete_guide(self):
+        self.foot.delete_guide()
+        self.limb.delete_guide()
 
-    def colorCtrl(self):
-        self.limb.colorCtrl()
-        self.foot.colorCtrl()
+    def color_controller(self):
+        self.limb.color_controller()
+        self.foot.color_controller()
+
 
 class LegFront(base.Base):
-    def __init__(self, side, id):
-        base.Base.__init__(self, side, id)
-        self.metaType = 'FrontLeg'
-        self.createNaming()
-        self.createSecondaryNaming()
+    """ This module creates a quadruped front leg rig"""
 
-    def createSecondaryNaming(self):
-        self.locList, self.jntList, self.ctrlList, self.ctrlOffsetList = ([] for i in range(4))  # ik has different ctrl name
-        self.limbType = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
-        for type in self.limbType:
-            self.locList.append('{}{}_loc'.format(self.name, type))
-            self.jntList.append('{}{}_jnt'.format(self.name, type))
-            self.ctrlList.append('{}{}_ctrl'.format(self.name, type))
-            self.ctrlOffsetList.append('{}{}_offset'.format(self.name, type))
+    def __init__(self, side, base_name):
+        """ Initialize LegFront with side and name
 
-        self.legIKName = '{}leg_ik'.format(self.name)
-        self.footIKName = '{}foot_ik'.format(self.name)
-        self.toeIKName = '{}toe_ik'.format(self.name)
+        :param side: str
+        :param base_name: str
+        """
 
-    def setLocAttr(self, startPos=[0, 5, 3], distance=1.5, height=0.2, scale=0.4):
-        self.startPos = startPos
+        base.Base.__init__(self, side, base_name)
+        self.meta_type = 'FrontLeg'
+        self.assign_naming()
+        self.assign_secondary_naming()
+
+    def assign_secondary_naming(self):
+        self.loc_list, self.jnt_list, self.ctrl_list, self.ctrl_offset_list = ([] for i in range(4))
+        self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
+        for component in self.limb_components:
+            self.loc_list.append('{}{}_loc'.format(self.name, component))
+            self.jnt_list.append('{}{}_jnt'.format(self.name, component))
+            self.ctrl_list.append('{}{}_ctrl'.format(self.name, component))
+            self.ctrl_offset_list.append('{}{}_offset'.format(self.name, component))
+
+        # ik has different ctrl name
+        self.leg_ik_name = '{}leg_ik'.format(self.name)
+        self.foot_ik_name = '{}foot_ik'.format(self.name)
+        self.toe_ik_name = '{}toe_ik'.format(self.name)
+
+    def set_locator_attr(self, start_pos=[0, 5, 3], distance=1.5, height=0.2, scale=0.4):
+        self.start_pos = start_pos
         self.distance = distance
         self.height = height
         self.scale = scale
 
-    def setCtrlShape(self):
+    @staticmethod
+    def set_controller_shape():
         sphere = cmds.createNode('implicitSphere')
-        sphereCtrl = cmds.rename(cmds.listRelatives(sphere, p=True), 'Shoulder_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, sphereCtrl)
+        sphere_ctrl = cmds.rename(cmds.listRelatives(sphere, p=True), 'Shoulder_tempShape')
+        cmds.scale(0.5, 0.5, 0.5, sphere_ctrl)
 
         pole = cmds.createNode('implicitSphere')
-        poleCtrl = cmds.rename(cmds.listRelatives(pole, p=True), 'Pole_tempShape')
-        cmds.scale(0.2, 0.2, 0.2, poleCtrl)
+        pole_ctrl = cmds.rename(cmds.listRelatives(pole, p=True), 'Pole_tempShape')
+        cmds.scale(0.2, 0.2, 0.2, pole_ctrl)
 
-        ctrlShape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Paw_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, ctrlShape)
+        ctrl_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Paw_tempShape')
+        cmds.scale(0.5, 0.5, 0.5, ctrl_shape)
 
-    def buildGuide(self):
-        grp = cmds.group(em=True, n=self.locGrpName)
+    def build_guide(self):
+        grp = cmds.group(em=True, n=self.loc_grp_name)
 
-        # shoulder
-        shoulder = cmds.spaceLocator(n=self.locList[0])
+        # Shoulder
+        shoulder = cmds.spaceLocator(n=self.loc_list[0])
         cmds.parent(shoulder, grp, relative=True)
-        cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], shoulder, relative=True)
+        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], shoulder, relative=True)
         cmds.scale(self.scale, self.scale, self.scale, shoulder)
 
-        # elbow
-        elbow = cmds.spaceLocator(n=self.locList[1])
+        # Elbow
+        elbow = cmds.spaceLocator(n=self.loc_list[1])
         cmds.parent(elbow, shoulder, relative=True)
         cmds.move(0, -self.distance, -0.5 * self.distance, elbow, relative=True)
 
-        # wrist
-        wrist = cmds.spaceLocator(n=self.locList[2])
+        # Wrist
+        wrist = cmds.spaceLocator(n=self.loc_list[2])
         cmds.parent(wrist, elbow, relative=True)
         cmds.move(0, -self.distance, 0, wrist, relative=True)
 
-        # paw
-        paw = cmds.spaceLocator(n=self.locList[3])
+        # Paw
+        paw = cmds.spaceLocator(n=self.loc_list[3])
         cmds.parent(paw, wrist, relative=True)
         cmds.move(0, -self.distance+self.height, 0.5 * self.distance, paw, relative=True)
 
-        # toe
-        toe = cmds.spaceLocator(n=self.locList[4])
+        # Toe
+        toe = cmds.spaceLocator(n=self.loc_list[4])
         cmds.parent(toe, paw, relative=True)
         cmds.move(0, 0, 0.5 * self.distance, toe, relative=True)
 
-        self.colorLoc()
-        cmds.parent(grp, self.locGrp)
+        self.color_locator()
+        cmds.parent(grp, self.loc_grp)
         return grp
 
-    def constructJnt(self):
+    def construct_joint(self):
         cmds.select(clear=True)
-        for index in range(len(self.locList)):
-            loc = cmds.ls(self.locList[index], transforms=True)
-            locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            jnt = cmds.joint(p=locPos, name=self.jntList[index])
+        for index in range(len(self.loc_list)):
+            loc = cmds.ls(self.loc_list[index], transforms=True)
+            loc_pos = cmds.xform(loc, q=True, t=True, ws=True)
+            jnt = cmds.joint(p=loc_pos, name=self.jnt_list[index])
             cmds.setAttr(jnt+'.radius', self.scale)
 
-        cmds.parent(self.jntList[0], self.jntGrp)
-        joint.orient_joint(self.jntList[0])
-        return self.jntList[0]
+        cmds.parent(self.jnt_list[0], self.jnt_grp)
+        joint.orient_joint(self.jnt_list[0])
+        return self.jnt_list[0]
 
-    def placeCtrl(self):
-        self.setCtrlShape()
+    def place_controller(self):
+        self.set_controller_shape()
 
-        # shoulder
-        shoulder = cmds.ls(self.jntList[0])
-        shoulderCtrl = cmds.duplicate('Shoulder_tempShape', name=self.ctrlList[0])[0]
-        shoulderPos = cmds.xform(shoulder, q=True, ws=True, t=True)
-        shoulderRot = cmds.xform(shoulder, q=True, ws=True, ro=True)
+        # Shoulder
+        shoulder = cmds.ls(self.jnt_list[0])
+        shoulder_ctrl = cmds.duplicate('Shoulder_tempShape', name=self.ctrl_list[0])[0]
+        shoulder_pos = cmds.xform(shoulder, q=True, ws=True, t=True)
+        shoulder_rot = cmds.xform(shoulder, q=True, ws=True, ro=True)
 
-        shoulderCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetList[0])
-        cmds.move(shoulderPos[0], shoulderPos[1], shoulderPos[2], shoulderCtrlOffset)
-        cmds.rotate(shoulderRot[0], shoulderRot[1], shoulderRot[2], shoulderCtrlOffset)
-        cmds.parent(shoulderCtrl, shoulderCtrlOffset, relative=True)
+        shoulder_ctrl_offset = cmds.group(em=True, name=self.ctrl_offset_list[0])
+        cmds.move(shoulder_pos[0], shoulder_pos[1], shoulder_pos[2], shoulder_ctrl_offset)
+        cmds.rotate(shoulder_rot[0], shoulder_rot[1], shoulder_rot[2], shoulder_ctrl_offset)
+        cmds.parent(shoulder_ctrl, shoulder_ctrl_offset, relative=True)
 
-        # front foot
-        paw = cmds.ls(self.jntList[3])
-        pawCtrl = cmds.duplicate('Paw_tempShape', name=self.ctrlList[3])[0]
-        pawPos = cmds.xform(paw, q=True, ws=True, t=True)
-        cmds.move(pawPos[0], 0, pawPos[2], pawCtrl)
+        # Front foot
+        paw = cmds.ls(self.jnt_list[3])
+        paw_ctrl = cmds.duplicate('Paw_tempShape', name=self.ctrl_list[3])[0]
+        paw_pos = cmds.xform(paw, q=True, ws=True, t=True)
+        cmds.move(paw_pos[0], 0, paw_pos[2], paw_ctrl)
+
         # custom attribute for later pivot group access
-        cmds.addAttr(pawCtrl, longName='Flex', attributeType='double', keyable=True)
-        cmds.addAttr(pawCtrl, longName='Swivel', attributeType='double', keyable=True)
-        cmds.addAttr(pawCtrl, longName='Toe_Tap', attributeType='double', keyable=True)
-        cmds.addAttr(pawCtrl, longName='Toe_Tip', attributeType='double', keyable=True)
-        cmds.addAttr(pawCtrl, longName='Wrist', attributeType='double', keyable=True)
-        cmds.makeIdentity(pawCtrl, apply=True, t=1, r=1, s=1)
+        cmds.addAttr(paw_ctrl, longName='Flex', attributeType='double', keyable=True)
+        cmds.addAttr(paw_ctrl, longName='Swivel', attributeType='double', keyable=True)
+        cmds.addAttr(paw_ctrl, longName='Toe_Tap', attributeType='double', keyable=True)
+        cmds.addAttr(paw_ctrl, longName='Toe_Tip', attributeType='double', keyable=True)
+        cmds.addAttr(paw_ctrl, longName='Wrist', attributeType='double', keyable=True)
+        cmds.makeIdentity(paw_ctrl, apply=True, t=1, r=1, s=1)
 
-        # elbow control - aka. pole vector
-        elbow = cmds.ls(self.jntList[1])
-        poleCtrl = cmds.duplicate('Pole_tempShape', name=self.ctrlList[1])[0]
-        poleCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetList[1])
-        elbowPos = cmds.xform(elbow, q=True, ws=True, t=True)
-        cmds.move(elbowPos[0], elbowPos[1], elbowPos[2]-self.distance, poleCtrlOffset)
-        cmds.parent(poleCtrl, poleCtrlOffset, relative=True)
-        cmds.parent(poleCtrlOffset, pawCtrl)
+        # Elbow control - aka. pole vector
+        elbow = cmds.ls(self.jnt_list[1])
+        pole_ctrl = cmds.duplicate('Pole_tempShape', name=self.ctrl_list[1])[0]
+        pole_ctrl_offset = cmds.group(em=True, name=self.ctrl_offset_list[1])
+        elbow_pos = cmds.xform(elbow, q=True, ws=True, t=True)
+        cmds.move(elbow_pos[0], elbow_pos[1], elbow_pos[2]-self.distance, pole_ctrl_offset)
+        cmds.parent(pole_ctrl, pole_ctrl_offset, relative=True)
+        cmds.parent(pole_ctrl_offset, paw_ctrl)
 
-        outliner.batch_parent([shoulderCtrlOffset, pawCtrl], self.ctrlGrp)
-        self.deleteShape()
+        outliner.batch_parent([shoulder_ctrl_offset, paw_ctrl], self.ctrl_grp)
+        self.delete_shape()
 
-    def buildIK(self):
-        cmds.ikHandle(startJoint=self.jntList[0], endEffector=self.jntList[2], name=self.legIKName, solver='ikRPsolver')
-        cmds.ikHandle(startJoint=self.jntList[2], endEffector=self.jntList[3], name=self.footIKName, solver='ikSCsolver')
-        cmds.ikHandle(startJoint=self.jntList[3], endEffector=self.jntList[4], name=self.toeIKName, solver='ikSCsolver')
-        cmds.setAttr(self.legIKName+'.visibility', 0)
-        cmds.setAttr(self.footIKName+'.visibility', 0)
-        cmds.setAttr(self.toeIKName+'.visibility', 0)
+    def build_ik(self):
+        cmds.ikHandle(startJoint=self.jnt_list[0], endEffector=self.jnt_list[2], name=self.leg_ik_name, solver='ikRPsolver')
+        cmds.ikHandle(startJoint=self.jnt_list[2], endEffector=self.jnt_list[3], name=self.foot_ik_name, solver='ikSCsolver')
+        cmds.ikHandle(startJoint=self.jnt_list[3], endEffector=self.jnt_list[4], name=self.toe_ik_name, solver='ikSCsolver')
+        cmds.setAttr(self.leg_ik_name+'.visibility', 0)
+        cmds.setAttr(self.foot_ik_name+'.visibility', 0)
+        cmds.setAttr(self.toe_ik_name+'.visibility', 0)
 
-    def addMeasurement(self):
-        # length segment
-        shoulderPos = cmds.xform(self.jntList[0], q=True, ws=True, t=True)
-        elbowPos = cmds.xform(self.jntList[1], q=True, ws=True, t=True)
-        wristPos = cmds.xform(self.jntList[2], q=True, ws=True, t=True)
-        straightenLen = ((shoulderPos[0]-elbowPos[0]) ** 2+(shoulderPos[1]-elbowPos[1]) ** 2+(shoulderPos[2]-elbowPos[2]) ** 2) ** 0.5+ \
-                        ((wristPos[0]-elbowPos[0]) ** 2+(wristPos[1]-elbowPos[1]) ** 2+(wristPos[2]-elbowPos[2]) ** 2) ** 0.5
+    def add_measurement(self):
+        # add length segment
+        shoulder_pos = cmds.xform(self.jnt_list[0], q=True, ws=True, t=True)
+        elbow_pos = cmds.xform(self.jnt_list[1], q=True, ws=True, t=True)
+        wrist_pos = cmds.xform(self.jnt_list[2], q=True, ws=True, t=True)
+        straighten_len = ((shoulder_pos[0]-elbow_pos[0]) ** 2+(shoulder_pos[1]-elbow_pos[1]) ** 2+(shoulder_pos[2]-elbow_pos[2]) ** 2) ** 0.5+ \
+                        ((wrist_pos[0]-elbow_pos[0]) ** 2+(wrist_pos[1]-elbow_pos[1]) ** 2+(wrist_pos[2]-elbow_pos[2]) ** 2) ** 0.5
 
         # create measurement
-        measureShape = cmds.distanceDimension(sp=shoulderPos, ep=wristPos)
-        locs = cmds.listConnections(measureShape)
-        measureNode = cmds.listRelatives(measureShape, parent=True, type='transform')
-        lengthNode = '{}length_node'.format(self.name)
-        shoulderLoc = '{}shoulder_node'.format(self.name)
-        elbowLoc = '{}elbow_node'.format(self.name)
-        cmds.rename(measureNode, lengthNode)
-        cmds.rename(locs[0], shoulderLoc)
-        cmds.rename(locs[1], elbowLoc)
+        measure_shape = cmds.distanceDimension(sp=shoulder_pos, ep=wrist_pos)
+        locs = cmds.listConnections(measure_shape)
+        measure_node = cmds.listRelatives(measure_shape, parent=True, type='transform')
+        length_node = '{}length_node'.format(self.name)
+        shoulder_loc = '{}shoulder_node'.format(self.name)
+        elbow_loc = '{}elbow_node'.format(self.name)
+        cmds.rename(measure_node, length_node)
+        cmds.rename(locs[0], shoulder_loc)
+        cmds.rename(locs[1], elbow_loc)
 
-        stretchNode = cmds.shadingNode('multiplyDivide', asUtility=True, name='{}stretch_node'.format(self.name))
-        cmds.setAttr(stretchNode+'.operation', 2)
-        cmds.setAttr(stretchNode+'.input2X', straightenLen)
-        cmds.connectAttr(lengthNode+'.distance', stretchNode+'.input1X')
+        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=True, name='{}stretch_node'.format(self.name))
+        cmds.setAttr(stretch_node+'.operation', 2)
+        cmds.setAttr(stretch_node+'.input2X', straighten_len)
+        cmds.connectAttr(length_node+'.distance', stretch_node+'.input1X')
 
-        conditionNode = cmds.shadingNode('condition', asUtility=True, name='{}condition_node'.format(self.name))
-        cmds.connectAttr(stretchNode+'.outputX', conditionNode+'.firstTerm')
-        cmds.setAttr(conditionNode+'.secondTerm', 1)
-        cmds.setAttr(conditionNode+'.operation', 2)  # Greater than
-        cmds.connectAttr(stretchNode+'.outputX', conditionNode+'.colorIfTrueR')
-        cmds.setAttr(conditionNode+'.colorIfFalseR', 1)
+        condition_node = cmds.shadingNode('condition', asUtility=True, name='{}condition_node'.format(self.name))
+        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.firstTerm')
+        cmds.setAttr(condition_node+'.secondTerm', 1)
+        cmds.setAttr(condition_node+'.operation', 2)  # Greater than
+        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.colorIfTrueR')
+        cmds.setAttr(condition_node+'.colorIfFalseR', 1)
 
-        cmds.connectAttr(conditionNode+'.outColorR', self.jntList[0]+'.scaleX')
-        cmds.connectAttr(conditionNode+'.outColorR', self.jntList[1]+'.scaleX')
+        cmds.connectAttr(condition_node+'.outColorR', self.jnt_list[0]+'.scaleX')
+        cmds.connectAttr(condition_node+'.outColorR', self.jnt_list[1]+'.scaleX')
 
-        cmds.setAttr(lengthNode+'.visibility', 0)
-        cmds.setAttr(shoulderLoc+'.visibility', 0)
-        cmds.setAttr(elbowLoc+'.visibility', 0)
-        outliner.batch_parent([lengthNode, shoulderLoc, elbowLoc], self.ctrlGrp)
+        cmds.setAttr(length_node+'.visibility', 0)
+        cmds.setAttr(shoulder_loc+'.visibility', 0)
+        cmds.setAttr(elbow_loc+'.visibility', 0)
+        outliner.batch_parent([length_node, shoulder_loc, elbow_loc], self.ctrl_grp)
 
-        cmds.parentConstraint(self.ctrlList[0], shoulderLoc)
-        cmds.parentConstraint(self.ctrlList[3], elbowLoc, mo=True)
+        cmds.parentConstraint(self.ctrl_list[0], shoulder_loc)
+        cmds.parentConstraint(self.ctrl_list[3], elbow_loc, mo=True)
 
-    def addConstraint(self):
-        self.buildIK()
-        # shoulder pivot
-        cmds.parentConstraint(self.ctrlList[0], self.jntList[0])
+    def add_constraint(self):
+        self.build_ik()
 
-        # front foot pivot group
-        toeTapPivotGrp = cmds.group(em=True, name='{}toetap_pivotGrp'.format(self.name))
-        flexPivotGrp = cmds.group(em=True, name='{}flex_pivotGrp'.format(self.name))
-        swivelPivotGrp = cmds.group(em=True, name='{}swivel_pivotGrp'.format(self.name))
-        toeTipPivotGrp = cmds.group(em=True, name='{}toetip_pivotGrp'.format(self.name))
-        wristPivotGrp = cmds.group(em=True, name='{}wrist_pivotGrp'.format(self.name))
+        # Shoulder pivot
+        cmds.parentConstraint(self.ctrl_list[0], self.jnt_list[0])
 
-        pawPos = cmds.xform(self.jntList[3], q=True, ws=True, t=True)
-        toePos = cmds.xform(self.jntList[4], q=True, ws=True, t=True)
-        wristPos = cmds.xform(self.jntList[2], q=True, ws=True, t=True)
-        cmds.move(pawPos[0], pawPos[1], pawPos[2], toeTapPivotGrp)
-        cmds.move(pawPos[0], pawPos[1], pawPos[2], flexPivotGrp)
-        cmds.move(pawPos[0], pawPos[1], pawPos[2], swivelPivotGrp)
-        cmds.move(toePos[0], toePos[1], toePos[2], toeTipPivotGrp)
-        cmds.move(wristPos[0], wristPos[1], wristPos[2], wristPivotGrp)
+        # Front foot pivot group
+        toe_tap_pivot_grp = cmds.group(em=True, name='{}toetap_pivot_grp'.format(self.name))
+        flex_pivot_grp = cmds.group(em=True, name='{}flex_pivot_grp'.format(self.name))
+        swivel_pivot_grp = cmds.group(em=True, name='{}swivel_pivot_grp'.format(self.name))
+        toe_tip_pivot_grp = cmds.group(em=True, name='{}toetip_pivot_grp'.format(self.name))
+        wrist_pivot_grp = cmds.group(em=True, name='{}wrist_pivot_grp'.format(self.name))
 
-        cmds.parent(self.toeIKName, toeTapPivotGrp)
-        outliner.batch_parent([self.legIKName, self.footIKName], flexPivotGrp)
-        outliner.batch_parent([toeTapPivotGrp, flexPivotGrp], swivelPivotGrp)
-        cmds.parent(swivelPivotGrp, toeTipPivotGrp)
-        cmds.parent(toeTipPivotGrp, wristPivotGrp)
-        cmds.parent(wristPivotGrp, self.ctrlList[3])
+        paw_pos = cmds.xform(self.jnt_list[3], q=True, ws=True, t=True)
+        toe_pos = cmds.xform(self.jnt_list[4], q=True, ws=True, t=True)
+        wrist_pos = cmds.xform(self.jnt_list[2], q=True, ws=True, t=True)
+        cmds.move(paw_pos[0], paw_pos[1], paw_pos[2], toe_tap_pivot_grp)
+        cmds.move(paw_pos[0], paw_pos[1], paw_pos[2], flex_pivot_grp)
+        cmds.move(paw_pos[0], paw_pos[1], paw_pos[2], swivel_pivot_grp)
+        cmds.move(toe_pos[0], toe_pos[1], toe_pos[2], toe_tip_pivot_grp)
+        cmds.move(wrist_pos[0], wrist_pos[1], wrist_pos[2], wrist_pivot_grp)
 
-        cmds.connectAttr(self.ctrlList[3]+'.Flex', flexPivotGrp+'.rotateX')
-        cmds.connectAttr(self.ctrlList[3]+'.Swivel', swivelPivotGrp+'.rotateY')
-        cmds.connectAttr(self.ctrlList[3]+'.Toe_Tap', toeTapPivotGrp+'.rotateX')
-        cmds.connectAttr(self.ctrlList[3]+'.Toe_Tip', toeTipPivotGrp+'.rotateX')
-        cmds.connectAttr(self.ctrlList[3]+'.Wrist', wristPivotGrp+'.rotateX')
+        cmds.parent(self.toe_ik_name, toe_tap_pivot_grp)
+        outliner.batch_parent([self.leg_ik_name, self.foot_ik_name], flex_pivot_grp)
+        outliner.batch_parent([toe_tap_pivot_grp, flex_pivot_grp], swivel_pivot_grp)
+        cmds.parent(swivel_pivot_grp, toe_tip_pivot_grp)
+        cmds.parent(toe_tip_pivot_grp, wrist_pivot_grp)
+        cmds.parent(wrist_pivot_grp, self.ctrl_list[3])
 
-        # pole vector constraint
-        cmds.poleVectorConstraint(self.ctrlList[1], self.legIKName)
+        cmds.connectAttr(self.ctrl_list[3]+'.Flex', flex_pivot_grp+'.rotateX')
+        cmds.connectAttr(self.ctrl_list[3]+'.Swivel', swivel_pivot_grp+'.rotateY')
+        cmds.connectAttr(self.ctrl_list[3]+'.Toe_Tap', toe_tap_pivot_grp+'.rotateX')
+        cmds.connectAttr(self.ctrl_list[3]+'.Toe_Tip', toe_tip_pivot_grp+'.rotateX')
+        cmds.connectAttr(self.ctrl_list[3]+'.Wrist', wrist_pivot_grp+'.rotateX')
 
-        # scalable
-        self.addMeasurement()
+        # Pole vector constraint
+        cmds.poleVectorConstraint(self.ctrl_list[1], self.leg_ik_name)
+
+        # Scalable rig setup
+        self.add_measurement()
+
 
 class LegBack(base.Base):
-    def __init__(self, side, id):
-        base.Base.__init__(self, side, id)
-        self.metaType = 'BackLeg'
-        self.createNaming()
-        self.createSecondaryNaming()
+    """ This module creates a quadruped back leg rig"""
 
-    def createSecondaryNaming(self):
-        self.locList, self.jntList, self.ctrlList, self.ctrlOffsetList, self.jntHelperList = ([] for i in range(5))  # ik has different ctrl name
-        self.limbType = ['hip', 'knee', 'ankle', 'paw', 'toe']
-        for type in self.limbType:
-            self.locList.append('{}{}_loc'.format(self.name, type))
-            self.jntList.append('{}{}_jnt'.format(self.name, type))
-            self.jntHelperList.append('{}{}helper_jnt'.format(self.name, type))
-            self.ctrlList.append('{}{}_ctrl'.format(self.name, type))
-            self.ctrlOffsetList.append('{}{}_offset'.format(self.name, type))
+    def __init__(self, side, base_name):
+        """ Initialize LegFront with side and name
 
-        self.legIKName = '{}leg_ik'.format(self.name)
-        self.footIKName = '{}foot_ik'.format(self.name)
-        self.toeIKName = '{}toe_ik'.format(self.name)
-        self.helperIKName = '{}helper_ik'.format(self.name)
+        :param side: str
+        :param base_name: str
+        """
 
-    def setLocAttr(self, startPos=[0, 5, -3], distance=1.5, height=0.2, scale=0.4):
-        self.startPos = startPos
+        base.Base.__init__(self, side, base_name)
+        self.meta_type = 'BackLeg'
+        self.assign_naming()
+        self.assign_secondary_naming()
+
+    def assign_secondary_naming(self):
+        self.loc_list, self.jnt_list, self.ctrl_list, self.ctrl_offset_list, self.jnt_helper_list = ([] for i in range(5))
+        self.limb_components = ['hip', 'knee', 'ankle', 'paw', 'toe']
+        for component in self.limb_components:
+            self.loc_list.append('{}{}_loc'.format(self.name, component))
+            self.jnt_list.append('{}{}_jnt'.format(self.name, component))
+            self.jnt_helper_list.append('{}{}helper_jnt'.format(self.name, component))
+            self.ctrl_list.append('{}{}_ctrl'.format(self.name, component))
+            self.ctrl_offset_list.append('{}{}_offset'.format(self.name, component))
+
+        # ik has different ctrl name
+        self.leg_ik_name = '{}leg_ik'.format(self.name)
+        self.foot_ik_name = '{}foot_ik'.format(self.name)
+        self.toe_ik_name = '{}toe_ik'.format(self.name)
+        self.helper_ik_name = '{}helper_ik'.format(self.name)
+
+    def set_locator_attr(self, start_pos=[0, 5, -3], distance=1.5, height=0.2, scale=0.4):
+        self.start_pos = start_pos
         self.distance = distance
         self.height = height
         self.scale = scale
 
-    def setCtrlShape(self):
+    @staticmethod
+    def set_controller_shape():
         sphere = cmds.createNode('implicitSphere')
-        sphereCtrl = cmds.rename(cmds.listRelatives(sphere, p=True), 'Hip_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, sphereCtrl)
+        sphere_ctrl = cmds.rename(cmds.listRelatives(sphere, p=True), 'Hip_tempShape')
+        cmds.scale(0.5, 0.5, 0.5, sphere_ctrl)
 
         pole = cmds.createNode('implicitSphere')
-        poleCtrl = cmds.rename(cmds.listRelatives(pole, p=True), 'Pole_tempShape')
-        cmds.scale(0.2, 0.2, 0.2, poleCtrl)
+        pole_ctrl = cmds.rename(cmds.listRelatives(pole, p=True), 'Pole_tempShape')
+        cmds.scale(0.2, 0.2, 0.2, pole_ctrl)
 
-        ctrlShape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, ctrlShape)
+        ctrl_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')
+        cmds.scale(0.5, 0.5, 0.5, ctrl_shape)
 
-    def buildGuide(self):
-        grp = cmds.group(em=True, n=self.locGrpName)
+    def build_guide(self):
+        grp = cmds.group(em=True, n=self.loc_grp_name)
 
-        # hip
-        hip = cmds.spaceLocator(n=self.locList[0])
+        # Hip
+        hip = cmds.spaceLocator(n=self.loc_list[0])
         cmds.parent(hip, grp, relative=True)
-        cmds.move(self.startPos[0], self.startPos[1], self.startPos[2], hip, relative=True)
+        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], hip, relative=True)
         cmds.scale(self.scale, self.scale, self.scale, hip)
 
-        # knee
-        knee = cmds.spaceLocator(n=self.locList[1])
+        # Knee
+        knee = cmds.spaceLocator(n=self.loc_list[1])
         cmds.parent(knee, hip, relative=True)
         cmds.move(0, -self.distance, 0, knee, relative=True)
 
-        # ankle
-        ankle = cmds.spaceLocator(n=self.locList[2])
+        # Ankle
+        ankle = cmds.spaceLocator(n=self.loc_list[2])
         cmds.parent(ankle, knee, relative=True)
         cmds.move(0, -self.distance, -0.5 * self.distance, ankle, relative=True)
 
-        # foot
-        foot = cmds.spaceLocator(n=self.locList[3])
+        # Foot
+        foot = cmds.spaceLocator(n=self.loc_list[3])
         cmds.parent(foot, ankle, relative=True)
         cmds.move(0, -self.distance+self.height, 0, foot, relative=True)
 
-        # toe
-        toe = cmds.spaceLocator(n=self.locList[4])
+        # Toe
+        toe = cmds.spaceLocator(n=self.loc_list[4])
         cmds.parent(toe, foot, relative=True)
         cmds.move(0, 0, 0.5 * self.distance, toe, relative=True)
 
-        self.colorLoc()
-        cmds.parent(grp, self.locGrp)
+        self.color_locator()
+        cmds.parent(grp, self.loc_grp)
         return grp
 
-    def constructJnt(self):
-        # result jnt chain
+    def construct_joint(self):
+        # Result joint chain
         cmds.select(clear=True)
-        for index in range(len(self.locList)):
-            loc = cmds.ls(self.locList[index], transforms=True)
-            locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            jnt = cmds.joint(p=locPos, name=self.jntList[index])
+        for index in range(len(self.loc_list)):
+            loc = cmds.ls(self.loc_list[index], transforms=True)
+            loc_pos = cmds.xform(loc, q=True, t=True, ws=True)
+            jnt = cmds.joint(p=loc_pos, name=self.jnt_list[index])
             cmds.setAttr(jnt+'.radius', self.scale)
-        joint.orient_joint(self.jntList[0])
-        cmds.parent(self.jntList[0], self.jntGrp)
+        joint.orient_joint(self.jnt_list[0])
+        cmds.parent(self.jnt_list[0], self.jnt_grp)
 
-        # helper jnt chain
+        # Helper joint chain
         cmds.select(clear=True)
-        for index in range(len(self.locList[:-1])):
-            loc = cmds.ls(self.locList[index], transforms=True)
-            locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            jnt = cmds.joint(p=locPos, name=self.jntHelperList[index])
+        for index in range(len(self.loc_list[:-1])):
+            loc = cmds.ls(self.loc_list[index], transforms=True)
+            loc_pos = cmds.xform(loc, q=True, t=True, ws=True)
+            jnt = cmds.joint(p=loc_pos, name=self.jnt_helper_list[index])
             cmds.setAttr(jnt+'.radius', 1)
-        joint.orient_joint(self.jntHelperList[0])
-        cmds.parent(self.jntHelperList[0], self.jntGrp)
-        cmds.setAttr(self.jntHelperList[0]+'.visibility', 0)
+        joint.orient_joint(self.jnt_helper_list[0])
+        cmds.parent(self.jnt_helper_list[0], self.jnt_grp)
+        cmds.setAttr(self.jnt_helper_list[0]+'.visibility', 0)
 
-        return self.jntList[0]
+        return self.jnt_list[0]
 
-    def placeCtrl(self):
-        self.setCtrlShape()
+    def place_controller(self):
+        self.set_controller_shape()
 
-        # hip
-        hip = cmds.ls(self.jntList[0])
-        hipCtrl = cmds.duplicate('Hip_tempShape', name=self.ctrlList[0])[0]
-        hipPos = cmds.xform(hip, q=True, ws=True, t=True)
-        hipRot = cmds.xform(hip, q=True, ws=True, ro=True)
+        # Hip
+        hip = cmds.ls(self.jnt_list[0])
+        hip_ctrl = cmds.duplicate('Hip_tempShape', name=self.ctrl_list[0])[0]
+        hip_pos = cmds.xform(hip, q=True, ws=True, t=True)
+        hip_rot = cmds.xform(hip, q=True, ws=True, ro=True)
 
-        hipCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetList[0])
-        cmds.move(hipPos[0], hipPos[1], hipPos[2], hipCtrlOffset)
-        cmds.rotate(hipRot[0], hipRot[1], hipRot[2], hipCtrlOffset)
-        cmds.parent(hipCtrl, hipCtrlOffset, relative=True)
+        hip_ctrl_offset = cmds.group(em=True, name=self.ctrl_offset_list[0])
+        cmds.move(hip_pos[0], hip_pos[1], hip_pos[2], hip_ctrl_offset)
+        cmds.rotate(hip_rot[0], hip_rot[1], hip_rot[2], hip_ctrl_offset)
+        cmds.parent(hip_ctrl, hip_ctrl_offset, relative=True)
 
-        # back foot
-        foot = cmds.ls(self.jntList[3])
-        footCtrl = cmds.duplicate('Foot_tempShape', name=self.ctrlList[3])[0]
-        footPos = cmds.xform(foot, q=True, ws=True, t=True)
-        cmds.move(footPos[0], 0, footPos[2], footCtrl)
-        cmds.makeIdentity(footCtrl, apply=True, t=1, r=1, s=1)
+        # Back foot
+        foot = cmds.ls(self.jnt_list[3])
+        foot_ctrl = cmds.duplicate('Foot_tempShape', name=self.ctrl_list[3])[0]
+        foot_pos = cmds.xform(foot, q=True, ws=True, t=True)
+        cmds.move(foot_pos[0], 0, foot_pos[2], foot_ctrl)
+        cmds.makeIdentity(foot_ctrl, apply=True, t=1, r=1, s=1)
+
         # custom attribute for later pivot group access
-        cmds.addAttr(footCtrl, longName='Flex', attributeType='double', keyable=True)
-        cmds.addAttr(footCtrl, longName='Swivel', attributeType='double', keyable=True)
-        cmds.addAttr(footCtrl, longName='Toe_Tap', attributeType='double', keyable=True)
-        cmds.addAttr(footCtrl, longName='Toe_Tip', attributeType='double', keyable=True)
+        cmds.addAttr(foot_ctrl, longName='Flex', attributeType='double', keyable=True)
+        cmds.addAttr(foot_ctrl, longName='Swivel', attributeType='double', keyable=True)
+        cmds.addAttr(foot_ctrl, longName='Toe_Tap', attributeType='double', keyable=True)
+        cmds.addAttr(foot_ctrl, longName='Toe_Tip', attributeType='double', keyable=True)
 
-        # ankle control - poleVector
-        ankle = cmds.ls(self.jntList[2])
-        poleCtrl = cmds.duplicate('Pole_tempShape', name=self.ctrlList[2])[0]
-        poleCtrlOffset = cmds.group(em=True, name=self.ctrlOffsetList[2])
-        anklePos = cmds.xform(ankle, q=True, ws=True, t=True)
-        cmds.move(anklePos[0], anklePos[1], anklePos[2]+self.distance, poleCtrlOffset)
-        cmds.parent(poleCtrl, poleCtrlOffset, relative=True)
-        cmds.parent(poleCtrlOffset, footCtrl)
+        # Ankle control - poleVector
+        ankle = cmds.ls(self.jnt_list[2])
+        pole_ctrl = cmds.duplicate('Pole_tempShape', name=self.ctrl_list[2])[0]
+        pole_ctrl_offset = cmds.group(em=True, name=self.ctrl_offset_list[2])
+        ankle_pos = cmds.xform(ankle, q=True, ws=True, t=True)
+        cmds.move(ankle_pos[0], ankle_pos[1], ankle_pos[2]+self.distance, pole_ctrl_offset)
+        cmds.parent(pole_ctrl, pole_ctrl_offset, relative=True)
+        cmds.parent(pole_ctrl_offset, foot_ctrl)
 
-        outliner.batch_parent([hipCtrlOffset, footCtrl], self.ctrlGrp)
-        self.deleteShape()
+        outliner.batch_parent([hip_ctrl_offset, foot_ctrl], self.ctrl_grp)
+        self.delete_shape()
 
-    def buildIK(self):
-        cmds.ikHandle(startJoint=self.jntList[0], endEffector=self.jntList[2], name=self.legIKName, solver='ikRPsolver')
-        cmds.ikHandle(startJoint=self.jntList[2], endEffector=self.jntList[3], name=self.footIKName, solver='ikSCsolver')
-        cmds.ikHandle(startJoint=self.jntList[3], endEffector=self.jntList[4], name=self.toeIKName, solver='ikSCsolver')
-        cmds.ikHandle(startJoint=self.jntHelperList[0], endEffector=self.jntHelperList[3], name=self.helperIKName, solver='ikRPsolver')
-        cmds.setAttr(self.legIKName+'.visibility', 0)
-        cmds.setAttr(self.footIKName+'.visibility', 0)
-        cmds.setAttr(self.toeIKName+'.visibility', 0)
-        cmds.setAttr(self.helperIKName+'.visibility', 0)
+    def build_ik(self):
+        cmds.ikHandle(startJoint=self.jnt_list[0], endEffector=self.jnt_list[2], name=self.leg_ik_name, solver='ikRPsolver')
+        cmds.ikHandle(startJoint=self.jnt_list[2], endEffector=self.jnt_list[3], name=self.foot_ik_name, solver='ikSCsolver')
+        cmds.ikHandle(startJoint=self.jnt_list[3], endEffector=self.jnt_list[4], name=self.toe_ik_name, solver='ikSCsolver')
+        cmds.ikHandle(startJoint=self.jnt_helper_list[0], endEffector=self.jnt_helper_list[3], name=self.helper_ik_name, solver='ikRPsolver')
+        cmds.setAttr(self.leg_ik_name+'.visibility', 0)
+        cmds.setAttr(self.foot_ik_name+'.visibility', 0)
+        cmds.setAttr(self.toe_ik_name+'.visibility', 0)
+        cmds.setAttr(self.helper_ik_name+'.visibility', 0)
 
-    def addMeasurement(self):
-        # length segment
-        hipPos = cmds.xform(self.jntList[0], q=True, ws=True, t=True)
-        kneePos = cmds.xform(self.jntList[1], q=True, ws=True, t=True)
-        anklePos = cmds.xform(self.jntList[2], q=True, ws=True, t=True)
-        footPos = cmds.xform(self.jntList[3], q=True, ws=True, t=True)
-        straightenLen = ((kneePos[0]-anklePos[0]) ** 2+(kneePos[1]-anklePos[1]) ** 2+(kneePos[2]-anklePos[2]) ** 2) ** 0.5+ \
-                        ((footPos[0]-anklePos[0]) ** 2+(footPos[1]-anklePos[1]) ** 2+(footPos[2]-anklePos[2]) ** 2) ** 0.5+ \
-                        ((hipPos[0]-kneePos[0]) ** 2+(hipPos[1]-kneePos[1]) ** 2+(hipPos[2]-kneePos[2]) ** 2) ** 0.5
+    def add_measurement(self):
+        # add length segment
+        hip_pos = cmds.xform(self.jnt_list[0], q=True, ws=True, t=True)
+        knee_pos = cmds.xform(self.jnt_list[1], q=True, ws=True, t=True)
+        ankle_pos = cmds.xform(self.jnt_list[2], q=True, ws=True, t=True)
+        foot_pos = cmds.xform(self.jnt_list[3], q=True, ws=True, t=True)
+        straighten_len = ((knee_pos[0]-ankle_pos[0]) ** 2+(knee_pos[1]-ankle_pos[1]) ** 2+(knee_pos[2]-ankle_pos[2]) ** 2) ** 0.5+ \
+                        ((foot_pos[0]-ankle_pos[0]) ** 2+(foot_pos[1]-ankle_pos[1]) ** 2+(foot_pos[2]-ankle_pos[2]) ** 2) ** 0.5+ \
+                        ((hip_pos[0]-knee_pos[0]) ** 2+(hip_pos[1]-knee_pos[1]) ** 2+(hip_pos[2]-knee_pos[2]) ** 2) ** 0.5
 
         # create measurement
-        measureShape = cmds.distanceDimension(sp=hipPos, ep=footPos)
-        locs = cmds.listConnections(measureShape)
-        measureNode = cmds.listRelatives(measureShape, parent=True, type='transform')
-        lengthNode = '{}length_node'.format(self.name)
-        hipLoc = '{}hip_node'.format(self.name)
-        ankleLoc = '{}ankle_node'.format(self.name)
-        cmds.rename(measureNode, lengthNode)
-        cmds.rename(locs[0], hipLoc)
-        cmds.rename(locs[1], ankleLoc)
+        measure_shape = cmds.distanceDimension(sp=hip_pos, ep=foot_pos)
+        locs = cmds.listConnections(measure_shape)
+        measure_node = cmds.listRelatives(measure_shape, parent=True, type='transform')
+        length_node = '{}length_node'.format(self.name)
+        hip_loc = '{}hip_node'.format(self.name)
+        ankle_loc = '{}ankle_node'.format(self.name)
+        cmds.rename(measure_node, length_node)
+        cmds.rename(locs[0], hip_loc)
+        cmds.rename(locs[1], ankle_loc)
 
-        stretchNode = cmds.shadingNode('multiplyDivide', asUtility=True, name='{}stretch_node'.format(self.name))
-        cmds.setAttr(stretchNode+'.operation', 2)
-        cmds.setAttr(stretchNode+'.input2X', straightenLen)
-        cmds.connectAttr(lengthNode+'.distance', stretchNode+'.input1X')
+        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=True, name='{}stretch_node'.format(self.name))
+        cmds.setAttr(stretch_node+'.operation', 2)
+        cmds.setAttr(stretch_node+'.input2X', straighten_len)
+        cmds.connectAttr(length_node+'.distance', stretch_node+'.input1X')
 
-        conditionNode = cmds.shadingNode('condition', asUtility=True, name='{}condition_node'.format(self.name))
-        cmds.connectAttr(stretchNode+'.outputX', conditionNode+'.firstTerm')
-        cmds.setAttr(conditionNode+'.secondTerm', 1)
-        cmds.setAttr(conditionNode+'.operation', 2)  # Greater than
-        cmds.connectAttr(stretchNode+'.outputX', conditionNode+'.colorIfTrueR')
-        cmds.setAttr(conditionNode+'.colorIfFalseR', 1)
+        condition_node = cmds.shadingNode('condition', asUtility=True, name='{}condition_node'.format(self.name))
+        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.firstTerm')
+        cmds.setAttr(condition_node+'.secondTerm', 1)
+        cmds.setAttr(condition_node+'.operation', 2)  # greater than
+        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.colorIfTrueR')
+        cmds.setAttr(condition_node+'.colorIfFalseR', 1)
 
-        for joint in [self.jntList[0], self.jntList[1], self.jntList[2],
-                      self.jntHelperList[0], self.jntHelperList[1], self.jntHelperList[2]]:
-            cmds.connectAttr(conditionNode+'.outColorR', joint+'.scaleX')
+        for joint in [self.jnt_list[0], self.jnt_list[1], self.jnt_list[2],
+                      self.jnt_helper_list[0], self.jnt_helper_list[1], self.jnt_helper_list[2]]:
+            cmds.connectAttr(condition_node+'.outColorR', joint+'.scaleX')
 
-        cmds.setAttr(lengthNode+'.visibility', 0)
-        cmds.setAttr(hipLoc+'.visibility', 0)
-        cmds.setAttr(ankleLoc+'.visibility', 0)
-        outliner.batch_parent([lengthNode, hipLoc, ankleLoc], self.ctrlGrp)
+        cmds.setAttr(length_node+'.visibility', 0)
+        cmds.setAttr(hip_loc+'.visibility', 0)
+        cmds.setAttr(ankle_loc+'.visibility', 0)
+        outliner.batch_parent([length_node, hip_loc, ankle_loc], self.ctrl_grp)
 
-        cmds.parentConstraint(self.ctrlList[0], hipLoc)
-        cmds.parentConstraint(self.ctrlList[3], ankleLoc, mo=True)
+        cmds.parentConstraint(self.ctrl_list[0], hip_loc)
+        cmds.parentConstraint(self.ctrl_list[3], ankle_loc, mo=True)
 
-    def addConstraint(self):
-        self.buildIK()
-        # shoulder pivot
-        cmds.parentConstraint(self.ctrlList[0], self.jntList[0])
-        cmds.parentConstraint(self.ctrlList[0], self.jntHelperList[0])
+    def add_constraint(self):
+        self.build_ik()
 
-        # front foot pivot group
-        toeTapPivotGrp = cmds.group(em=True, name='{}toetap_pivotGrp'.format(self.name))
-        flexPivotGrp = cmds.group(em=True, name='{}flex_pivotGrp'.format(self.name))
-        flexOffsetGrp = cmds.group(em=True, name='{}flex_offsetGrp'.format(self.name))
-        swivelPivotGrp = cmds.group(em=True, name='{}swivel_pivotGrp'.format(self.name))
-        toeTipPivotGrp = cmds.group(em=True, name='{}toetip_pivotGrp'.format(self.name))
+        # Shoulder pivot
+        cmds.parentConstraint(self.ctrl_list[0], self.jnt_list[0])
+        cmds.parentConstraint(self.ctrl_list[0], self.jnt_helper_list[0])
 
-        footPos = cmds.xform(self.jntList[3], q=True, ws=True, t=True)
-        toePos = cmds.xform(self.jntList[4], q=True, ws=True, t=True)
+        # Front foot pivot group
+        toe_tap_pivot_grp = cmds.group(em=True, name='{}toetap_pivot_grp'.format(self.name))
+        flex_pivot_grp = cmds.group(em=True, name='{}flex_pivot_grp'.format(self.name))
+        flex_offset_grp = cmds.group(em=True, name='{}flex_offset_grp'.format(self.name))
+        swivel_pivot_grp = cmds.group(em=True, name='{}swivel_pivot_grp'.format(self.name))
+        toe_tip_pivot_grp = cmds.group(em=True, name='{}toetip_pivot_grp'.format(self.name))
 
-        cmds.move(footPos[0], footPos[1], footPos[2], flexOffsetGrp)
-        cmds.move(footPos[0], footPos[1], footPos[2], flexPivotGrp)
-        cmds.move(footPos[0], footPos[1], footPos[2], toeTapPivotGrp)
-        cmds.move(footPos[0], footPos[1], footPos[2], swivelPivotGrp)
-        cmds.move(toePos[0], toePos[1], toePos[2], toeTipPivotGrp)
+        foot_pos = cmds.xform(self.jnt_list[3], q=True, ws=True, t=True)
+        toe_pos = cmds.xform(self.jnt_list[4], q=True, ws=True, t=True)
 
-        outliner.batch_parent([self.legIKName, self.footIKName], flexPivotGrp)
-        cmds.parent(flexPivotGrp, flexOffsetGrp)
-        cmds.parentConstraint(self.jntHelperList[3], flexOffsetGrp, mo=True)
-        outliner.batch_parent([self.toeIKName, self.helperIKName], toeTapPivotGrp)
-        outliner.batch_parent([toeTapPivotGrp, flexOffsetGrp], toeTipPivotGrp)
-        cmds.parent(toeTipPivotGrp, swivelPivotGrp)
-        cmds.parent(swivelPivotGrp, self.ctrlList[3])
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], flex_offset_grp)
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], flex_pivot_grp)
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], toe_tap_pivot_grp)
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], swivel_pivot_grp)
+        cmds.move(toe_pos[0], toe_pos[1], toe_pos[2], toe_tip_pivot_grp)
 
-        cmds.connectAttr(self.ctrlList[3]+'.Flex', flexPivotGrp+'.rotateX')
-        cmds.connectAttr(self.ctrlList[3]+'.Swivel', swivelPivotGrp+'.rotateY')
-        cmds.connectAttr(self.ctrlList[3]+'.Toe_Tap', toeTapPivotGrp+'.rotateX')
-        cmds.connectAttr(self.ctrlList[3]+'.Toe_Tip', toeTipPivotGrp+'.rotateX')
+        outliner.batch_parent([self.leg_ik_name, self.foot_ik_name], flex_pivot_grp)
+        cmds.parent(flex_pivot_grp, flex_offset_grp)
+        cmds.parentConstraint(self.jnt_helper_list[3], flex_offset_grp, mo=True)
+        outliner.batch_parent([self.toe_ik_name, self.helper_ik_name], toe_tap_pivot_grp)
+        outliner.batch_parent([toe_tap_pivot_grp, flex_offset_grp], toe_tip_pivot_grp)
+        cmds.parent(toe_tip_pivot_grp, swivel_pivot_grp)
+        cmds.parent(swivel_pivot_grp, self.ctrl_list[3])
 
-        # pole vector constraint
-        cmds.poleVectorConstraint(self.ctrlList[2], self.legIKName)
-        cmds.poleVectorConstraint(self.ctrlList[2], self.helperIKName)
-        cmds.parent(self.ctrlOffsetList[2], swivelPivotGrp)
+        cmds.connectAttr(self.ctrl_list[3]+'.Flex', flex_pivot_grp+'.rotateX')
+        cmds.connectAttr(self.ctrl_list[3]+'.Swivel', swivel_pivot_grp+'.rotateY')
+        cmds.connectAttr(self.ctrl_list[3]+'.Toe_Tap', toe_tap_pivot_grp+'.rotateX')
+        cmds.connectAttr(self.ctrl_list[3]+'.Toe_Tip', toe_tip_pivot_grp+'.rotateX')
 
-        # scalable
-        self.addMeasurement()
+        # Pole vector constraint
+        cmds.poleVectorConstraint(self.ctrl_list[2], self.leg_ik_name)
+        cmds.poleVectorConstraint(self.ctrl_list[2], self.helper_ik_name)
+        cmds.parent(self.ctrl_offset_list[2], swivel_pivot_grp)
+
+        # Scalable rig setup
+        self.add_measurement()

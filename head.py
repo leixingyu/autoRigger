@@ -7,14 +7,14 @@ class Head(base.Base):
         self.metaType = 'Face'
 
         self.constructNameSpace(self.metaType)
-        self.setLocAttr()
+        self.set_locator_attr()
         
-    def setLocAttr(self, startPos=[0, 0, 0], distance=0.1, scale=0.1):
+    def set_locator_attr(self, startPos=[0, 0, 0], distance=0.1, scale=0.1):
         self.startPos = startPos
         self.distance = distance
         self.scale = scale
     
-    def buildGuide(self):
+    def build_guide(self):
         self.eyeLocators()
         #self.lipLocators()
         #self.addLocators()
@@ -135,7 +135,7 @@ class Head(base.Base):
         crvGrp = cmds.group(em=True, name='FaceCV_Grp')
         cmds.parent(crvs, crvGrp)
     
-    def constructJnt(self):
+    def construct_joint(self):
         jointGrp = cmds.group(em=True, name='Joint_Grp')
         allLocs = cmds.ls('Loc_Face_*', transforms=True)
         for loc in allLocs:
@@ -170,7 +170,7 @@ class Head(base.Base):
         cmds.parent('Jnt_Face_JawEnd', 'Jnt_Face_Center')
         cmds.parent('Jnt_Face_Head', 'Jnt_Face_Center')
     
-    def placeCtrl(self):
+    def place_controller(self):
         ctrlGrp = cmds.group(em=True, name='FaceCtrl_Grp')
         for side in ['L', 'R']:
             allJnts = cmds.ls('Jnt_Face_%s*' % side)
@@ -207,7 +207,7 @@ class Head(base.Base):
         cmds.move(jawEndPos[0], jawEndPos[1], jawEndPos[2], jawCtrl + '.scalePivot')
         cmds.parent(jawCtrl, ctrlGrp)
     
-    def addConstraint(self):
+    def add_constraint(self):
         self.connectNode()
 
         filteredCtrl = []
@@ -232,7 +232,7 @@ class Head(base.Base):
             jnt = cmds.ls('Jnt_Face' + name)
             cmds.pointConstraint(ctrl, jnt)
 
-        self.lockCtrl()
+        self.lock_controller()
 
     def connectNode(self):
         allctrls = cmds.ls("Ctrl_Face*", transforms=True)
@@ -316,7 +316,7 @@ class Head(base.Base):
                 for ctrl in controllers:
                     cmds.setAttr(ctrl+'.overrideColor', 13)
 
-    def lockCtrl(self):
+    def lock_controller(self):
         allCtrls = cmds.ls('Ctrl_Face_*', transforms=True)
         for ctrl in allCtrls:
             cmds.setAttr(ctrl+'.visibility', k=0, l=1)
@@ -335,7 +335,7 @@ class Head(base.Base):
                 for axis in 'xyz':
                     cmds.setAttr(ctrl+'.r'+axis, k=0, l=1)
     
-    def deleteGuide(self):
+    def delete_guide(self):
         cmds.delete('FaceCV_Grp', 'FaceLoc_Grp')
 
     '''Utility methods'''

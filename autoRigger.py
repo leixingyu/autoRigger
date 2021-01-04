@@ -1,165 +1,220 @@
+#!/usr/bin/env python
+""" AutoRigger provides procedural approach for maya rigging """
+
 from utility.Qt import QtCore, QtGui, QtWidgets
 from utility.Qt import _loadUi
-import maya.OpenMayaUI
+from utility import other
 import os
 import warnings
-from shiboken2 import wrapInstance
-import base, finger, foot, spine, limb, hand, arm, leg, biped, tail, quadSpine, quadruped
+import base
+import finger
+import foot
+import spine
+import limb
+import hand
+import arm
+import leg
+import biped
+import tail
+import quadruped
 
-PATH = os.path.dirname(os.path.abspath(__file__))+r'\ui'
-COMPONENTS = [
-    'base',     #  0
-    'finger',   #  1
-    'hand',     #  2
-    'limb',     #  3
-    'arm',      #  4
-    'foot',     #  5
-    'leg',      #  6
-    'head',     #  7
-    'spine',    #  8
-    'biped',    #  9
-    'legfront', #  10
-    'legback',  #  11
-    'spinequad',#  12
-    'tail',     #  13
-    'quad',     #  14
+__author__ = "Xingyu Lei"
+__maintainer__ = "Xingyu Lei"
+__email__ = "wzaxzt@gmail.com"
+__status__ = "development"
+
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+RIG_COMPONENTS = [
+    'base',       # 0
+    'finger',     # 1
+    'hand',       # 2
+    'limb',       # 3
+    'arm',        # 4
+    'foot',       # 5
+    'leg',        # 6
+    'head',       # 7
+    'spine',      # 8
+    'biped',      # 9
+    'legfront',   # 10
+    'legback',    # 11
+    'spinequad',  # 12
+    'tail',       # 13
+    'quad',       # 14
 ]
 
-def getMayaMainWindow():
-    main_window_ptr = maya.OpenMayaUI.MQtUtil.mainWindow()
-    return wrapInstance(long(main_window_ptr), QtWidgets.QMainWindow)
 
 class AutoRigger(QtWidgets.QDialog):
-    def __init__(self, parent=getMayaMainWindow()):
+    """ This module is the class for the main dialog window """
+
+    def __init__(self, parent=other.get_maya_main_window()):
+        """ Initialize AutoRigger class with parent window
+
+        :param parent: window instance
+        """
+
         super(AutoRigger, self).__init__(parent)
-        _loadUi('new.ui', self)
+        _loadUi(CURRENT_PATH + r'\ui\autoRigger.ui', self)
 
         self.setWindowFlags(QtCore.Qt.Window)
 
-        #--- Connect signals and slots ---#
-        self.ui_tabWidget.currentChanged.connect(lambda:self.refreshList())
-        self.ui_listWidget.itemClicked.connect(self.itemClicked)
-        self.ui_guideBtn.clicked.connect(self.createGuide)
-        self.ui_buildBtn.clicked.connect(self.createModule)
+        # Reset list icon and item
+        self.ui_icon_list = []
+        self.ui_item_list = []
 
-        self.generateIcon()
-        self.generateItem()
+        # Connect signals and slots
+        self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_list())
+        self.ui_listWidget.itemClicked.connect(lambda: self.element_clicked())
+        self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
+        self.ui_buildBtn.clicked.connect(lambda: self.create_module())
+
+        self.generate_icon()
+        self.generate_item()
 
         self.toBuild = []
 
         # position could be numeric value
-        intOnly = QtGui.QIntValidator()
-        self.ui_worldX.setValidator(intOnly)
-        self.ui_worldY.setValidator(intOnly)
-        self.ui_worldZ.setValidator(intOnly)
+        int_only = QtGui.QIntValidator()
+        self.ui_worldX.setValidator(int_only)
+        self.ui_worldY.setValidator(int_only)
+        self.ui_worldZ.setValidator(int_only)
 
-        #--- Reset tab position and populate list ---#
+        # Reset tab position and populate list
         self.ui_tabWidget.setCurrentIndex(0)
-        self.refreshList()
+        self.refresh_list()
 
-    def generateIcon(self):
-        self.ui_iconList = []
-        for component in COMPONENTS:
-            self.ui_iconList.append(QtGui.QIcon())
+    def generate_icon(self):
+        for _ in RIG_COMPONENTS:
+            self.ui_icon_list.append(QtGui.QIcon())
 
-        for index, icon in enumerate(self.ui_iconList):
-            icon.addFile(os.path.join(PATH, COMPONENTS[index]+'.png'))
+        for index, icon in enumerate(self.ui_icon_list):
+            icon.addFile(os.path.join(CURRENT_PATH + r'\ui', RIG_COMPONENTS[index] + '.png'))
 
-    def generateItem(self):
-        self.ui_itemList = []
-        for component in COMPONENTS:
-            self.ui_itemList.append(QtWidgets.QListWidgetItem())
+    def generate_item(self):
+        for _ in RIG_COMPONENTS:
+            self.ui_item_list.append(QtWidgets.QListWidgetItem())
 
-        for index, item in enumerate(self.ui_itemList):
-            item.setText(COMPONENTS[index])
-            item.setIcon(self.ui_iconList[index])
+        for index, item in enumerate(self.ui_item_list):
+            item.setText(RIG_COMPONENTS[index])
+            item.setIcon(self.ui_icon_list[index])
 
-    def refreshList(self):
-        self.clearList(self.ui_listWidget)
+    def refresh_list(self):
+        self.clear_list(self.ui_listWidget)
         index = self.ui_tabWidget.currentIndex()
-        ### Biped ###
-        if index == 0:   list = map(self.ui_itemList.__getitem__, [9, 4, 6, 7, 8])
-        ### Quadruped ###
-        elif index == 1: list = map(self.ui_itemList.__getitem__, [14, 10, 11, 12, 13])
-        ### Bird ###
-        elif index == 2: list = []
-        ### Custom ###
-        elif index == 3: list = map(self.ui_itemList.__getitem__, [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13])
+
+        # Biped
+        if index == 0:
+            items = map(self.ui_item_list.__getitem__, [9, 4, 6, 7, 8])
+
+        # Quadruped
+        elif index == 1:
+            items = map(self.ui_item_list.__getitem__, [14, 10, 11, 12, 13])
+
+        # Bird
+        elif index == 2:
+            items = []
+
+        # Custom
+        elif index == 3:
+            items = map(self.ui_item_list.__getitem__,
+                        [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13])
+
         else:
             print "list not created"
             return
 
-        for item in list: self.ui_listWidget.addItem(item)
+        for item in items:
+            self.ui_listWidget.addItem(item)
 
-    def itemClicked(self):
-        self.clearField()
-        itemName = self.ui_listWidget.currentItem().text()
-        #--- Also set field lock ---#
+    def element_clicked(self):
+        self.clear_field()
+        item_name = self.ui_listWidget.currentItem().text()
+        print item_name
 
-        print itemName
+        # TODO: change field based on item clicked
 
-    def createGuide(self):
-        #--- Fetch all field info ---#
-        if not self.ui_nameEdit.text(): id = 'null'
-        else: id = self.ui_nameEdit.text()
+    def create_guide(self):
+        # Fetch all field info
 
+        # Base name
+        if not self.ui_nameEdit.text(): 
+            base_name = 'null'
+        else: 
+            base_name = self.ui_nameEdit.text()
+
+        # Side
         side = ['L', 'R', 'M'][self.ui_sideCBox.currentIndex()]
 
+        # Start Position
         pos = [0, 0, 0]
-        if self.ui_worldX.text(): pos[0] = int(self.ui_worldX.text())
-        if self.ui_worldY.text(): pos[1] = int(self.ui_worldY.text())
-        if self.ui_worldZ.text(): pos[2] = int(self.ui_worldZ.text())
+        if self.ui_worldX.text():
+            pos[0] = int(self.ui_worldX.text())
+        if self.ui_worldY.text():
+            pos[1] = int(self.ui_worldY.text())
+        if self.ui_worldZ.text():
+            pos[2] = int(self.ui_worldZ.text())
 
-        #--- Identify the item type and build it ---#
-        itemName = self.ui_listWidget.currentItem().text()
-        ### Biped ###
-        if itemName == 'finger':        obj = finger.Finger(side, id)
-        elif itemName == 'hand':        obj = hand.Hand(side, id, 5)
-        elif itemName == 'limb':        obj = limb.Limb(side, id)
-        elif itemName == 'arm':         obj = arm.Arm(side, id)
-        elif itemName == 'foot':        obj = foot.Foot(side, id)
-        elif itemName == 'leg':         obj = leg.Leg(side, id)
-        elif itemName == 'spine':       obj = spine.Spine(side, id)
-        elif itemName == 'biped':       obj = biped.Biped(side, id)
+        # Identify the item type and build it
+        item_name = self.ui_listWidget.currentItem().text()
 
-        ### Quadruped ###
-        elif itemName == 'legfront':   obj = leg.LegFront(side, id)
-        elif itemName == 'legback':    obj = leg.LegBack(side, id)
-        elif itemName == 'tail':       obj = tail.Tail(side, id)
-        elif itemName == 'spinequad':  obj = spine.SpineQuad(side, id)
-        elif itemName == 'quad' :      obj = quadruped.Quadruped(side, id)
+        # Biped
+        if item_name == 'finger':
+            obj = finger.Finger(side, base_name)
+        elif item_name == 'hand':
+            obj = hand.Hand(side, base_name, 5)
+        elif item_name == 'limb':
+            obj = limb.Limb(side, base_name)
+        elif item_name == 'arm':
+            obj = arm.Arm(side, base_name)
+        elif item_name == 'foot':
+            obj = foot.Foot(side, base_name)
+        elif item_name == 'leg':
+            obj = leg.Leg(side, base_name)
+        elif item_name == 'spine':
+            obj = spine.Spine(side, base_name)
+        elif item_name == 'biped':
+            obj = biped.Biped(side, base_name)
 
+        # Quadruped
+        elif item_name == 'legfront':
+            obj = leg.LegFront(side, base_name)
+        elif item_name == 'legback':
+            obj = leg.LegBack(side, base_name)
+        elif item_name == 'tail':
+            obj = tail.Tail(side, base_name)
+        elif item_name == 'spinequad':
+            obj = spine.SpineQuad(side, base_name)
+        elif item_name == 'quad':
+            obj = quadruped.Quadruped(side, base_name)
         else:
             warnings.warn("object name not found, use base component instead")
-            obj = base.Base(side, id)
+            obj = base.Base(side, base_name)
 
-        obj.setLocAttr(pos)
-        obj.buildGuide()
+        obj.set_locator_attr(pos)
+        obj.build_guide()
         self.toBuild.append(obj)
-        self.clearField()
-        #print id, side, pos
+        self.clear_field()
 
-    def createModule(self):
+    def create_module(self):
         for item in self.toBuild:
-            item.buildRig()
+            item.build_rig()
         self.toBuild = []
 
-    def clearList(self, widget):
+    def clear_list(self, widget):
         """ This clears all items in the list but not deleting them """
+
         while widget.takeItem(0):
             widget.takeItem(0)
-        self.clearField()
+        self.clear_field()
 
-    def clearField(self):
+    def clear_field(self):
         self.ui_nameEdit.setText('')
         self.ui_sideCBox.setCurrentIndex(0)
         self.ui_worldX.setText('')
         self.ui_worldY.setText('')
         self.ui_worldZ.setText('')
 
+
 def show():
-    os.chdir(PATH)
-    #currentDir = os.getcwd()
     window = AutoRigger()
     window.show()
     return window
