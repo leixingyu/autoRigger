@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """ AutoRigger provides procedural approach for maya rigging """
 
+from enum import Enum, IntEnum, unique
+import os
+import warnings
 from utility.Qt import QtCore, QtGui, QtWidgets
 from utility.Qt import _loadUi
 from utility import other
-import os
-import warnings
 import base
 import finger
 import foot
@@ -24,27 +25,37 @@ __email__ = "wzaxzt@gmail.com"
 __status__ = "development"
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-RIG_COMPONENTS = [
-    'base',       # 0
-    'finger',     # 1
-    'hand',       # 2
-    'limb',       # 3
-    'arm',        # 4
-    'foot',       # 5
-    'leg',        # 6
-    'head',       # 7
-    'spine',      # 8
-    'biped',      # 9
-    'legfront',   # 10
-    'legback',    # 11
-    'spinequad',  # 12
-    'tail',       # 13
-    'quad',       # 14
-]
+
+
+@unique
+class RigComponents(Enum):
+    BASE = 'base'
+    FINGER = 'finger'
+    HAND = 'hand'
+    LIMB = 'limb'
+    ARM = 'arm'
+    FOOT = 'foot'
+    LEG = 'leg'
+    HEAD = 'head'
+    SPINE = 'spine'
+    BIPED = 'biped'
+    LEG_FRONT = 'legfront'
+    LEG_BACK = 'legback'
+    SPINE_QUAD = 'spinequad'
+    TAIL = 'tail'
+    QUAD = 'quad'
+
+
+@unique
+class RigType(IntEnum):
+    BIPED = 0
+    QUADRUPED = 1
+    BIRD = 2
+    CUSTOM = 3
 
 
 class AutoRigger(QtWidgets.QDialog):
-    """ This module is the class for the main dialog window """
+    """ This module is the class for the main dialog """
 
     def __init__(self, parent=other.get_maya_main_window()):
         """ Initialize AutoRigger class with parent window
@@ -58,19 +69,19 @@ class AutoRigger(QtWidgets.QDialog):
         self.setWindowFlags(QtCore.Qt.Window)
 
         # Reset list icon and item
-        self.ui_icon_list = []
-        self.ui_item_list = []
+        self.items = []
+        self.to_build = []
 
         # Connect signals and slots
-        self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_list())
-        self.ui_listWidget.itemClicked.connect(lambda: self.element_clicked())
+        self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_items())
+        self.ui_listWidget.itemClicked.connect(lambda: self.initialize_field())
         self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
-        self.ui_buildBtn.clicked.connect(lambda: self.create_module())
+        self.ui_buildBtn.clicked.connect(lambda: self.create_rig())
 
-        self.generate_icon()
-        self.generate_item()
-
-        self.toBuild = []
+        # Reset tab position and populate list
+        self.connect_items()
+        self.ui_tabWidget.setCurrentIndex(0)
+        self.refresh_items()
 
         # position could be numeric value
         int_only = QtGui.QIntValidator()
@@ -78,135 +89,129 @@ class AutoRigger(QtWidgets.QDialog):
         self.ui_worldY.setValidator(int_only)
         self.ui_worldZ.setValidator(int_only)
 
-        # Reset tab position and populate list
-        self.ui_tabWidget.setCurrentIndex(0)
-        self.refresh_list()
+    def connect_items(self):
+        """ Connect Rig component items with icon and text """
+        
+        for component in RigComponents:
+            icon = QtGui.QIcon()
+            icon.addFile(os.path.join(CURRENT_PATH + r'\ui', component.value + '.png'))
 
-    def generate_icon(self):
-        for _ in RIG_COMPONENTS:
-            self.ui_icon_list.append(QtGui.QIcon())
+            item = QtWidgets.QListWidgetItem()
+            item.setText(component.value)
+            item.setIcon(icon)
+            self.items.append(item)
 
-        for index, icon in enumerate(self.ui_icon_list):
-            icon.addFile(os.path.join(CURRENT_PATH + r'\ui', RIG_COMPONENTS[index] + '.png'))
-
-    def generate_item(self):
-        for _ in RIG_COMPONENTS:
-            self.ui_item_list.append(QtWidgets.QListWidgetItem())
-
-        for index, item in enumerate(self.ui_item_list):
-            item.setText(RIG_COMPONENTS[index])
-            item.setIcon(self.ui_icon_list[index])
-
-    def refresh_list(self):
-        self.clear_list(self.ui_listWidget)
-        index = self.ui_tabWidget.currentIndex()
+    def refresh_items(self):
+        """ Clear and Re-generate Rig component items in the list widget """
+        
+        self.clear_items(self.ui_listWidget)
+        components = []
+        tab_index = self.ui_tabWidget.currentIndex()
 
         # Biped
-        if index == 0:
-            items = map(self.ui_item_list.__getitem__, [9, 4, 6, 7, 8])
+        if tab_index == RigType.BIPED:
+            components = [RigComponents.BIPED, RigComponents.HEAD,
+                          RigComponents.ARM, RigComponents.SPINE,
+                          RigComponents.LEG]
 
         # Quadruped
-        elif index == 1:
-            items = map(self.ui_item_list.__getitem__, [14, 10, 11, 12, 13])
+        elif tab_index == RigType.QUADRUPED:
+            components = [RigComponents.QUAD, RigComponents.LEG_BACK,
+                          RigComponents.LEG_FRONT, RigComponents.SPINE_QUAD,
+                          RigComponents.TAIL]
 
         # Bird
-        elif index == 2:
-            items = []
+        elif tab_index == RigType.BIRD:
+            pass
 
         # Custom
-        elif index == 3:
-            items = map(self.ui_item_list.__getitem__,
-                        [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13])
+        elif tab_index == RigType.CUSTOM:
+            components = RigComponents
 
-        else:
-            print "list not created"
-            return
-
+        tab_items = [tab_item.value for tab_item in components]
+        items = [item for item in self.items if item.text() in tab_items]
         for item in items:
             self.ui_listWidget.addItem(item)
 
-    def element_clicked(self):
-        self.clear_field()
+    def initialize_field(self):
+        """ Change the field format after clicking item """
+        
+        self.reset_field()
         item_name = self.ui_listWidget.currentItem().text()
         print item_name
 
         # TODO: change field based on item clicked
 
     def create_guide(self):
-        # Fetch all field info
-
+        """ Fetch all field info and build the rig guide """
+        
         # Base name
-        if not self.ui_nameEdit.text(): 
-            base_name = 'null'
-        else: 
-            base_name = self.ui_nameEdit.text()
+        base_name = self.ui_nameEdit.text() if self.ui_nameEdit.text() else 'null'
 
         # Side
         side = ['L', 'R', 'M'][self.ui_sideCBox.currentIndex()]
 
         # Start Position
-        pos = [0, 0, 0]
-        if self.ui_worldX.text():
-            pos[0] = int(self.ui_worldX.text())
-        if self.ui_worldY.text():
-            pos[1] = int(self.ui_worldY.text())
-        if self.ui_worldZ.text():
-            pos[2] = int(self.ui_worldZ.text())
+        pos_x = int(self.ui_worldX.text()) if self.ui_worldX.text() else 0
+        pos_y = int(self.ui_worldY.text()) if self.ui_worldZ.text() else 0
+        pos_z = int(self.ui_worldY.text()) if self.ui_worldZ.text() else 0
 
         # Identify the item type and build it
-        item_name = self.ui_listWidget.currentItem().text()
-
-        # Biped
-        if item_name == 'finger':
+        item = self.ui_listWidget.currentItem().text()
+        if item == RigComponents.FINGER.value:
             obj = finger.Finger(side, base_name)
-        elif item_name == 'hand':
+        elif item == RigComponents.HAND.value:
             obj = hand.Hand(side, base_name, 5)
-        elif item_name == 'limb':
+        elif item == RigComponents.LIMB.value:
             obj = limb.Limb(side, base_name)
-        elif item_name == 'arm':
+        elif item == RigComponents.ARM.value:
             obj = arm.Arm(side, base_name)
-        elif item_name == 'foot':
+        elif item == RigComponents.FOOT.value:
             obj = foot.Foot(side, base_name)
-        elif item_name == 'leg':
+        elif item == RigComponents.LEG.value:
             obj = leg.Leg(side, base_name)
-        elif item_name == 'spine':
+        elif item == RigComponents.SPINE.value:
             obj = spine.Spine(side, base_name)
-        elif item_name == 'biped':
+        elif item == RigComponents.BIPED.value:
             obj = biped.Biped(side, base_name)
-
-        # Quadruped
-        elif item_name == 'legfront':
+        elif item == RigComponents.LEG_FRONT.value:
             obj = leg.LegFront(side, base_name)
-        elif item_name == 'legback':
+        elif item == RigComponents.LEG_BACK.value:
             obj = leg.LegBack(side, base_name)
-        elif item_name == 'tail':
+        elif item == RigComponents.TAIL.value:
             obj = tail.Tail(side, base_name)
-        elif item_name == 'spinequad':
+        elif item == RigComponents.SPINE_QUAD.value:
             obj = spine.SpineQuad(side, base_name)
-        elif item_name == 'quad':
+        elif item == RigComponents.QUAD.value:
             obj = quadruped.Quadruped(side, base_name)
         else:
-            warnings.warn("object name not found, use base component instead")
+            warnings.warn("object name not found, using base component instead")
             obj = base.Base(side, base_name)
-
-        obj.set_locator_attr(pos)
+        obj.set_locator_attr([pos_x, pos_y, pos_z])
         obj.build_guide()
-        self.toBuild.append(obj)
-        self.clear_field()
+        self.to_build.append(obj)
+        self.reset_field()
 
-    def create_module(self):
-        for item in self.toBuild:
+    def create_rig(self):
+        """ Build the Rig based on the to_build list and guide """
+        
+        for item in self.to_build:
             item.build_rig()
-        self.toBuild = []
+        self.to_build = []
 
-    def clear_list(self, widget):
-        """ This clears all items in the list but not deleting them """
+    def clear_items(self, widget):
+        """ This clears all items in the list widget without deleting them 
+        
+        :param widget: QListWidget
+        """
 
         while widget.takeItem(0):
             widget.takeItem(0)
-        self.clear_field()
+        self.reset_field()
 
-    def clear_field(self):
+    def reset_field(self):
+        """ Reset all field to default value """
+        
         self.ui_nameEdit.setText('')
         self.ui_sideCBox.setCurrentIndex(0)
         self.ui_worldX.setText('')
