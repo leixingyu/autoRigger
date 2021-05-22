@@ -110,12 +110,12 @@ class Biped(base.Base):
 
         # Connect
         # Leg driven by root spine control #
-        cmds.parentConstraint(self.spine.global_ctrl, self.left_leg.limb.switch_ctrl, mo=True)
-        cmds.parentConstraint(self.spine.global_ctrl, self.right_leg.limb.switch_ctrl, mo=True)
+        cmds.parent(self.left_leg.limb.switch_offset_grp, self.spine.global_ctrl)
+        cmds.parent(self.right_leg.limb.switch_offset_grp, self.spine.global_ctrl)
 
         # Arm driven by top spine control #
-        cmds.parentConstraint(self.spine.ctrl_list[-1], self.left_arm.limb.switch_ctrl, mo=True)
-        cmds.parentConstraint(self.spine.ctrl_list[-1], self.right_arm.limb.switch_ctrl, mo=True)
+        cmds.parent(self.left_arm.limb.switch_offset_grp, self.spine.ctrl_list[-1])
+        cmds.parent(self.right_arm.limb.switch_offset_grp, self.spine.ctrl_list[-1])
 
         # Neck to Head chain #
         cmds.parent(self.tip.ctrl_offset_grp, self.head.ctrl_offset_grp)

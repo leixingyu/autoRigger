@@ -53,6 +53,7 @@ class Limb(base.Base):
         self.ik_ctrl_name =   '{}_ik_ctrl'.format(self.name)
         self.ik_pole_name =   '{}_ikpole_ctrl'.format(self.name)
         self.ik_offset_name = '{}_ik_offset'.format(self.name)
+        self.ik_pole_offset_name = '{}_ikpole_offset'.format(self.name)
 
     def set_locator_attr(self, start_pos=[0, 0, 0], interval=2, scale=0.4):
         self.start_pos = start_pos
@@ -143,9 +144,10 @@ class Limb(base.Base):
         root_rot, mid_rot, top_rot = [cmds.xform(self.jnt_list[i], q=True, ro=True, ws=True) for i in range(len(self.limb_components))]
 
         # FK Setup
+
+        # Root
         root_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrl_list[0])[0]
         cmds.move(root_pos[0], root_pos[1], root_pos[2], root_fk_ctrl, absolute=True)
-        # if self.direction == 'Vertical': cmds.rotate(0, 0, 90, root_fk_ctrl)
             
         root_offset = cmds.group(em=True, name=self.fk_offset_list[0])
         cmds.move(root_pos[0], root_pos[1], root_pos[2], root_offset)
@@ -153,9 +155,9 @@ class Limb(base.Base):
         cmds.rotate(root_rot[0], root_rot[1], root_rot[2], root_offset)
         cmds.makeIdentity(root_fk_ctrl, apply=True, t=1, r=1, s=1)
 
+        # Mid
         mid_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrl_list[1])[0]
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_fk_ctrl, absolute=True)
-        # if self.direction == 'Vertical': cmds.rotate(0, 0, 90, mid_fk_ctrl)
             
         mid_offset = cmds.group(em=True, name=self.fk_offset_list[1])
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_offset)
@@ -163,9 +165,9 @@ class Limb(base.Base):
         cmds.rotate(mid_rot[0], mid_rot[1], mid_rot[2], mid_offset)
         cmds.makeIdentity(mid_fk_ctrl, apply=True, t=1, r=1, s=1)
 
+        # Top
         top_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrl_list[2])[0]
         cmds.move(top_pos[0], top_pos[1], top_pos[2], top_fk_ctrl, absolute=True)
-        # if self.direction == 'Vertical': cmds.rotate(0, 0, 90, top_fk_ctrl)
 
         top_offset = cmds.group(em=True, name=self.fk_offset_list[2])
         cmds.move(top_pos[0], top_pos[1], top_pos[2], top_offset)
@@ -177,9 +179,10 @@ class Limb(base.Base):
         cmds.parent(mid_offset, root_fk_ctrl)
 
         # IK Setup
+
+        # Root
         ik_ctrl = cmds.duplicate('LimbIK_tempShape', name=self.ik_ctrl_name)[0]
         cmds.move(top_pos[0], top_pos[1], top_pos[2], ik_ctrl, absolute=True)
-        # if self.direction == 'Vertical': cmds.rotate(0, 0, 90, ik_ctrl)
 
         offset_grp = cmds.group(em=True, name=self.ik_offset_name)
         cmds.move(top_pos[0], top_pos[1], top_pos[2], offset_grp)
@@ -187,32 +190,34 @@ class Limb(base.Base):
         cmds.rotate(top_rot[0], top_rot[1], top_rot[2], offset_grp)
         cmds.makeIdentity(ik_ctrl, apply=True, t=1, r=1, s=1)
 
+        # Pole
         pole_ctrl = cmds.duplicate('LimbIKPole_tempShape', name=self.ik_pole_name)
         if self.direction == 'Vertical':
             cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]+3, pole_ctrl, absolute=True)
         elif self.direction == 'Horizontal':
             cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]-3, pole_ctrl, absolute=True)
             cmds.rotate(0, 180, 0, pole_ctrl, relative=True)
+
+        offset_grp = cmds.group(em=True, name=self.ik_pole_offset_name)
+        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], offset_grp)
+        cmds.parent(pole_ctrl, offset_grp)
         cmds.makeIdentity(pole_ctrl, apply=True, t=1, r=1, s=1)
 
         # IK/FK Switch Setup
         self.switch_ctrl = cmds.duplicate('Switch_tempShape', name='{}_switch_ctrl'.format(self.name))[0]
-        # if self.direction == 'Vertical':
-        #     cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_ctrl, absolute=True)
-        # elif self.direction == 'Horizontal':
         cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_ctrl, absolute=True)
         cmds.rotate(0, 0, 90, self.switch_ctrl, relative=True)
         cmds.addAttr(self.switch_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=True)
 
-        offset_grp = cmds.group(em=True, name='{}_switch_offset'.format(self.name))
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], offset_grp)
-        cmds.parent(self.switch_ctrl, offset_grp)
-        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], offset_grp)
+        self.switch_offset_grp = cmds.group(em=True, name='{}_switch_offset'.format(self.name))
+        cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_offset_grp)
+        cmds.parent(self.switch_ctrl, self.switch_offset_grp)
+        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], self.switch_offset_grp)
         cmds.makeIdentity(self.switch_ctrl, apply=True, t=1, r=1, s=1)
 
         # Cleanup
         self.delete_shape()
-        cmds.parent(offset_grp, self.ctrl_grp)
+        cmds.parent(self.switch_offset_grp, self.ctrl_grp)
 
     def add_constraint(self):
         # Result Joint + IK/FK Switch
@@ -266,13 +271,12 @@ class Limb(base.Base):
         cmds.pointConstraint(self.ik_ctrl_name, ik_handle, mo=True)
         cmds.orientConstraint(self.ik_ctrl_name, self.ik_jnt_list[-1], mo=True)
         cmds.poleVectorConstraint(self.ik_pole_name, ik_handle)
-        cmds.aimConstraint(middle_ik_jnt, self.ik_pole_name, mo=True)
         cmds.setAttr(ik_handle+'.visibility', 0)
 
         # Cleanup
         cmds.pointConstraint(self.switch_ctrl, self.ik_jnt_list[0], mo=True)
         cmds.pointConstraint(self.switch_ctrl, self.fk_jnt_list[0], mo=True)
-        outliner.batch_parent([self.ik_offset_name, self.ik_pole_name, self.fk_offset_list[0], ik_handle], self.switch_ctrl)
+        outliner.batch_parent([self.ik_offset_name, self.ik_pole_offset_name, self.fk_offset_list[0], ik_handle], self.switch_ctrl)
 
     def lock_controller(self):
         fk_mid_ctrl = cmds.ls(self.fk_ctrl_list[1], transforms=True)[0]

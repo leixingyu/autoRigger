@@ -6,7 +6,7 @@ import os
 import warnings
 from utility.Qt import QtCore, QtGui, QtWidgets
 from utility.Qt import _loadUi
-from utility import other
+from utility import setup
 import base
 import finger
 import foot
@@ -57,7 +57,7 @@ class RigType(IntEnum):
 class AutoRigger(QtWidgets.QDialog):
     """ This module is the class for the main dialog """
 
-    def __init__(self, parent=other.get_maya_main_window()):
+    def __init__(self, parent=setup.get_maya_main_window()):
         """ Initialize AutoRigger class with parent window
 
         :param parent: window instance
