@@ -47,7 +47,7 @@ class Base(object):
 
         for grp in [self.loc_grp, self.ctrl_grp, self.jnt_grp, self.mesh_grp]:
             if not cmds.ls(grp):
-                cmds.group(em=True, name=grp)
+                cmds.group(em=1, name=grp)
 
     @staticmethod
     def set_controller_shape():
@@ -69,9 +69,9 @@ class Base(object):
         """ Create the rig guides for placement purpose """
 
         self.loc = cmds.spaceLocator(n=self.loc_name)
-        grp = cmds.group(em=True, name=self.loc_grp_name)
+        grp = cmds.group(em=1, name=self.loc_grp_name)
 
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], self.loc, relative=True)
+        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], self.loc, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, self.loc)
 
         cmds.parent(self.loc, grp)
@@ -97,8 +97,8 @@ class Base(object):
     def construct_joint(self):
         """ Create the rig joints based on the guide's transform """
 
-        cmds.select(clear=True)
-        locPos = cmds.xform(self.loc_name, q=True, t=True, ws=True)
+        cmds.select(clear=1)
+        locPos = cmds.xform(self.loc_name, q=1, t=1, ws=1)
 
         self.jnt = cmds.joint(p=locPos, name=self.jnt_name)
         cmds.setAttr(self.jnt + '.radius', 1)
@@ -112,16 +112,16 @@ class Base(object):
         place them based on guide's and joint's transform """
 
         self.ctrl = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.ctrl_name)[0]
-        jntPos = cmds.xform(self.jnt, q=True, t=True, ws=True)
-        locRot = cmds.xform(self.loc, q=True, ro=True, ws=True)
+        jntPos = cmds.xform(self.jnt, q=1, t=1, ws=1)
+        locRot = cmds.xform(self.loc, q=1, ro=1, ws=1)
 
         # use offset group to clear out rotation on ctrl
-        self.ctrl_offset_grp = cmds.group(em=True, name=self.ctrl_offset_grp_name)
+        self.ctrl_offset_grp = cmds.group(em=1, name=self.ctrl_offset_grp_name)
         cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrl_offset_grp)
         cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrl_offset_grp)
 
         # ctrl has transform relative to offset group, which is 0
-        cmds.parent(self.ctrl, self.ctrl_offset_grp, relative=True)
+        cmds.parent(self.ctrl, self.ctrl_offset_grp, relative=1)
         cmds.parent(self.ctrl_offset_grp, self.ctrl_grp)
 
     def add_constraint(self):

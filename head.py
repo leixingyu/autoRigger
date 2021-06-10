@@ -22,8 +22,8 @@ class Head(base.Base):
     
     def eyeLocators(self):
         if cmds.objExists('L_Eye') and cmds.objExists('R_Eye'):
-            leftPos = cmds.xform('L_Eye.rotatePivot', q=True, t=True, ws=True)
-            rightPos = cmds.xform('R_Eye.rotatePivot', q=True, t=True, ws=True)
+            leftPos = cmds.xform('L_Eye.rotatePivot', q=1, t=1, ws=1)
+            rightPos = cmds.xform('R_Eye.rotatePivot', q=1, t=1, ws=1)
             self.startPos = [(leftPos[0]+rightPos[0])/2,
                              (leftPos[1]+rightPos[1])/2,
                              (leftPos[2]+rightPos[2])/2]
@@ -71,7 +71,7 @@ class Head(base.Base):
             sideMult = 1
             scaleFac = self.scale
     
-            jawLoc = cmds.xform("Loc_Face_Jaw", q=True, t=True, ws=True)
+            jawLoc = cmds.xform("Loc_Face_Jaw", q=1, t=1, ws=1)
     
             for side in 'LR':
                 upperLipCurve = [(0, 0.2*scaleFac, 0), (1*scaleFac*sideMult, 0.2*scaleFac, 0), (2*scaleFac*sideMult, 0.2*scaleFac, 0), (3*scaleFac*sideMult, -0.2*scaleFac, 0)]
@@ -106,7 +106,7 @@ class Head(base.Base):
     
         curves = cmds.ls("CV_*")
         for curve in curves:
-            cvs = cmds.ls(curve+'.cv[0:]', fl=True)
+            cvs = cmds.ls(curve+'.cv[0:]', fl=1)
             for i, cv in enumerate(cvs):
                 temp = cv.split('CV_')[1].split('.cv')[0]
     
@@ -115,7 +115,7 @@ class Head(base.Base):
                     pass
                 else:
                     faceLoc = cmds.spaceLocator(name='Loc_Face_%s_%s' % (temp, str(i)))
-                    clusterPos = cmds.xform(faceCluster[1]+'.rotatePivot', q=True, t=True, ws=True)
+                    clusterPos = cmds.xform(faceCluster[1]+'.rotatePivot', q=1, t=1, ws=1)
                     cmds.move(clusterPos[0], clusterPos[1], clusterPos[2], faceLoc)
                     cmds.scale(0.2, 0.2, 0.2, faceLoc)
     
@@ -127,20 +127,20 @@ class Head(base.Base):
                     cmds.parent(faceCluster[1], faceLoc)
     
     def groupLocators(self):
-        locs = cmds.ls('Loc_Face_*', transforms=True)
-        locGrp = cmds.group(em=True, name='FaceLoc_Grp')
+        locs = cmds.ls('Loc_Face_*', transforms=1)
+        locGrp = cmds.group(em=1, name='FaceLoc_Grp')
         cmds.parent(locs, locGrp)
     
-        crvs = cmds.ls('CV_*', transforms=True)
-        crvGrp = cmds.group(em=True, name='FaceCV_Grp')
+        crvs = cmds.ls('CV_*', transforms=1)
+        crvGrp = cmds.group(em=1, name='FaceCV_Grp')
         cmds.parent(crvs, crvGrp)
     
     def construct_joint(self):
-        jointGrp = cmds.group(em=True, name='Joint_Grp')
-        allLocs = cmds.ls('Loc_Face_*', transforms=True)
+        jointGrp = cmds.group(em=1, name='Joint_Grp')
+        allLocs = cmds.ls('Loc_Face_*', transforms=1)
         for loc in allLocs:
-            locPos = cmds.xform(loc, q=True, t=True, ws=True)
-            cmds.select(clear=True)
+            locPos = cmds.xform(loc, q=1, t=1, ws=1)
+            cmds.select(clear=1)
             name = loc.split('Loc_Face_')[1]
             jnt = cmds.joint(p=locPos, name='Jnt_Face_'+name)
             cmds.parent(jnt, jointGrp)
@@ -171,36 +171,36 @@ class Head(base.Base):
         cmds.parent('Jnt_Face_Head', 'Jnt_Face_Center')
     
     def place_controller(self):
-        ctrlGrp = cmds.group(em=True, name='FaceCtrl_Grp')
+        ctrlGrp = cmds.group(em=1, name='FaceCtrl_Grp')
         for side in ['L', 'R']:
             allJnts = cmds.ls('Jnt_Face_%s*' % side)
             for jnt in allJnts:
                 ctrl = cmds.circle(nr=(0, 0, 1), c=(0, 0, 0), radius=0.07, s=6, name='Ctrl_Face_%s' % jnt.split('Jnt_Face_')[1])
-                ctrlOffsetGrp = cmds.group(em=True, n='CtrlOffset_Face_%s' % jnt.split('Jnt_Face_')[1])
-                jntPos = cmds.xform(jnt, q=True, t=True, ws=True)
+                ctrlOffsetGrp = cmds.group(em=1, n='CtrlOffset_Face_%s' % jnt.split('Jnt_Face_')[1])
+                jntPos = cmds.xform(jnt, q=1, t=1, ws=1)
     
                 cmds.move(jntPos[0], jntPos[1], jntPos[2], ctrl)
                 cmds.move(jntPos[0], jntPos[1], jntPos[2], ctrlOffsetGrp)
-                cmds.parent(cmds.ls(ctrl, transforms=True), ctrlOffsetGrp)
+                cmds.parent(cmds.ls(ctrl, transforms=1), ctrlOffsetGrp)
                 cmds.parent(ctrlOffsetGrp, ctrlGrp)
     
             # Advance controller
             # Mouth Corner
-            cornerEndPos = cmds.xform('Jnt_Face_%s_Smile_4' % side, q=True, t=True, ws=True)
-            cornerStartPos = cmds.xform('Jnt_Face_%s_UpperLip_3' % side, q=True, t=True, ws=True)
+            cornerEndPos = cmds.xform('Jnt_Face_%s_Smile_4' % side, q=1, t=1, ws=1)
+            cornerStartPos = cmds.xform('Jnt_Face_%s_UpperLip_3' % side, q=1, t=1, ws=1)
             cornerCtrl = cmds.circle(nr=(0, 0, 1), c=(0, 0, 0), radius=0.1, s=6, n='Ctrl_Face_%s_MouthCorner' % side)
             cmds.move((cornerStartPos[0]+cornerEndPos[0])/2, (cornerStartPos[1]+cornerEndPos[1])/2, (cornerStartPos[2]+cornerEndPos[2])/2, cornerCtrl)
-            cmds.parent(cmds.ls(cornerCtrl, transforms=True), ctrlGrp)
+            cmds.parent(cmds.ls(cornerCtrl, transforms=1), ctrlGrp)
     
             # Cheek Advance
-            cheekPos = cmds.xform('Jnt_Face_%s_Cheek' % side, q=True, t=True, ws=True)
-            smilePos = cmds.xform('Jnt_Face_%s_Smile_1' % side, q=True, t=True, ws=True)
+            cheekPos = cmds.xform('Jnt_Face_%s_Cheek' % side, q=1, t=1, ws=1)
+            smilePos = cmds.xform('Jnt_Face_%s_Smile_1' % side, q=1, t=1, ws=1)
             cheekAdCtrl = cmds.circle(nr=(0, 0, 1), c=(0, 0, 0), radius=0.1, s=6, n='Ctrl_Face_%s_SecondCheek' % side)
             cmds.move((cheekPos[0] + smilePos[0]) / 2, (cheekPos[1] + smilePos[1]) / 2, (cheekPos[2] + smilePos[2]) / 2, cheekAdCtrl)
-            cmds.parent(cmds.ls(cheekAdCtrl, transforms=True), ctrlGrp)
+            cmds.parent(cmds.ls(cheekAdCtrl, transforms=1), ctrlGrp)
     
-        jawPos = cmds.xform('Jnt_Face_Jaw', q=True, t=True, ws=True)
-        jawEndPos = cmds.xform('Jnt_Face_JawEnd', q=True, t=True, ws=True)
+        jawPos = cmds.xform('Jnt_Face_Jaw', q=1, t=1, ws=1)
+        jawEndPos = cmds.xform('Jnt_Face_JawEnd', q=1, t=1, ws=1)
         jawCtrl = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=0.12, s=6, n='Ctrl_Face_Jaw')[0]
         cmds.move(jawPos[0], jawPos[1], jawPos[2], jawCtrl)
         cmds.move(jawEndPos[0], jawEndPos[1], jawEndPos[2], jawCtrl+'.rotatePivot')
@@ -211,12 +211,12 @@ class Head(base.Base):
         self.connectNode()
 
         filteredCtrl = []
-        allCtrls = cmds.ls('Ctrl_Face*', transforms=True)
+        allCtrls = cmds.ls('Ctrl_Face*', transforms=1)
         for ctrl in allCtrls:
             if 'EyeLid' in ctrl or 'Jaw' in ctrl:
                 name = ctrl.split('Ctrl_Face')[1]
                 jnt = cmds.ls('Jnt_Face' + name)
-                cmds.parentConstraint(ctrl, jnt, mo=True)
+                cmds.parentConstraint(ctrl, jnt, mo=1)
             elif 'EyeAim' in ctrl:
                 pass
             elif 'MouthCorner' in ctrl:
@@ -235,24 +235,24 @@ class Head(base.Base):
         self.lock_controller()
 
     def connectNode(self):
-        allctrls = cmds.ls("Ctrl_Face*", transforms=True)
+        allctrls = cmds.ls("Ctrl_Face*", transforms=1)
         for ctrl in allctrls:
-            cmds.makeIdentity(ctrl, apply=True, t=1, s=1, r=1)
-        allctrloffsets = cmds.ls("CtrlOffset_Face*", transforms=True)
+            cmds.makeIdentity(ctrl, apply=1, t=1, s=1, r=1)
+        allctrloffsets = cmds.ls("CtrlOffset_Face*", transforms=1)
 
         for side in 'LR':
-            eyeLidCtrl = cmds.ls('Ctrl_Face_%s_*EyeLid*' % side, transforms=True)
-            eyeCenterPos = cmds.xform('Jnt_Face_%s_EyeCenter' % side, q=True, t=True, ws=True)
+            eyeLidCtrl = cmds.ls('Ctrl_Face_%s_*EyeLid*' % side, transforms=1)
+            eyeCenterPos = cmds.xform('Jnt_Face_%s_EyeCenter' % side, q=1, t=1, ws=1)
             for ctrl in eyeLidCtrl:
                 cmds.move(eyeCenterPos[0], eyeCenterPos[1], eyeCenterPos[2], ctrl+'.scalePivot')
                 cmds.move(eyeCenterPos[0], eyeCenterPos[1], eyeCenterPos[2], ctrl+'.rotatePivot')
 
         for i, ctrl in enumerate(allctrloffsets):
-            cmds.makeIdentity(ctrl, apply=True, t=1, s=1, r=1)
+            cmds.makeIdentity(ctrl, apply=1, t=1, s=1, r=1)
             # Lip part advance control
             if 'Lip' in ctrl:
                 value = ctrl.split('Lip_')[-1]
-                multNode = cmds.shadingNode('multiplyDivide', asUtility=True, n='Node_Face_Influence'+str(i))
+                multNode = cmds.shadingNode('multiplyDivide', asUtility=1, n='Node_Face_Influence'+str(i))
                 for axis in 'XYZ':
                     cmds.setAttr(multNode+'.input2'+axis, 0.2 * int(value))
                 cmds.setAttr(multNode+'.operation', 1)
@@ -266,13 +266,13 @@ class Head(base.Base):
                     cmds.connectAttr(multNode+'.output', ctrl+'.translate')
             if 'Smile' in ctrl:
                 value = ctrl.split('_Smile_')[-1]
-                addNode = cmds.shadingNode('plusMinusAverage', asUtility=True, n='Node_Smile_Distribution'+str(i))
+                addNode = cmds.shadingNode('plusMinusAverage', asUtility=1, n='Node_Smile_Distribution'+str(i))
                 cmds.setAttr(addNode+'.operation', 1)
-                multCornerNode = cmds.shadingNode('multiplyDivide', asUtility=True, n='Node_Smile_Corner_Influence'+str(i))
+                multCornerNode = cmds.shadingNode('multiplyDivide', asUtility=1, n='Node_Smile_Corner_Influence'+str(i))
                 cmds.setAttr(multCornerNode+'.operation', 1)
                 for axis in 'XYZ':
                     cmds.setAttr(multCornerNode+'.input2'+axis, 0.15 * int(value))
-                multCheekNode = cmds.shadingNode('multiplyDivide', asUtility=True, n='Node_Smile_Cheek_Influence'+str(i))
+                multCheekNode = cmds.shadingNode('multiplyDivide', asUtility=1, n='Node_Smile_Cheek_Influence'+str(i))
                 cmds.setAttr(multCheekNode+'.operation', 1)
                 for axis in 'XYZ':
                     cmds.setAttr(multCheekNode+'.input2'+axis, 0.15 * (4-int(value)))
@@ -287,7 +287,7 @@ class Head(base.Base):
                 cmds.connectAttr(multCheekNode+'.output', addNode+'.input3D[1]')
                 cmds.connectAttr(addNode+'.output3D', ctrl+'.translate')
             if '_Cheek' in ctrl:
-                multNode = cmds.shadingNode('multiplyDivide', asUtility=True, n='Node_Cheek_Influence'+str(i))
+                multNode = cmds.shadingNode('multiplyDivide', asUtility=1, n='Node_Cheek_Influence'+str(i))
                 cmds.setAttr(multNode+'.operation', 1)
                 for axis in 'XYZ':
                     cmds.setAttr(multNode+'.input2'+axis, 0.7)
@@ -317,7 +317,7 @@ class Head(base.Base):
                     cmds.setAttr(ctrl+'.overrideColor', 13)
 
     def lock_controller(self):
-        allCtrls = cmds.ls('Ctrl_Face_*', transforms=True)
+        allCtrls = cmds.ls('Ctrl_Face_*', transforms=1)
         for ctrl in allCtrls:
             cmds.setAttr(ctrl+'.visibility', k=0, l=1)
             for axis in 'xyz':
@@ -342,14 +342,14 @@ class Head(base.Base):
     #############################################################
 
     def mirror(self):
-        rLocs = cmds.ls('Loc_Face_R_*', transforms=True)
+        rLocs = cmds.ls('Loc_Face_R_*', transforms=1)
 
-        lLocs = cmds.ls('Loc_Face_L_*', transforms=True)
+        lLocs = cmds.ls('Loc_Face_L_*', transforms=1)
         lLocs.remove('Loc_Face_L_UpperLip_0')
         lLocs.remove('Loc_Face_L_LowerLip_0')
 
         for i, loc in enumerate(lLocs):
-            pos = cmds.xform(loc, q=True, t=True, ws=True)
+            pos = cmds.xform(loc, q=1, t=1, ws=1)
             cmds.move(-pos[0], pos[1], pos[2], rLocs[i])
 
     def ConnectWBody(self):

@@ -33,9 +33,9 @@ class Finger(base.Base):
         # Finger Shape
         finger_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=6, name='Finger_tempShape')
         cmds.select('Finger_tempShape.cv[3]', 'Finger_tempShape.cv[5]')
-        cmds.scale(0.2, 0.2, 0.2, relative=True)
+        cmds.scale(0.2, 0.2, 0.2, relative=1)
         cmds.select('Finger_tempShape.cv[1]', 'Finger_tempShape.cv[4]')
-        cmds.move(0, 0, 1, relative=True)
+        cmds.move(0, 0, 1, relative=1)
         cmds.scale(0.2, 0.2, 0.4, finger_shape)
         cmds.rotate(90, 0, 0, finger_shape)
 
@@ -49,32 +49,32 @@ class Finger(base.Base):
         self.scale = scale
 
     def build_guide(self):
-        grp = cmds.group(em=True, n=self.loc_grp_name)
+        grp = cmds.group(em=1, n=self.loc_grp_name)
         for i in range(self.segment):
             finger = cmds.spaceLocator(n=self.loc_list[i])
             # root locator of finger parent to the locator group
             if i is 0:
-                cmds.parent(finger, grp, relative=True)
-                cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], finger, absolute=True)
+                cmds.parent(finger, grp, relative=1)
+                cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], finger, absolute=1)
                 cmds.scale(self.scale, self.scale, self.scale, finger)
             # non-root locator parent to the previous locator
             else:
-                cmds.parent(finger, self.loc_list[i-1], relative=True)
+                cmds.parent(finger, self.loc_list[i-1], relative=1)
                 if self.side == 'L':  # move finger locator along +x axis
-                    cmds.move(self.interval, 0, 0, finger, relative=True)
+                    cmds.move(self.interval, 0, 0, finger, relative=1)
                 elif self.side == 'R':  # move finger locator along -x axis
-                    cmds.move(-self.interval, 0, 0, finger, relative=True)
+                    cmds.move(-self.interval, 0, 0, finger, relative=1)
 
         cmds.parent(grp, self.loc_grp)
         self.color_locator()
-        cmds.select(clear=True)
+        cmds.select(clear=1)
         return grp
 
     def construct_joint(self):
-        cmds.select(clear=True)
+        cmds.select(clear=1)
 
         for i, loc in enumerate(self.loc_list):
-            loc_pos = cmds.xform(loc, q=True, t=True, ws=True)
+            loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
             jnt = cmds.joint(p=loc_pos, name=self.jnt_list[i])
             cmds.setAttr(jnt+'.radius', self.scale)
         cmds.parent(self.jnt_list[0], self.jnt_grp)
@@ -84,8 +84,8 @@ class Finger(base.Base):
         self.set_controller_shape()
 
         for i in range(self.segment-1):
-            jnt_pos = cmds.xform(self.jnt_list[i], q=True, t=True, ws=True)
-            jnt_rot = cmds.xform(self.jnt_list[i], q=True, ro=True, ws=True)
+            jnt_pos = cmds.xform(self.jnt_list[i], q=1, t=1, ws=1)
+            jnt_rot = cmds.xform(self.jnt_list[i], q=1, ro=1, ws=1)
 
             if self.finger_type != 'Thumb':
                 ctrl = cmds.duplicate('Finger_tempShape', name=self.ctrl_list[i])[0]
@@ -95,11 +95,11 @@ class Finger(base.Base):
                 ctrl = cmds.duplicate('Thumb_tempShape', name=self.ctrl_list[i])[0]
                 cmds.move(jnt_pos[0], jnt_pos[1], jnt_pos[2], ctrl)
 
-            offset_grp = cmds.group(em=True, name=self.ctrl_offset_list[i])
+            offset_grp = cmds.group(em=1, name=self.ctrl_offset_list[i])
             cmds.move(jnt_pos[0], jnt_pos[1], jnt_pos[2], offset_grp)
             cmds.parent(ctrl, offset_grp)
             cmds.rotate(jnt_rot[0], jnt_rot[1], jnt_rot[2], offset_grp)
-            cmds.makeIdentity(ctrl, apply=True, t=1, r=1, s=1)
+            cmds.makeIdentity(ctrl, apply=1, t=1, r=1, s=1)
 
             if i == 0:
                 cmds.parent(offset_grp, self.ctrl_grp)
@@ -113,7 +113,7 @@ class Finger(base.Base):
         for i in range(self.segment-1):
             ctrl = cmds.ls(self.ctrl_list[i])[0]
             jnt = cmds.ls(self.jnt_list[i])
-            cmds.orientConstraint(ctrl, jnt, mo=True)
+            cmds.orientConstraint(ctrl, jnt, mo=1)
 
     def lock_controller(self):
         if self.finger_type != 'Thumb':
@@ -121,5 +121,5 @@ class Finger(base.Base):
                 if ctrl not in self.ctrl_offset_list:
                     for transform in 's':
                         for axis in 'xyz':
-                            cmds.setAttr('{}.{}{}'.format(ctrl, transform, axis), l=True, k=0)
+                            cmds.setAttr('{}.{}{}'.format(ctrl, transform, axis), l=1, k=0)
                     cmds.setAttr(ctrl+'.rx', l=1, k=0)

@@ -26,7 +26,7 @@ class Hand(base.Base):
     def set_controller_shape():
         hand_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=10, name='Hand_tempShape')[0]
         selection = cmds.select('Hand_tempShape.cv[7:9]', 'Hand_tempShape.cv[0]')
-        cmds.scale(1.5, 1, 1.5, selection, relative=True)
+        cmds.scale(1.5, 1, 1.5, selection, relative=1)
         cmds.scale(1.8, 1, 1.3, hand_shape)
 
     def set_locator_attr(self, start_pos=[0, 0, 0], interval=0.5, distance=2, scale=0.2):
@@ -36,7 +36,7 @@ class Hand(base.Base):
         self.scale = scale
 
     def build_guide(self):
-        grp = cmds.group(em=True, n=self.loc_grp_name)
+        grp = cmds.group(em=1, n=self.loc_grp_name)
         side_factor = 1
         if self.side == 'R': side_factor = -1
 
@@ -96,7 +96,7 @@ class Hand(base.Base):
             obj.add_constraint()
 
         for obj in self.constraint_list:
-            cmds.parentConstraint(self.wrist.jnt_name, obj, mo=True)
+            cmds.parentConstraint(self.wrist.jnt_name, obj, mo=1)
 
     def color_controller(self):
         for obj in self.finger_list:

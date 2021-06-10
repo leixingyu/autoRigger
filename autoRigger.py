@@ -25,24 +25,25 @@ __email__ = "wzaxzt@gmail.com"
 __status__ = "development"
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+UI_PATH = r'ui\autoRigger.ui'
 
 
 @unique
 class RigComponents(Enum):
     BASE = 'base'
-    FINGER = 'finger'
-    HAND = 'hand'
+    FINGER = 'biped-finger'
+    HAND = 'biped-hand'
     LIMB = 'limb'
-    ARM = 'arm'
-    FOOT = 'foot'
-    LEG = 'leg'
-    HEAD = 'head'
-    SPINE = 'spine'
+    ARM = 'biped-arm'
+    FOOT = 'biped-foot'
+    LEG = 'biped-leg'
+    HEAD = 'biped-head'
+    SPINE = 'biped-spine'
     BIPED = 'biped'
-    LEG_FRONT = 'legfront'
-    LEG_BACK = 'legback'
-    SPINE_QUAD = 'spinequad'
-    TAIL = 'tail'
+    LEG_FRONT = 'quad-front'
+    LEG_BACK = 'quad-hind'
+    SPINE_QUAD = 'quad-spine'
+    TAIL = 'quad-tail'
     QUAD = 'quad'
 
 
@@ -54,7 +55,7 @@ class RigType(IntEnum):
     CUSTOM = 3
 
 
-class AutoRigger(QtWidgets.QDialog):
+class AutoRiggerWindow(QtWidgets.QMainWindow):
     """ This module is the class for the main dialog """
 
     def __init__(self, parent=setup.get_maya_main_window()):
@@ -63,8 +64,8 @@ class AutoRigger(QtWidgets.QDialog):
         :param parent: window instance
         """
 
-        super(AutoRigger, self).__init__(parent)
-        _loadUi(CURRENT_PATH + r'\ui\autoRigger.ui', self)
+        super(AutoRiggerWindow, self).__init__(parent)
+        _loadUi(os.path.join(CURRENT_PATH, UI_PATH), self)
 
         self.setWindowFlags(QtCore.Qt.Window)
 
@@ -72,11 +73,7 @@ class AutoRigger(QtWidgets.QDialog):
         self.items = []
         self.to_build = []
 
-        # Connect signals and slots
-        self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_items())
-        self.ui_listWidget.itemClicked.connect(lambda: self.initialize_field())
-        self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
-        self.ui_buildBtn.clicked.connect(lambda: self.create_rig())
+        self.connect_signals()
 
         # Reset tab position and populate list
         self.connect_items()
@@ -88,6 +85,18 @@ class AutoRigger(QtWidgets.QDialog):
         self.ui_worldX.setValidator(int_only)
         self.ui_worldY.setValidator(int_only)
         self.ui_worldZ.setValidator(int_only)
+
+    def connect_signals(self):
+        # Connect signals and slots
+        self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_items())
+        self.ui_listWidget.itemClicked.connect(lambda: self.initialize_field())
+        self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
+        self.ui_buildBtn.clicked.connect(lambda: self.create_rig())
+        #self.ui_clearBtn.clicked.connect()
+
+        # Connect action menu
+        self.ui_snapAction.triggered.connect(lambda: launch_snap())
+        self.ui_traceAction.triggered.connect(lambda: launch_tracer())
 
     def connect_items(self):
         """ Connect Rig component items with icon and text """
@@ -219,7 +228,23 @@ class AutoRigger(QtWidgets.QDialog):
         self.ui_worldZ.setText('')
 
 
+def launch_snap():
+    from .toolkit.snapTool import snap
+    reload(snap)
+    snap_win = snap.show()
+
+
+def launch_tracer():
+    from mocapTracer import main
+    tracer_win = main.show()
+
+
 def show():
-    window = AutoRigger()
+    window = AutoRiggerWindow()
+    try:
+        window.close()
+    except:
+        pass
+    window.setAttribute(QtCore.Qt.WA_DeleteOnClose)
     window.show()
     return window

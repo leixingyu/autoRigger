@@ -54,7 +54,7 @@ class Arm(base.Base):
     def add_constraint(self):
         self.limb.add_constraint()
         self.hand.add_constraint()
-        cmds.parentConstraint(self.limb.jnt_list[-1], self.hand.wrist.jnt_name, mo=True)
+        cmds.parentConstraint(self.limb.jnt_list[-1], self.hand.wrist.jnt_name, mo=1)
 
     def lock_controller(self):
         self.limb.lock_controller()

@@ -104,7 +104,7 @@ class Quadruped(base.Base):
         self.head.place_controller()
         self.tip.place_controller()
 
-        cmds.addAttr(self.spine.master_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=True)
+        cmds.addAttr(self.spine.master_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
 
     def add_constraint(self):
         self.left_arm.add_constraint()
@@ -121,7 +121,7 @@ class Quadruped(base.Base):
         # parenting the front and back leg and tail under spine ctrl
         outliner.batch_parent([self.left_arm.ctrl_offset_list[0], self.right_arm.ctrl_offset_list[0]], self.spine.ctrl_list[-1])
         outliner.batch_parent([self.left_leg.ctrl_offset_list[0], self.right_leg.ctrl_offset_list[0]], self.spine.ctrl_list[0])
-        cmds.parentConstraint(self.spine.ctrl_list[0], self.tail.master_ctrl, mo=True)
+        cmds.parentConstraint(self.spine.ctrl_list[0], self.tail.master_ctrl, mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
         cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
