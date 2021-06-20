@@ -228,17 +228,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldZ.setText('')
 
 
-def launch_snap():
-    from .toolkit.snapTool import snap
-    reload(snap)
-    snap_win = snap.show()
-
-
-def launch_tracer():
-    from mocapTracer import main
-    tracer_win = main.show()
-
-
 def show():
     window = AutoRiggerWindow()
     try:

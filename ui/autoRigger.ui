@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>374</width>
-    <height>474</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -80,7 +80,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <property name="iconSize">
           <size>
@@ -470,30 +470,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>374</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuToolKit">
-    <property name="font">
-     <font>
-      <family>Bahnschrift</family>
-     </font>
-    </property>
-    <property name="title">
-     <string>ToolKit</string>
-    </property>
-    <addaction name="ui_snapAction"/>
-    <addaction name="ui_traceAction"/>
-   </widget>
-   <addaction name="menuToolKit"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="ui_snapAction">
    <property name="text">
     <string>IK/FK Snap</string>
