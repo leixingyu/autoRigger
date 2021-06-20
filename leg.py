@@ -1,7 +1,5 @@
 import maya.cmds as cmds
-import base
-import foot
-import limb
+from . import base, foot, limb
 from utility import joint, outliner
 
 

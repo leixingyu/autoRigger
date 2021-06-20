@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-import base
+from . import base
 
 
 class Finger(base.Base):

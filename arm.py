@@ -1,7 +1,5 @@
 import maya.cmds as cmds
-import base
-import hand
-import limb
+from . import base, hand, limb
 
 
 class Arm(base.Base):

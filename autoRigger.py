@@ -7,17 +7,8 @@ import warnings
 from utility.Qt import QtCore, QtGui, QtWidgets
 from utility.Qt import _loadUi
 from utility import setup
-import base
-import finger
-import foot
-import spine
-import limb
-import hand
-import arm
-import leg
-import biped
-import tail
-import quadruped
+from . import base, finger, foot, spine, limb, hand, arm, leg, biped, tail, quadruped
+
 
 __author__ = "Xingyu Lei"
 __maintainer__ = "Xingyu Lei"
@@ -147,7 +138,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         
         self.reset_field()
         item_name = self.ui_listWidget.currentItem().text()
-        print item_name
+        print(item_name)
 
         # TODO: change field based on item clicked
 

@@ -1,8 +1,5 @@
 import maya.cmds as cmds
-import base
-import tail
-import spine
-import leg
+from . import base, tail, spine, leg
 from utility import outliner
 
 

@@ -1,5 +1,6 @@
 import maya.cmds as cmds
-import base
+from . import base
+
 
 class Head(base.Base):
     def __init__(self, id, side='NA'):

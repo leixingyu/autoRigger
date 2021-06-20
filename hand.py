@@ -1,6 +1,5 @@
 import maya.cmds as cmds
-import base
-import finger
+from . import base, finger
 from utility import outliner
 
 
