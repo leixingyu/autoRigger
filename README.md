@@ -1,4 +1,10 @@
-# autoRigger
+# Announcement
+
+Looking back at this project I started three years ago, I realized there's a huge
+room for improvement as my skill grows. So, I decided to do a major overhaul. It may take couple of weeks or 
+months, maybe even years. who knows?
+
+## Introduction
 AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well as providing pre-made template for Biped, Quadruped, and next up Bird.
 
 quadruped rigging demo: https://youtu.be/GT15B_x8R9w
