@@ -1,22 +1,27 @@
 import maya.cmds as cmds
-from . import base
+from . import rig
 from utility import joint, outliner
 
 
-class Spine(base.Base):
+class Spine(rig.Bone):
     """ This module creates a biped spine rig"""
 
-    def __init__(self, side, base_name):
+    def __init__(self, side, base_name, start_pos=[0, 0, 0], length=6.0, segment=6):
         """ Initialize Spine class with side and name
 
         :param side: str
         :param base_name: str
         """
 
-        base.Base.__init__(self, side, base_name)
+        rig.Bone.__init__(self, side, base_name)
         self.metaType = 'Spine'
-        self.assign_naming()
-        self.assign_secondary_naming()
+
+        self.start_pos = start_pos
+        self.interval = length/(segment-1)
+        self.segment = segment
+        self.scale = 0.5
+
+        self.initial_setup()
 
     def assign_secondary_naming(self):
         self.loc_list, self.jnt_list, self.ctrl_list, self.cluster_list = ([] for i in range(4))
@@ -43,13 +48,7 @@ class Spine(base.Base):
         cmds.rotate(0, 0, 90, spine_shape)
         cmds.scale(0.5, 0.5, 0.5, spine_shape)
 
-    def set_locator_attr(self, start_pos=[0, 0, 0], length=6.0, segment=6, scale=0.5):
-        self.start_pos = start_pos
-        self.interval = length/(segment-1)
-        self.segment = segment
-        self.scale = scale
-
-    def build_guide(self):
+    def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp_name)
 
         for i in range(self.segment):
@@ -65,11 +64,10 @@ class Spine(base.Base):
                 # move spine locator along +y axis
                 cmds.move(0, self.interval, 0, spine, relative=1)
 
-        self.color_locator()
-        cmds.parent(grp, self.loc_grp)
+        cmds.parent(grp, self.loc_global_grp)
         return grp
 
-    def construct_joint(self):
+    def create_joint(self):
         cmds.select(clear=1)
 
         for i, loc in enumerate(self.loc_list):
@@ -77,11 +75,10 @@ class Spine(base.Base):
             jnt = cmds.joint(p=loc_pos, name=self.jnt_list[i])
             cmds.setAttr(jnt + '.radius', self.scale)
 
-        cmds.parent(self.jnt_list[0], self.jnt_grp)
+        cmds.parent(self.jnt_list[0], self.jnt_global_grp)
         return self.jnt_list[0]
     
     def place_controller(self):
-        self.set_controller_shape()
         grp = cmds.group(em=1, name=self.ctrl_grp_name)
         
         for i, spine in enumerate(self.jnt_list):
@@ -105,8 +102,7 @@ class Spine(base.Base):
             cmds.delete(line)
 
         cmds.parent(self.ctrl_name, grp)
-        self.delete_shape()
-        cmds.parent(grp, self.ctrl_grp)
+        cmds.parent(grp, self.ctrl_global_grp)
         return grp
 
     def build_ik(self):
@@ -123,14 +119,14 @@ class Spine(base.Base):
         # Create Spline IK
         cmds.ikHandle(startJoint=self.jnt_list[0], endEffector=self.jnt_list[-1], name=self.ik_name, curve=self.ik_curve, createCurve=False, parentCurve=1, roc=1, solver='ikSplineSolver')
         cmds.setAttr(self.ik_name+'.visibility', 0)
-        cmds.parent(self.ik_name, self.ctrl_grp)
+        cmds.parent(self.ik_name, self.ctrl_global_grp)
 
         # Create Cluster
         cvs = cmds.ls('{}.cv[0:]'.format(self.ik_curve), fl=1)
         for i, cv in enumerate(cvs):
             cluster = cmds.cluster(cv, name=self.cluster_list[i])[-1]
             if i != 0: cmds.parent(cluster, '{}Handle'.format(self.cluster_list[i-1]), relative=False)
-            else: cmds.parent(cluster, self.ctrl_grp)
+            else: cmds.parent(cluster, self.ctrl_global_grp)
             cmds.setAttr(cluster+'.visibility', 0)
 
     def add_constraint(self):
@@ -148,21 +144,25 @@ class Spine(base.Base):
                     cmds.setAttr(ctrl+'.'+transform+axis, l=1, k=0)
 
 
-class SpineQuad(base.Base):
+class SpineQuad(rig.Bone):
     """ This module creates a quadruped spine rig """
 
-    def __init__(self, side, base_name):
+    def __init__(self, side, base_name, start_pos=[0, 6, -3], length=6.0, segment=7):
         """ Initialize SpineQuad class with side and name
 
         :param side: str
         :param base_name: str
         """
 
-        base.Base.__init__(self, side, base_name)
-        self.metaType = 'Spine'
-        self.assign_naming()
-        self.assign_secondary_naming()
-        #self.set_locator_attr()
+        rig.Bone.__init__(self, side, base_name)
+        self.meta_type = 'Spine'
+
+        self.start_pos = start_pos
+        self.interval = length / (segment-1)
+        self.segment = segment
+        self.scale = 0.4
+
+        self.initial_setup()
 
     def assign_secondary_naming(self):
         self.loc_list, self.jnt_list, self.cluster_list, self.ctrl_list, self.ctrlOffset_list = ([] for i in range(5))
@@ -190,13 +190,7 @@ class SpineQuad(base.Base):
         ctrl_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name='Spine_tempShape')
         cmds.scale(1, 1, 1, ctrl_shape)
 
-    def set_locator_attr(self, start_pos=[0, 6, -3], length=6.0, segment=7, scale=0.4):
-        self.start_pos = start_pos
-        self.interval = length / (segment-1)
-        self.segment = segment
-        self.scale = scale
-
-    def build_guide(self):
+    def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp_name)
 
         for i in range(self.segment):
@@ -210,11 +204,10 @@ class SpineQuad(base.Base):
                 # move spine locator along +z axis
                 cmds.move(0, 0, self.interval, spine, relative=1)
 
-        self.color_locator()
-        cmds.parent(grp, self.loc_grp)
+        cmds.parent(grp, self.loc_global_grp)
         return grp
 
-    def construct_joint(self):
+    def create_joint(self):
         cmds.select(clear=1)
 
         for i, loc in enumerate(self.loc_list):
@@ -222,13 +215,11 @@ class SpineQuad(base.Base):
             jnt = cmds.joint(p=loc_pos, name=self.jnt_list[i])
             cmds.setAttr(jnt+'.radius', self.scale)
 
-        cmds.parent(self.jnt_list[0], self.jnt_grp)
+        cmds.parent(self.jnt_list[0], self.jnt_global_grp)
         joint.orient_joint(self.jnt_list[0])
         return self.jnt_list[0]
 
     def place_controller(self):
-        self.set_controller_shape()
-
         root_pos = cmds.xform(self.jnt_list[0], q=1, t=1, ws=1)
         root_rot = cmds.xform(self.jnt_list[0], q=1, ro=1, ws=1)
         top_pos = cmds.xform(self.jnt_list[-1], q=1, t=1, ws=1)
@@ -258,8 +249,9 @@ class SpineQuad(base.Base):
 
         # mid ctrl is positioned at the middle joint / or middle two joint
         if self.segment % 2 != 0:
-            mid_pos = cmds.xform(self.jnt_list[(self.segment-1) / 2], q=1, t=1, ws=1)
-            mid_rot = cmds.xform(self.jnt_list[(self.segment-1) / 2], q=1, ro=1, ws=1)
+            index = int((self.segment-1)/2)
+            mid_pos = cmds.xform(self.jnt_list[index], q=1, t=1, ws=1)
+            mid_rot = cmds.xform(self.jnt_list[index], q=1, ro=1, ws=1)
         else:
             mid_upper_pos = cmds.xform(self.jnt_list[(self.segment+1) / 2], q=1, t=1, ws=1)
             mid_upper_rot = cmds.xform(self.jnt_list[(self.segment+1) / 2], q=1, ro=1, ws=1)
@@ -276,8 +268,7 @@ class SpineQuad(base.Base):
 
         # Cleanup
         outliner.batch_parent([self.ctrlOffset_list[0], self.ctrlOffset_list[1], self.ctrlOffset_list[-1]], self.master_ctrl)
-        cmds.parent(self.master_offset, self.ctrl_grp)
-        self.delete_shape()
+        cmds.parent(self.master_offset, self.ctrl_global_grp)
         return self.master_ctrl
 
     def build_ik(self):
@@ -291,7 +282,7 @@ class SpineQuad(base.Base):
         cmds.cluster(self.ik_curve+'.cv[3:4]', name=self.cluster_list[-1])
 
         cmds.setAttr(self.ik_name+'.visibility', 0)  # hide ik
-        cmds.parent(self.ik_name, self.ctrl_grp)
+        cmds.parent(self.ik_name, self.ctrl_global_grp)
 
     def add_constraint(self):
         # each ik control is the parent of spine clusters
@@ -308,7 +299,7 @@ class SpineQuad(base.Base):
         # scaling of the spine
         arc_len = cmds.arclen(self.ik_curve, constructionHistory=1)
         cmds.rename(arc_len, self.ik_curve+'Info')
-        cmds.parent(self.ik_curve, self.ctrl_grp)
+        cmds.parent(self.ik_curve, self.ctrl_global_grp)
         cmds.setAttr(self.ik_curve+'.visibility', 0)
 
         # create curve length node and multiply node

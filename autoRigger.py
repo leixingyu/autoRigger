@@ -83,11 +83,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_listWidget.itemClicked.connect(lambda: self.initialize_field())
         self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
         self.ui_buildBtn.clicked.connect(lambda: self.create_rig())
-        #self.ui_clearBtn.clicked.connect()
-
-        # Connect action menu
-        self.ui_snapAction.triggered.connect(lambda: launch_snap())
-        self.ui_traceAction.triggered.connect(lambda: launch_tracer())
+        self.ui_clearBtn.clicked.connect(lambda: self.empty_scene())
 
     def connect_items(self):
         """ Connect Rig component items with icon and text """
@@ -161,7 +157,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         if item == RigComponents.FINGER.value:
             obj = finger.Finger(side, base_name)
         elif item == RigComponents.HAND.value:
-            obj = hand.Hand(side, base_name, 5)
+            obj = hand.Hand(side, base_name)
         elif item == RigComponents.LIMB.value:
             obj = limb.Limb(side, base_name)
         elif item == RigComponents.ARM.value:
@@ -187,8 +183,10 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         else:
             warnings.warn("object name not found, using base component instead")
             obj = base.Base(side, base_name)
-        obj.set_locator_attr([pos_x, pos_y, pos_z])
+
+        # obj.set_locator_attr([pos_x, pos_y, pos_z])
         obj.build_guide()
+
         self.to_build.append(obj)
         self.reset_field()
 
@@ -218,6 +216,17 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldY.setText('')
         self.ui_worldZ.setText('')
 
+
+    def empty_scene(self):
+        self.to_build = []
+        from maya import cmds
+        loc_grp = '_Locators'
+        ctrl_grp = '_Controllers'
+        jnt_grp = '_Joints'
+        mesh_grp = '_Meshes'
+
+        for grp in [loc_grp, ctrl_grp, jnt_grp, mesh_grp]:
+            cmds.delete(grp)
 
 def show():
     window = AutoRiggerWindow()

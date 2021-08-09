@@ -2,9 +2,9 @@ import maya.cmds as cmds
 from . import base
 
 
-class Head(base.Base):
+class Head(create_locator.Bone):
     def __init__(self, id, side='NA'):
-        base.Base.__init__(self, side, id)
+        create_locator.Bone.__init__(self, side, id)
         self.metaType = 'Face'
 
         self.constructNameSpace(self.metaType)
@@ -15,7 +15,7 @@ class Head(base.Base):
         self.distance = distance
         self.scale = scale
     
-    def build_guide(self):
+    def create_locator(self):
         self.eyeLocators()
         #self.lipLocators()
         #self.addLocators()
@@ -136,7 +136,7 @@ class Head(base.Base):
         crvGrp = cmds.group(em=1, name='FaceCV_Grp')
         cmds.parent(crvs, crvGrp)
     
-    def construct_joint(self):
+    def create_joint(self):
         jointGrp = cmds.group(em=1, name='Joint_Grp')
         allLocs = cmds.ls('Loc_Face_*', transforms=1)
         for loc in allLocs:

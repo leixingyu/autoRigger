@@ -1,23 +1,27 @@
 import maya.cmds as cmds
-from . import base
+from . import rig
 from utility import joint, outliner
 
 
-class Tail(base.Base):
+class Tail(rig.Bone):
     """ This module creates a quadruped tail rig"""
 
-    def __init__(self, side, base_name):
+    def __init__(self, side, base_name, start_pos=[0, 6, -4], length=4.0, segment=6):
         """ Initialize Tail class with side and name
 
         :param side: str
         :param base_name: str
         """
 
-        self.segment = 6
-        base.Base.__init__(self, side, base_name)
-        self.metaType = 'Tail'
-        self.assign_naming()
-        self.assign_secondary_naming()
+        rig.Bone.__init__(self, side, base_name)
+        self.meta_type = 'Tail'
+
+        self.segment = segment
+        self.start_pos = start_pos
+        self.interval = length / (self.segment-1)
+        self.scale = 0.4
+
+        self.initial_setup()
 
     def assign_secondary_naming(self):
         self.loc_list, self.jnt_list, self.ik_jnt_list, self.fk_jnt_list,\
@@ -48,12 +52,8 @@ class Tail(base.Base):
         ctrl_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name='TailFK_tempShape')
         cmds.scale(0.3, 0.3, 0.3, ctrl_shape)
 
-    def set_locator_attr(self, start_pos=[0, 6, -4], length=4.0, scale=0.4):
-        self.start_pos = start_pos
-        self.interval = length / (self.segment-1)
-        self.scale = scale
 
-    def build_guide(self):
+    def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp_name)
 
         for i in range(self.segment):
@@ -69,11 +69,10 @@ class Tail(base.Base):
                 # move tail locator along -y axis
                 cmds.move(0, -self.interval, 0, tail, relative=1)
 
-        self.color_locator()
-        cmds.parent(grp, self.loc_grp)
+        cmds.parent(grp, self.loc_global_grp)
         return grp
 
-    def construct_joint(self):
+    def create_joint(self):
         # Result jnt
         cmds.select(clear=1)
         for i, loc in enumerate(self.loc_list):
@@ -98,12 +97,11 @@ class Tail(base.Base):
         # Cleanup
         cmds.setAttr(self.fk_jnt_list[0]+'.visibility', 0)
         cmds.setAttr(self.ik_jnt_list[0]+'.visibility', 0)
-        outliner.batch_parent([self.jnt_list[0], self.fk_jnt_list[0], self.ik_jnt_list[0]], self.jnt_grp)
+        outliner.batch_parent([self.jnt_list[0], self.fk_jnt_list[0], self.ik_jnt_list[0]], self.jnt_global_grp)
         joint.orient_joint([self.jnt_list[0], self.fk_jnt_list[0], self.ik_jnt_list[0]])
         return self.jnt_list[0]
 
     def place_controller(self):
-        self.set_controller_shape()
 
         # Master control
         cmds.duplicate('TailIK_tempShape', name=self.master_ctrl)
@@ -135,8 +133,7 @@ class Tail(base.Base):
                 outliner.batch_parent([self.ik_offset_list[i], self.fk_offset_list[i]], self.master_ctrl)
 
         # Cleanup
-        cmds.parent(self.master_ctrl, self.ctrl_grp)
-        self.delete_shape()
+        cmds.parent(self.master_ctrl, self.ctrl_global_grp)
         return self.master_ctrl
 
     def build_ik(self):
@@ -158,7 +155,7 @@ class Tail(base.Base):
         cmds.ikHandle(startJoint=self.ik_jnt_list[0], endEffector=self.ik_jnt_list[self.segment-1], name=self.tail_ik, curve=tail_curve, createCurve=False,
                       parentCurve=1, roc=1, solver='ikSplineSolver')
         cmds.setAttr(self.tail_ik+'.visibility', 0)
-        cmds.parent(self.tail_ik, self.ctrl_grp)
+        cmds.parent(self.tail_ik, self.ctrl_global_grp)
 
     def build_fk(self):
         pass

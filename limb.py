@@ -1,12 +1,12 @@
 import maya.cmds as cmds
-from . import base
+from . import rig
 from utility import joint, outliner
 
 
-class Limb(base.Base):
+class Limb(rig.Bone):
     """ This module create a Limb rig which is used in arm or leg """
     
-    def __init__(self, side, base_name, limb_type='Null'):
+    def __init__(self, side, base_name, start_pos=[0, 0, 0], interval=2, limb_type='Null'):
         """ Initialize Limb class with side, name and type of the limb
         
         :param side: str
@@ -14,15 +14,23 @@ class Limb(base.Base):
         :param limb_type: str, 'Arm', 'Leg' or 'Null'
         """
         
-        base.Base.__init__(self, side, base_name)
+        rig.Bone.__init__(self, side, base_name)
         self.meta_type = 'Limb'
+
+        self.start_pos = start_pos
+        self.interval = interval
+        self.scale = 0.4
+
+        self.limb_components = []
+        self.direction = None
+
+        # unique to limb
         self.set_limb_type(limb_type)
-        self.assign_naming()
-        self.assign_secondary_naming()
-        self.set_locator_attr([0, 0, 0], 2)
+
+        self.initial_setup()
 
     def set_limb_type(self, limb_type):
-        self.limb_components = []
+
         if limb_type == 'Arm':
             self.limb_components = ['shoulder', 'elbow', 'wrist']
             self.direction = 'Horizontal'
@@ -54,11 +62,6 @@ class Limb(base.Base):
         self.ik_offset_name = '{}_ik_offset'.format(self.name)
         self.ik_pole_offset_name = '{}_ikpole_offset'.format(self.name)
 
-    def set_locator_attr(self, start_pos=[0, 0, 0], interval=2, scale=0.4):
-        self.start_pos = start_pos
-        self.interval = interval
-        self.scale = scale
-
     @staticmethod
     def set_controller_shape():
         limb_fk_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbFK_tempShape')
@@ -79,7 +82,7 @@ class Limb(base.Base):
         switch_shape = cmds.curve(p=arrow_pt_list, degree=1, name='Switch_tempShape')
         cmds.scale(0.3, 0.3, 0.3, switch_shape)
 
-    def build_guide(self):
+    def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp_name)
 
         side_factor, horizontal_factor, vertical_factor = 1, 1, 0
@@ -103,11 +106,10 @@ class Limb(base.Base):
         cmds.move(self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0, limb_top, relative=1)  # move limb joint along +x axis
 
         # Cleanup
-        self.color_locator()
-        cmds.parent(grp, self.loc_grp)
+        cmds.parent(grp, self.loc_global_grp)
         return grp
 
-    def construct_joint(self):
+    def create_joint(self):
         # Result joint
         cmds.select(clear=1)
         for i, component in enumerate(self.limb_components):
@@ -133,12 +135,11 @@ class Limb(base.Base):
             cmds.setAttr(ik_jnt+'.radius', 1)
 
         # Cleanup
-        outliner.batch_parent([self.jnt_list[0], self.ik_jnt_list[0], self.fk_jnt_list[0]], self.jnt_grp)
+        outliner.batch_parent([self.jnt_list[0], self.ik_jnt_list[0], self.fk_jnt_list[0]], self.jnt_global_grp)
         joint.orient_joint([self.jnt_list[0], self.ik_jnt_list[0], self.fk_jnt_list[0]])
         return cmds.ls(self.jnt_list[0])
 
     def place_controller(self):
-        self.set_controller_shape()
         root_pos, mid_pos, top_pos = [cmds.xform(self.jnt_list[i], q=1, t=1, ws=1) for i in range(len(self.limb_components))]
         root_rot, mid_rot, top_rot = [cmds.xform(self.jnt_list[i], q=1, ro=1, ws=1) for i in range(len(self.limb_components))]
 
@@ -215,8 +216,7 @@ class Limb(base.Base):
         cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        self.delete_shape()
-        cmds.parent(self.switch_offset_grp, self.ctrl_grp)
+        cmds.parent(self.switch_offset_grp, self.ctrl_global_grp)
 
     def add_constraint(self):
         # Result Joint + IK/FK Switch
@@ -278,7 +278,8 @@ class Limb(base.Base):
         outliner.batch_parent([self.ik_offset_name, self.ik_pole_offset_name, self.fk_offset_list[0], ik_handle], self.switch_ctrl)
 
     def lock_controller(self):
-        return
+        # FIXME: locking seems to be wrong
+
         fk_mid_ctrl = cmds.ls(self.fk_ctrl_list[1], transforms=1)[0]
         if self.direction == 'Horizontal':
             cmds.setAttr(fk_mid_ctrl+'.rz', l=1, k=0)

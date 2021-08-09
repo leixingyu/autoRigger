@@ -1,49 +1,72 @@
 import maya.cmds as cmds
-from . import base, hand, limb
+from . import rig, hand, limb
 
 
-class Arm(base.Base):
+class Arm(rig.Bone):
     """ This module creates an Arm rig with a limb and a hand"""
 
-    def __init__(self, side, base_name):
+    def __init__(self, side, base_name, start_pos=[0, 10, 0], distance=2, interval=0.5, gap=2):
         """  Initialize Arm class with side and base_name
 
         :param side: str
         :param base_name: str
         """
 
-        base.Base.__init__(self, side, base_name)
+        rig.Bone.__init__(self, side, base_name)
         self.meta_type = 'Arm'
-        self.assign_naming()
-        self.set_locator_attr(start_pos=[0, 10, 0])
-        self.limb = limb.Limb(side=self.side, base_name=base_name, limb_type='Arm')
-        self.hand = hand.Hand(side=self.side, base_name=base_name)
-
-    def set_locator_attr(self, start_pos=[0, 0, 0], distance=2, interval=0.5, gap=2, scale=0.2):
         self.start_pos = start_pos
         self.distance = distance
         self.interval = interval
         self.gap = gap
-        self.scale = scale
+        self.scale = 0.2
 
-    def build_guide(self):
+        self.initial_setup()
+
+        self.limb = limb.Limb(
+            side=self.side,
+            base_name=base_name,
+            limb_type='Arm',
+            start_pos=self.start_pos,
+            interval=self.distance
+        )
+
+        self.hand = None
+        if self.side == 'L':
+            self.hand = hand.Hand(
+                side=self.side,
+                base_name=base_name,
+                start_pos=[self.start_pos[0]+2 * self.distance+self.gap,
+                           self.start_pos[1], self.start_pos[2]],
+                interval=self.interval,
+                distance=self.gap
+            )
+        elif self.side == 'R':
+            self.hand = hand.Hand(
+                side=self.side,
+                base_name=base_name,
+                start_pos=[self.start_pos[0]-2 * self.distance-self.gap,
+                           self.start_pos[1], self.start_pos[2]],
+                interval=self.interval,
+                distance=self.gap
+            )
+
+    def create_locator(self):
         # Limb
-        self.limb.set_locator_attr(start_pos=self.start_pos, interval=self.distance)
-        self.limb.build_guide()
+        self.limb.create_locator()
 
         # Hand
-        if self.side == 'L':
-            self.hand.set_locator_attr(start_pos=[self.start_pos[0] + 2 * self.distance + self.gap, self.start_pos[1], self.start_pos[2]], interval=self.interval, distance=self.gap)
-        elif self.side == 'R':
-            self.hand.set_locator_attr(start_pos=[self.start_pos[0] - 2 * self.distance - self.gap, self.start_pos[1], self.start_pos[2]], interval=self.interval, distance=self.gap)
-        wrist_loc = self.hand.build_guide()
+        wrist_loc = self.hand.create_locator()
 
         # parent wrist to the tip of limb
         cmds.parent(wrist_loc, self.limb.loc_list[-1])
 
-    def construct_joint(self):
-        self.limb.construct_joint()
-        self.hand.construct_joint()
+    def set_controller_shape(self):
+        self.limb.set_controller_shape()
+        self.hand.set_controller_shape()
+
+    def create_joint(self):
+        self.limb.create_joint()
+        self.hand.create_joint()
 
     def place_controller(self):
         self.limb.place_controller()

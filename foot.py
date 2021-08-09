@@ -1,22 +1,27 @@
 import maya.cmds as cmds
-from . import base
+from . import rig
 from utility import outliner, other
 
 
-class Foot(base.Base):
+class Foot(rig.Bone):
     """ This module creates a foot rig """
     
-    def __init__(self, side, base_name):
+    def __init__(self, side, base_name, start_pos=[0, 0, 0], interval=0.5, height=0.4):
         """ Initialize Foot class with side and name
         
         :param side: str
         :param base_name: str
         """
         
-        base.Base.__init__(self, side, base_name)
+        rig.Bone.__init__(self, side, base_name)
+
         self.meta_type = 'Foot'
-        self.assign_naming()
-        self.assign_secondary_naming()
+        self.start_pos = start_pos
+        self.interval = interval
+        self.height = height
+        self.scale = 0.2
+
+        self.initial_setup()
 
     def assign_secondary_naming(self):
         self.ankle_loc_name = '{}{}_loc'.format(self.name, 'ankle')
@@ -44,11 +49,6 @@ class Foot(base.Base):
         self.fk_ctrl_name     = '{}{}_ctrl'.format(self.name, 'fk')
         self.switch_ctrl_name = '{}{}_ctrl'.format(self.name, 'switch')
 
-    def set_locator_attr(self, start_pos=[0, 0, 0], interval=0.5, height=0.4, scale=0.2):
-        self.start_pos = start_pos
-        self.interval = interval
-        self.height = height
-        self.scale = scale
 
     @staticmethod
     def set_controller_shape():
@@ -64,7 +64,7 @@ class Foot(base.Base):
         foot_switch_shape = other.make_curve_by_text(text='FK/IK', name='FootSwitch_tempShape')
         cmds.rotate(-90, 0, 0, foot_switch_shape, relative=1)
 
-    def build_guide(self):
+    def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp_name)
 
         # Result Foot
@@ -100,12 +100,11 @@ class Foot(base.Base):
         cmds.move(0, 0, -1.5*self.interval, heel, relative=1)
 
         # Cleanup
-        self.color_locator()
         cmds.parent(ankle, grp)
-        cmds.parent(grp, self.loc_grp)
+        cmds.parent(grp, self.loc_global_grp)
         return grp
         
-    def construct_joint(self):
+    def create_joint(self):
         # Result Foot
         ankle = cmds.ls(self.ankle_loc_name)
         cmds.select(clear=1)
@@ -148,11 +147,9 @@ class Foot(base.Base):
         cmds.setAttr(ankle_jnt_fk+'.visibility', 0)
 
         # Cleanup
-        outliner.batch_parent([ankle_jnt_fk, inner_jnt, ankle_jnt], self.jnt_grp)
+        outliner.batch_parent([ankle_jnt_fk, inner_jnt, ankle_jnt], self.jnt_global_grp)
 
     def place_controller(self):
-        self.set_controller_shape()
-
         # IK Setup
         foot_ctrl = cmds.duplicate('Foot_tempShape', name=self.ctrl_name)[0]
         cmds.addAttr(foot_ctrl, longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=1)
@@ -179,8 +176,7 @@ class Foot(base.Base):
         cmds.makeIdentity(switch, apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        outliner.batch_parent([switch, foot_ctrl, foot_fk_ctrl], self.ctrl_grp)
-        self.delete_shape()
+        outliner.batch_parent([switch, foot_ctrl, foot_fk_ctrl], self.ctrl_global_grp)
 
     def add_constraint(self):
         # FK Setup
