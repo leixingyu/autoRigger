@@ -4,42 +4,33 @@ import maya.cmds as cmds
 class Bone(object):
     """ Abstract class for joint """
 
-    def __init__(self, side, base_name):
+    def __init__(self, side, name, rig_type):
         """ Initialize Base class with side and name
 
         :param side: str, 'M', 'L' or 'R'
-        :param base_name: str
+        :param name: str
         """
 
-        self.side = side
-        self.base_name = base_name
-
-        self.meta_type = 'Abstract'
-
-    def initial_setup(self):
-        # all initial setup
-
-        self.assign_naming()
-        self.assign_secondary_naming()
-        self.create_outliner_grp()
-
-    def assign_naming(self):
-        """ Create primary naming convention """
+        self._side = side
+        self._name = name
+        self._rig_type = rig_type
+        self.base_name = '{}_{}_{}'.format(self._rig_type, self._side, self._name)
 
         self.loc_global_grp = '_Locators'
         self.ctrl_global_grp = '_Controllers'
         self.jnt_global_grp = '_Joints'
         self.mesh_global_grp = '_Meshes'
 
-        self.name = '{}_{}_{}'.format(self.meta_type, self.side, self.base_name)
+        self.loc_name = '{}_loc'.format(self.base_name)
+        self.loc_grp = '{}_locGrp'.format(self.base_name)
+        self.jnt_name = '{}_jnt'.format(self.base_name)
+        self.jnt_grp = '{}_jntGrp'.format(self.base_name)
+        self.ctrl_name = '{}_ctrl'.format(self.base_name)
+        self.ctrl_grp = '{}_ctrlGrp'.format(self.base_name)
+        self.ctrl_offset = '{}_offset'.format(self.base_name)
 
-        self.loc_name = '{}_loc'.format(self.name)
-        self.loc_grp_name = '{}_locGrp'.format(self.name)
-        self.jnt_name = '{}_jnt'.format(self.name)
-        self.jnt_grp_name = '{}_jntGrp'.format(self.name)
-        self.ctrl_name = '{}_ctrl'.format(self.name)
-        self.ctrl_grp_name = '{}_ctrlGrp'.format(self.name)
-        self.ctrl_offset_grp_name = '{}_offset'.format(self.name)
+        self.assign_secondary_naming()
+        self.create_outliner_grp()
 
     def assign_secondary_naming(self):
         """ Create secondary naming convention for complex module """
@@ -48,7 +39,6 @@ class Bone(object):
 
     def create_outliner_grp(self):
         """ Create different groups in the outliner """
-
         for grp in [self.loc_global_grp, self.ctrl_global_grp, self.jnt_global_grp, self.mesh_global_grp]:
             if not cmds.ls(grp):
                 cmds.group(em=1, name=grp)
@@ -72,13 +62,13 @@ class Bone(object):
     def color_locator(self):
         """ Color-code the guide locators based on left, right, middle side """
 
-        locs = cmds.ls('{}*_loc'.format(self.name))
+        locs = cmds.ls('{}*_loc'.format(self.base_name))
         for loc in locs:
             if cmds.nodeType(loc) in ['transform']:
                 cmds.setAttr(loc + '.overrideEnabled', 1)
-                if self.side == 'L':
+                if self._side == 'L':
                     cmds.setAttr(loc + '.overrideColor', 6)
-                elif self.side == 'R':
+                elif self._side == 'R':
                     cmds.setAttr(loc + '.overrideColor', 13)
                 else:
                     cmds.setAttr(loc + '.overrideColor', 17)
@@ -97,13 +87,13 @@ class Bone(object):
     def color_controller(self):
         """ Colorize the controller based on left, right, middle side """
 
-        ctrls = cmds.ls('{}*_ctrl'.format(self.name))
+        ctrls = cmds.ls('{}*_ctrl'.format(self.base_name))
         for ctrl in ctrls:
             if cmds.nodeType(ctrl) in ['nurbsCurve', 'transform']:
                 cmds.setAttr(ctrl + '.overrideEnabled', 1)
-                if self.side == 'L':
+                if self._side == 'L':
                     cmds.setAttr(ctrl + '.overrideColor', 6)
-                elif self.side == 'R':
+                elif self._side == 'R':
                     cmds.setAttr(ctrl + '.overrideColor', 13)
                 else:
                     cmds.setAttr(ctrl + '.overrideColor', 17)
@@ -116,7 +106,7 @@ class Bone(object):
     def delete_guide(self):
         """ Delete all locator guides to de-clutter the scene """
 
-        grp = cmds.ls(self.loc_grp_name)
+        grp = cmds.ls(self.loc_grp)
         cmds.delete(grp)
 
     @staticmethod

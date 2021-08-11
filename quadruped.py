@@ -14,40 +14,37 @@ class Quadruped(rig.Bone):
     one tail
     """
 
-    def __init__(self, side='NA', base_name='standard', start_pos=[0, 0, 0]):
+    def __init__(self, side='NA', rig_type='Quadruped', name='standard', start_pos=[0, 0, 0]):
         """ Initialize Quadruped class with side and name
 
         :param side: str
-        :param base_name: str
+        :param name: str
         """
 
-        rig.Bone.__init__(self, side, base_name)
-        self.meta_type = 'Quadruped'
+        rig.Bone.__init__(self, side, name, rig_type)
 
         self.left_arm  = leg.LegFront(
             side='L',
-            base_name='standard',
+            name='standard',
             start_pos=[
                 1 + start_pos[0],
                 5 + start_pos[1],
                 3 + start_pos[2]]
         )
 
-        self.right_arm = leg.LegFront(side='R', base_name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], 3+start_pos[2]])
+        self.right_arm = leg.LegFront(side='R', name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], 3+start_pos[2]])
 
-        self.left_leg  = leg.LegBack(side='L', base_name='standard', start_pos=[1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
-        self.right_leg = leg.LegBack(side='R', base_name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
+        self.left_leg  = leg.LegBack(side='L', name='standard', start_pos=[1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
+        self.right_leg = leg.LegBack(side='R', name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
 
-        self.spine = spine.SpineQuad(side='M', base_name='spine', start_pos=[start_pos[0], 6+start_pos[1], -3+start_pos[2]])
-        self.tail = tail.Tail(side='M', base_name='tail', start_pos=[start_pos[0], 6+start_pos[1], -4+start_pos[2]])
+        self.spine = spine.SpineQuad(side='M', name='spine', start_pos=[start_pos[0], 6+start_pos[1], -3+start_pos[2]])
+        self.tail = tail.Tail(side='M', name='tail', start_pos=[start_pos[0], 6+start_pos[1], -4+start_pos[2]])
 
-        self.neck_root = base.Base(side='M', base_name='neck_root', start_pos=[start_pos[0], 6+start_pos[1]+0.5, 3+start_pos[2]+0.5])
-        self.head = base.Base(side='M', base_name='head', start_pos=[start_pos[0], 7.5+start_pos[1], 4+start_pos[2]])
-        self.tip = base.Base(side='M', base_name='tip', start_pos=[start_pos[0], 7.5+start_pos[1], 6+start_pos[2]])
+        self.neck_root = base.Base(side='M', name='neck_root', start_pos=[start_pos[0], 6+start_pos[1]+0.5, 3+start_pos[2]+0.5])
+        self.head = base.Base(side='M', name='head', start_pos=[start_pos[0], 7.5+start_pos[1], 4+start_pos[2]])
+        self.tip = base.Base(side='M', name='tip', start_pos=[start_pos[0], 7.5+start_pos[1], 6+start_pos[2]])
 
         self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.tail, self.neck_root, self.head, self.tip]
-
-        self.initial_setup()
 
     def create_locator(self):
         for rig_component in self.rig_components:
@@ -73,7 +70,7 @@ class Quadruped(rig.Bone):
         tip = self.tip.create_joint()
 
         # parent leg root joints to root spline joint
-        outliner.batch_parent([left_shoulder, right_shoulder], self.spine.jnt_list[-1])
+        outliner.batch_parent([left_shoulder, right_shoulder], self.spine.jnts[-1])
 
         # parent arm root joints to top spline joint
         outliner.batch_parent([left_hip, right_hip], spine_root)
@@ -82,7 +79,7 @@ class Quadruped(rig.Bone):
         cmds.parent(tail_root, spine_root)
 
         # parent neck, head, tip
-        cmds.parent(neck_root, self.spine.jnt_list[-1])
+        cmds.parent(neck_root, self.spine.jnts[-1])
         cmds.parent(head, neck_root)
         cmds.parent(tip, head)
 
@@ -97,17 +94,17 @@ class Quadruped(rig.Bone):
             rig_component.add_constraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        outliner.batch_parent([self.left_arm.ctrl_offset_list[0], self.right_arm.ctrl_offset_list[0]], self.spine.ctrl_list[-1])
-        outliner.batch_parent([self.left_leg.ctrl_offset_list[0], self.right_leg.ctrl_offset_list[0]], self.spine.ctrl_list[0])
-        cmds.parentConstraint(self.spine.ctrl_list[0], self.tail.master_ctrl, mo=1)
+        outliner.batch_parent([self.left_arm.ctrl_offsets[0], self.right_arm.ctrl_offsets[0]], self.spine.ctrls[-1])
+        outliner.batch_parent([self.left_leg.ctrl_offsets[0], self.right_leg.ctrl_offsets[0]], self.spine.ctrls[0])
+        cmds.parentConstraint(self.spine.ctrls[0], self.tail.master_ctrl, mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
         cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
 
         # parent head up
-        cmds.parent(self.neck_root.ctrl_offset_grp, self.spine.ctrl_list[-1])
-        cmds.parent(self.head.ctrl_offset_grp, self.neck_root.ctrl)
-        cmds.parent(self.tip.ctrl_offset_grp, self.head.ctrl)
+        cmds.parent(self.neck_root.ctrl_offset, self.spine.ctrls[-1])
+        cmds.parent(self.head.ctrl_offset, self.neck_root.ctrl)
+        cmds.parent(self.tip.ctrl_offset, self.head.ctrl)
 
     def color_controller(self):
         for rig_component in self.rig_components:

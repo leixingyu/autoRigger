@@ -226,7 +226,10 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         mesh_grp = '_Meshes'
 
         for grp in [loc_grp, ctrl_grp, jnt_grp, mesh_grp]:
-            cmds.delete(grp)
+            try:
+                cmds.delete(grp)
+            except:
+                pass
 
 def show():
     window = AutoRiggerWindow()

@@ -6,42 +6,40 @@ from utility import joint, outliner
 class Tail(rig.Bone):
     """ This module creates a quadruped tail rig"""
 
-    def __init__(self, side, base_name, start_pos=[0, 6, -4], length=4.0, segment=6):
+    def __init__(self, side, name, rig_type='Tail', start_pos=[0, 6, -4], length=4.0, segment=6):
         """ Initialize Tail class with side and name
 
         :param side: str
-        :param base_name: str
+        :param name: str
         """
-
-        rig.Bone.__init__(self, side, base_name)
-        self.meta_type = 'Tail'
 
         self.segment = segment
         self.start_pos = start_pos
         self.interval = length / (self.segment-1)
         self.scale = 0.4
 
-        self.initial_setup()
+        rig.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
-        self.loc_list, self.jnt_list, self.ik_jnt_list, self.fk_jnt_list,\
-        self.fk_ctrl_list, self.ik_ctrl_list, self.fk_offset_list,\
-        self.cluster_list, self.ik_offset_list = ([] for i in range(9))
+        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, \
+        self.fk_ctrls, self.ik_ctrls, self.fk_offsets, \
+        self.clusters, self.ik_offsets = ([] for i in range(9))
 
         for i in range(self.segment):
-            self.loc_list.append('{}{}_loc'.format(self.name, i))
-            self.jnt_list.append('{}{}_jnt'.format(self.name, i))
-            self.fk_jnt_list.append('{}{}fk_jnt'.format(self.name, i))
-            self.ik_jnt_list.append('{}{}ik_jnt'.format(self.name, i))
-            self.fk_ctrl_list.append('{}{}fk_ctrl'.format(self.name, i))
-            self.ik_ctrl_list.append('{}{}ik_ctrl'.format(self.name, i))
-            self.fk_offset_list.append('{}{}fk_offset'.format(self.name, i))
-            self.ik_offset_list.append('{}{}ik_offset'.format(self.name, i))
-            self.cluster_list.append('{}{}_cluster'.format(self.name, i))
+            self.locs.append('{}{}_loc'.format(self.base_name, i))
+            self.jnts.append('{}{}_jnt'.format(self.base_name, i))
+            self.fk_jnts.append('{}{}fk_jnt'.format(self.base_name, i))
+            self.ik_jnts.append('{}{}ik_jnt'.format(self.base_name, i))
+            self.fk_ctrls.append('{}{}fk_ctrl'.format(self.base_name, i))
+            self.ik_ctrls.append('{}{}ik_ctrl'.format(self.base_name, i))
+            self.fk_offsets.append('{}{}fk_offset'.format(self.base_name, i))
+            self.ik_offsets.append('{}{}ik_offset'.format(self.base_name, i))
+            self.clusters.append('{}{}_cluster'.format(self.base_name, i))
+
         # ik has different ctrl name
-        self.master_ctrl = '{}master_ctrl'.format(self.name)
-        self.ik_curve = '{}ik_curve'.format(self.name)
-        self.tail_ik = '{}_ik'.format(self.name)
+        self.master_ctrl = '{}master_ctrl'.format(self.base_name)
+        self.ik_curve = '{}ik_curve'.format(self.base_name)
+        self.tail_ik = '{}_ik'.format(self.base_name)
 
     @staticmethod
     def set_controller_shape():
@@ -54,10 +52,10 @@ class Tail(rig.Bone):
 
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp_name)
+        grp = cmds.group(em=1, n=self.loc_grp)
 
         for i in range(self.segment):
-            tail = cmds.spaceLocator(n=self.loc_list[i])
+            tail = cmds.spaceLocator(n=self.locs[i])
             # root locator of tail parent to the tail group
             if i is 0:
                 cmds.parent(tail, grp, relative=1)
@@ -65,7 +63,7 @@ class Tail(rig.Bone):
                 cmds.scale(self.scale, self.scale, self.scale, tail)
             # tail locator parent to the previous locator
             else:
-                cmds.parent(tail, self.loc_list[i-1], relative=1)
+                cmds.parent(tail, self.locs[i-1], relative=1)
                 # move tail locator along -y axis
                 cmds.move(0, -self.interval, 0, tail, relative=1)
 
@@ -75,62 +73,62 @@ class Tail(rig.Bone):
     def create_joint(self):
         # Result jnt
         cmds.select(clear=1)
-        for i, loc in enumerate(self.loc_list):
+        for i, loc in enumerate(self.locs):
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
-            jnt = cmds.joint(p=loc_pos, name=self.jnt_list[i])
+            jnt = cmds.joint(p=loc_pos, name=self.jnts[i])
             cmds.setAttr(jnt+'.radius', self.scale)
 
         # IK jnt
         cmds.select(clear=1)
-        for i, loc in enumerate(self.loc_list):
+        for i, loc in enumerate(self.locs):
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
-            jnt = cmds.joint(p=loc_pos, name=self.ik_jnt_list[i])
+            jnt = cmds.joint(p=loc_pos, name=self.ik_jnts[i])
             cmds.setAttr(jnt+'.radius', self.scale)
 
         # FK jnt
         cmds.select(clear=1)
-        for i, loc in enumerate(self.loc_list):
+        for i, loc in enumerate(self.locs):
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
-            jnt = cmds.joint(p=loc_pos, name=self.fk_jnt_list[i])
+            jnt = cmds.joint(p=loc_pos, name=self.fk_jnts[i])
             cmds.setAttr(jnt+'.radius', self.scale)
 
         # Cleanup
-        cmds.setAttr(self.fk_jnt_list[0]+'.visibility', 0)
-        cmds.setAttr(self.ik_jnt_list[0]+'.visibility', 0)
-        outliner.batch_parent([self.jnt_list[0], self.fk_jnt_list[0], self.ik_jnt_list[0]], self.jnt_global_grp)
-        joint.orient_joint([self.jnt_list[0], self.fk_jnt_list[0], self.ik_jnt_list[0]])
-        return self.jnt_list[0]
+        cmds.setAttr(self.fk_jnts[0]+'.visibility', 0)
+        cmds.setAttr(self.ik_jnts[0]+'.visibility', 0)
+        outliner.batch_parent([self.jnts[0], self.fk_jnts[0], self.ik_jnts[0]], self.jnt_global_grp)
+        joint.orient_joint([self.jnts[0], self.fk_jnts[0], self.ik_jnts[0]])
+        return self.jnts[0]
 
     def place_controller(self):
 
         # Master control
         cmds.duplicate('TailIK_tempShape', name=self.master_ctrl)
-        tail_pos = cmds.xform(self.jnt_list[0], q=1, t=1, ws=1)
+        tail_pos = cmds.xform(self.jnts[0], q=1, t=1, ws=1)
         cmds.move(tail_pos[0], tail_pos[1], tail_pos[2]-1, self.master_ctrl)
         cmds.addAttr(self.master_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
 
         # IK and FK control has the same setup
         for i in range(self.segment):
-            cmds.duplicate('TailIK_tempShape', name=self.ik_ctrl_list[i])
-            cmds.group(em=1, name=self.ik_offset_list[i])
-            cmds.duplicate('TailFK_tempShape', name=self.fk_ctrl_list[i])
-            cmds.group(em=1, name=self.fk_offset_list[i])
+            cmds.duplicate('TailIK_tempShape', name=self.ik_ctrls[i])
+            cmds.group(em=1, name=self.ik_offsets[i])
+            cmds.duplicate('TailFK_tempShape', name=self.fk_ctrls[i])
+            cmds.group(em=1, name=self.fk_offsets[i])
 
-        for i, tail in enumerate(self.jnt_list):
+        for i, tail in enumerate(self.jnts):
             tail_pos = cmds.xform(tail, q=1, t=1, ws=1)
             tail_rot = cmds.xform(tail, q=1, ro=1, ws=1)
-            cmds.move(tail_pos[0], tail_pos[1], tail_pos[2], self.ik_offset_list[i])
-            cmds.rotate(tail_rot[0], tail_rot[1], tail_rot[2], self.ik_offset_list[i])
-            cmds.move(tail_pos[0], tail_pos[1], tail_pos[2], self.fk_offset_list[i])
-            cmds.rotate(tail_rot[0], tail_rot[1], tail_rot[2], self.fk_offset_list[i])
+            cmds.move(tail_pos[0], tail_pos[1], tail_pos[2], self.ik_offsets[i])
+            cmds.rotate(tail_rot[0], tail_rot[1], tail_rot[2], self.ik_offsets[i])
+            cmds.move(tail_pos[0], tail_pos[1], tail_pos[2], self.fk_offsets[i])
+            cmds.rotate(tail_rot[0], tail_rot[1], tail_rot[2], self.fk_offsets[i])
         for i in range(self.segment):
-            cmds.parent(self.ik_ctrl_list[i], self.ik_offset_list[i], relative=1)
-            cmds.parent(self.fk_ctrl_list[i], self.fk_offset_list[i], relative=1)
+            cmds.parent(self.ik_ctrls[i], self.ik_offsets[i], relative=1)
+            cmds.parent(self.fk_ctrls[i], self.fk_offsets[i], relative=1)
             if i != 0:
-                cmds.parent(self.ik_offset_list[i], self.ik_ctrl_list[i-1])
-                cmds.parent(self.fk_offset_list[i], self.fk_ctrl_list[i-1])
+                cmds.parent(self.ik_offsets[i], self.ik_ctrls[i-1])
+                cmds.parent(self.fk_offsets[i], self.fk_ctrls[i-1])
             else:
-                outliner.batch_parent([self.ik_offset_list[i], self.fk_offset_list[i]], self.master_ctrl)
+                outliner.batch_parent([self.ik_offsets[i], self.fk_offsets[i]], self.master_ctrl)
 
         # Cleanup
         cmds.parent(self.master_ctrl, self.ctrl_global_grp)
@@ -138,7 +136,7 @@ class Tail(rig.Bone):
 
     def build_ik(self):
         curve_points = []
-        for i, tail in enumerate(self.ik_jnt_list):
+        for i, tail in enumerate(self.ik_jnts):
             tail_pos = cmds.xform(tail, q=1, t=1, ws=1)
             curve_points.append(tail_pos)
 
@@ -149,10 +147,10 @@ class Tail(rig.Bone):
 
         cvs = cmds.ls(self.ik_curve+'.cv[0:]', fl=1)
         for i, cv in enumerate(cvs):
-            cluster = cmds.cluster(cv, name=self.cluster_list[i])[-1]
+            cluster = cmds.cluster(cv, name=self.clusters[i])[-1]
             cmds.setAttr(cluster+'.visibility', 0)
 
-        cmds.ikHandle(startJoint=self.ik_jnt_list[0], endEffector=self.ik_jnt_list[self.segment-1], name=self.tail_ik, curve=tail_curve, createCurve=False,
+        cmds.ikHandle(startJoint=self.ik_jnts[0], endEffector=self.ik_jnts[self.segment-1], name=self.tail_ik, curve=tail_curve, createCurve=False,
                       parentCurve=1, roc=1, solver='ikSplineSolver')
         cmds.setAttr(self.tail_ik+'.visibility', 0)
         cmds.parent(self.tail_ik, self.ctrl_global_grp)
@@ -163,36 +161,36 @@ class Tail(rig.Bone):
     def add_constraint(self):
         self.build_ik()
         for i in range(self.segment):
-            tail_cluster = cmds.ls('{}Handle'.format(self.cluster_list[i]))
-            tail_ctrl = cmds.ls(self.ik_ctrl_list[i])
+            tail_cluster = cmds.ls('{}Handle'.format(self.clusters[i]))
+            tail_ctrl = cmds.ls(self.ik_ctrls[i])
             cmds.parent(tail_cluster, tail_ctrl)
 
         self.build_fk()
-        for i, tail_jnt in enumerate(self.fk_jnt_list):
-            tail_ctrl = cmds.ls(self.fk_ctrl_list[i])
+        for i, tail_jnt in enumerate(self.fk_jnts):
+            tail_ctrl = cmds.ls(self.fk_ctrls[i])
             cmds.parentConstraint(tail_ctrl, tail_jnt)
 
         # IK, FK to result jnt
         for i in range(self.segment):
-            ik_tail = cmds.ls(self.ik_jnt_list[i])
-            fk_tail = cmds.ls(self.fk_jnt_list[i])
-            final_tail = cmds.ls(self.jnt_list[i])
+            ik_tail = cmds.ls(self.ik_jnts[i])
+            fk_tail = cmds.ls(self.fk_jnts[i])
+            final_tail = cmds.ls(self.jnts[i])
             cmds.parentConstraint(ik_tail, fk_tail, final_tail)
 
         # IK FK switch
         for i in range(self.segment):
-            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jnt_list[i], self.ik_jnt_list[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=1)
-            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jnt_list[i], self.fk_jnt_list[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=0)
-            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jnt_list[i], self.ik_jnt_list[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=0)
-            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jnt_list[i], self.fk_jnt_list[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=1)
+            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jnts[i], self.ik_jnts[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=1)
+            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jnts[i], self.fk_jnts[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=0)
+            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jnts[i], self.ik_jnts[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=0)
+            cmds.setDrivenKeyframe('{}_parentConstraint1.{}W1'.format(self.jnts[i], self.fk_jnts[i]), currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=1)
     
-            cmds.setDrivenKeyframe(self.ik_ctrl_list[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=1)
-            cmds.setDrivenKeyframe(self.ik_ctrl_list[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=0)
-            cmds.setDrivenKeyframe(self.fk_ctrl_list[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=1)
-            cmds.setDrivenKeyframe(self.fk_ctrl_list[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=0)
+            cmds.setDrivenKeyframe(self.ik_ctrls[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=1)
+            cmds.setDrivenKeyframe(self.ik_ctrls[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=0)
+            cmds.setDrivenKeyframe(self.fk_ctrls[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=0, value=1)
+            cmds.setDrivenKeyframe(self.fk_ctrls[i]+'.visibility', currentDriver=self.master_ctrl+'.FK_IK', driverValue=1, value=0)
 
     def lock_controller(self):
-        for ctrl in self.fk_ctrl_list+self.ik_ctrl_list+[self.master_ctrl]:
+        for ctrl in self.fk_ctrls+self.ik_ctrls+[self.master_ctrl]:
             for transform in 's':
                 for axis in 'xyz':
                     cmds.setAttr('{}.{}{}'.format(ctrl, transform, axis), l=1, k=0)

@@ -5,21 +5,21 @@ from utility import outliner
 # TODO: make so the finger count is not hard coded
 # FIXME: lets get rid of the side factor and use direction instead
 
+
 class Hand(rig.Bone):
     """ This module creates a Hand rig with multiple fingers and a wrist """
 
-    def __init__(self, side, base_name, finger_count=5, start_pos=[0, 0, 0], interval=0.5, distance=2):
+    def __init__(self, side, name, rig_type='Hand', finger_count=5, start_pos=[0, 0, 0], interval=0.5, distance=2):
         """ Initialize Hand class
 
         :param side: str
-        :param base_name: str
+        :param name: str
         :param finger_count: int, number of fingers
         :param interval: interval between each fingers
         :param distance: distance between finger root and wrist
         """
 
-        rig.Bone.__init__(self, side, base_name)
-        self.meta_type = 'Hand'
+        rig.Bone.__init__(self, side, name, rig_type)
 
         self.finger_count = finger_count
         self.start_pos = start_pos
@@ -30,7 +30,7 @@ class Hand(rig.Bone):
         self.ctrl_scale = 1
 
         side_factor = 1
-        if self.side == 'R':
+        if self._side == 'R':
             side_factor = -1
 
         # Finger Locators
@@ -44,8 +44,8 @@ class Hand(rig.Bone):
         ]
 
         thumb = finger.Finger(
-            side=self.side,
-            base_name='thumb',
+            side=self._side,
+            name='thumb',
             start_pos=[
                 self.start_pos[0],
                 self.start_pos[1],
@@ -56,8 +56,8 @@ class Hand(rig.Bone):
         )
 
         index = finger.Finger(
-            side=self.side,
-            base_name='index',
+            side=self._side,
+            name='index',
             start_pos=[
                 self.start_pos[0],
                 self.start_pos[1],
@@ -67,8 +67,8 @@ class Hand(rig.Bone):
         )
 
         middle = finger.Finger(
-            side=self.side,
-            base_name='middle',
+            side=self._side,
+            name='middle',
             start_pos=[
                 self.start_pos[0],
                 self.start_pos[1],
@@ -78,8 +78,8 @@ class Hand(rig.Bone):
         )
 
         ring = finger.Finger(
-            side=self.side,
-            base_name='ring',
+            side=self._side,
+            name='ring',
             start_pos=[
                 self.start_pos[0],
                 self.start_pos[1],
@@ -89,8 +89,8 @@ class Hand(rig.Bone):
         )
 
         pinky = finger.Finger(
-            side=self.side,
-            base_name='pinky',
+            side=self._side,
+            name='pinky',
             start_pos=[
                 self.start_pos[0],
                 self.start_pos[1],
@@ -101,8 +101,8 @@ class Hand(rig.Bone):
 
         # Single Wrist Locator
         self.wrist = base.Base(
-            side=self.side,
-            base_name='wrist',
+            side=self._side,
+            name='wrist',
             start_pos=[
                 self.start_pos[0] - side_factor * self.distance,
                 self.start_pos[1],
@@ -111,7 +111,6 @@ class Hand(rig.Bone):
         )
 
         self.finger_list = [thumb, index, middle, ring, pinky]
-        self.initial_setup()
 
     def set_controller_shape(self):
         for obj in self.finger_list:
@@ -125,7 +124,7 @@ class Hand(rig.Bone):
         cmds.scale(self.ctrl_scale, self.ctrl_scale, self.ctrl_scale, hand_shape, relative=1)
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp_name)
+        grp = cmds.group(em=1, n=self.loc_grp)
 
         finger_grp = [finger.create_locator() for finger in self.finger_list]
         wrist_grp = self.wrist.create_locator()
