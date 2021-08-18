@@ -14,7 +14,7 @@ class Quadruped(rig.Bone):
     one tail
     """
 
-    def __init__(self, side='NA', rig_type='Quadruped', name='standard', start_pos=[0, 0, 0]):
+    def __init__(self, side='NA', rig_type='Quadruped', name='standard', pos=[0, 0, 0]):
         """ Initialize Quadruped class with side and name
 
         :param side: str
@@ -23,26 +23,26 @@ class Quadruped(rig.Bone):
 
         rig.Bone.__init__(self, side, name, rig_type)
 
-        self.left_arm  = leg.LegFront(
+        self.left_arm = leg.LegFront(
             side='L',
             name='standard',
-            start_pos=[
-                1 + start_pos[0],
-                5 + start_pos[1],
-                3 + start_pos[2]]
+            pos=[
+                1 + pos[0],
+                5 + pos[1],
+                3 + pos[2]]
         )
 
-        self.right_arm = leg.LegFront(side='R', name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], 3+start_pos[2]])
+        self.right_arm = leg.LegFront(side='R', name='standard', pos=[-1+pos[0], 5+pos[1], 3+pos[2]])
 
-        self.left_leg  = leg.LegBack(side='L', name='standard', start_pos=[1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
-        self.right_leg = leg.LegBack(side='R', name='standard', start_pos=[-1+start_pos[0], 5+start_pos[1], -3+start_pos[2]])
+        self.left_leg = leg.LegBack(side='L', name='standard', pos=[1+pos[0], 5+pos[1], -3+pos[2]])
+        self.right_leg = leg.LegBack(side='R', name='standard', pos=[-1+pos[0], 5+pos[1], -3+pos[2]])
 
-        self.spine = spine.SpineQuad(side='M', name='spine', start_pos=[start_pos[0], 6+start_pos[1], -3+start_pos[2]])
-        self.tail = tail.Tail(side='M', name='tail', start_pos=[start_pos[0], 6+start_pos[1], -4+start_pos[2]])
+        self.spine = spine.SpineQuad(side='M', name='spine', pos=[pos[0], 6+pos[1], -3+pos[2]])
+        self.tail = tail.Tail(side='M', name='tail', pos=[pos[0], 6+pos[1], -4+pos[2]])
 
-        self.neck_root = base.Base(side='M', name='neck_root', start_pos=[start_pos[0], 6+start_pos[1]+0.5, 3+start_pos[2]+0.5])
-        self.head = base.Base(side='M', name='head', start_pos=[start_pos[0], 7.5+start_pos[1], 4+start_pos[2]])
-        self.tip = base.Base(side='M', name='tip', start_pos=[start_pos[0], 7.5+start_pos[1], 6+start_pos[2]])
+        self.neck_root = base.Base(side='M', name='neck_root', pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
+        self.head = base.Base(side='M', name='head', pos=[pos[0], 7.5+pos[1], 4+pos[2]])
+        self.tip = base.Base(side='M', name='tip', pos=[pos[0], 7.5+pos[1], 6+pos[2]])
 
         self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.tail, self.neck_root, self.head, self.tip]
 
@@ -109,7 +109,6 @@ class Quadruped(rig.Bone):
     def color_controller(self):
         for rig_component in self.rig_components:
             rig_component.color_controller()
-
 
     def delete_guide(self):
         loc = cmds.ls(self.loc_global_grp)

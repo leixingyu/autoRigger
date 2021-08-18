@@ -6,7 +6,7 @@ from utility import joint, outliner
 class Tail(rig.Bone):
     """ This module creates a quadruped tail rig"""
 
-    def __init__(self, side, name, rig_type='Tail', start_pos=[0, 6, -4], length=4.0, segment=6):
+    def __init__(self, side, name, rig_type='Tail', pos=[0, 6, -4], length=4.0, segment=6):
         """ Initialize Tail class with side and name
 
         :param side: str
@@ -14,17 +14,15 @@ class Tail(rig.Bone):
         """
 
         self.segment = segment
-        self.start_pos = start_pos
+        self.pos = pos
         self.interval = length / (self.segment-1)
         self.scale = 0.4
+
+        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, self.fk_ctrls, self.ik_ctrls, self.fk_offsets,  self.clusters, self.ik_offsets = ([] for _ in range(9))
 
         rig.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
-        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, \
-        self.fk_ctrls, self.ik_ctrls, self.fk_offsets, \
-        self.clusters, self.ik_offsets = ([] for i in range(9))
-
         for i in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, i))
             self.jnts.append('{}{}_jnt'.format(self.base_name, i))
@@ -50,7 +48,6 @@ class Tail(rig.Bone):
         ctrl_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name='TailFK_tempShape')
         cmds.scale(0.3, 0.3, 0.3, ctrl_shape)
 
-
     def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp)
 
@@ -59,7 +56,7 @@ class Tail(rig.Bone):
             # root locator of tail parent to the tail group
             if i is 0:
                 cmds.parent(tail, grp, relative=1)
-                cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], tail, absolute=1)
+                cmds.move(self.pos[0], self.pos[1], self.pos[2], tail, absolute=1)
                 cmds.scale(self.scale, self.scale, self.scale, tail)
             # tail locator parent to the previous locator
             else:
@@ -194,5 +191,3 @@ class Tail(rig.Bone):
             for transform in 's':
                 for axis in 'xyz':
                     cmds.setAttr('{}.{}{}'.format(ctrl, transform, axis), l=1, k=0)
-
-

@@ -13,24 +13,24 @@ class Biped(rig.Bone):
     two legs
     """
 
-    def __init__(self, side, name, rig_type='Biped', start_pos=[0, 8.4, 0], spine_len=5.0):
+    def __init__(self, side, name, rig_type='Biped', pos=[0, 8.4, 0], spine_len=5.0):
         """ Initialize Biped class with side and name
 
         :param side: str
         :param name: str
         """
-        self.start_pos = start_pos
+        self.pos = pos
         self.spine_len = spine_len
         self.scale = 0.2
 
-        self.left_arm = arm.Arm(side='L', name='arm', start_pos=[self.start_pos[0]+2, self.start_pos[1]+self.spine_len, self.start_pos[2]])
-        self.right_arm = arm.Arm(side='R', name='arm', start_pos=[self.start_pos[0]-2, self.start_pos[1]+self.spine_len, self.start_pos[2]])
-        self.left_leg = leg.Leg(side='L', name='leg', start_pos=[self.start_pos[0]+1, self.start_pos[1], self.start_pos[2]])
-        self.right_leg = leg.Leg(side='R', name='leg', start_pos=[self.start_pos[0]-1, self.start_pos[1], self.start_pos[2]])
-        self.spine = spine.Spine(side='M', name='spine', start_pos=self.start_pos, length=self.spine_len)
-        self.neck = base.Base(side='M', name='neck', start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+1, self.start_pos[2]])
-        self.head = base.Base(side='M', name='head', start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+1.5, self.start_pos[2]])
-        self.tip = base.Base(side='M', name='tip', start_pos=[self.start_pos[0], self.start_pos[1]+self.spine_len+2, self.start_pos[2]])
+        self.left_arm = arm.Arm(side='L', name='arm', pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
+        self.right_arm = arm.Arm(side='R', name='arm', pos=[self.pos[0]-2, self.pos[1]+self.spine_len, self.pos[2]])
+        self.left_leg = leg.Leg(side='L', name='leg', pos=[self.pos[0]+1, self.pos[1], self.pos[2]])
+        self.right_leg = leg.Leg(side='R', name='leg', pos=[self.pos[0]-1, self.pos[1], self.pos[2]])
+        self.spine = spine.Spine(side='M', name='spine', pos=self.pos, length=self.spine_len)
+        self.neck = base.Base(side='M', name='neck', pos=[self.pos[0], self.pos[1]+self.spine_len+1, self.pos[2]])
+        self.head = base.Base(side='M', name='head', pos=[self.pos[0], self.pos[1]+self.spine_len+1.5, self.pos[2]])
+        self.tip = base.Base(side='M', name='tip', pos=[self.pos[0], self.pos[1]+self.spine_len+2, self.pos[2]])
 
         self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.neck, self.head, self.tip]
 
@@ -95,5 +95,3 @@ class Biped(rig.Bone):
     def delete_guide(self):
         loc = cmds.ls(self.loc_global_grp)
         cmds.delete(loc)
-
-

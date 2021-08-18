@@ -6,7 +6,7 @@ from . import rig
 class Base(rig.Bone):
     """ This module creates a single joint rig """
 
-    def __init__(self, side='M', name='idPlaceHolder', rig_type='Base', start_pos=[0, 0, 0], scale=0.2):
+    def __init__(self, side, name, rig_type='Base', pos=[0, 0, 0], scale=0.2):
         """ Initialize Base class with side and name
 
         :param side: str, 'M', 'L' or 'R'
@@ -15,7 +15,7 @@ class Base(rig.Bone):
         rig.Bone.__init__(self, side, name, rig_type)
         self.ctrl_scale = 1
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.scale = scale
 
     def set_controller_shape(self):
@@ -28,10 +28,10 @@ class Base(rig.Bone):
     def create_locator(self):
         """ Create the rig guides for placement purpose """
 
-        self.loc = cmds.spaceLocator(n=self.loc_name)
+        cmds.spaceLocator(n=self.loc)
         grp = cmds.group(em=1, name=self.loc_grp)
 
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], self.loc, relative=1)
+        cmds.move(self.pos[0], self.pos[1], self.pos[2], self.loc, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, self.loc)
 
         cmds.parent(self.loc, grp)
@@ -43,10 +43,10 @@ class Base(rig.Bone):
         """ Create the rig joints based on the guide's transform """
 
         cmds.select(clear=1)
-        locPos = cmds.xform(self.loc_name, q=1, t=1, ws=1)
+        loc_pos = cmds.xform(self.loc, q=1, t=1, ws=1)
 
-        self.jnt = cmds.joint(p=locPos, name=self.jnt_name)
-        cmds.setAttr(self.jnt + '.radius', 1)
+        cmds.joint(p=loc_pos, name=self.jnt)
+        cmds.setAttr(self.jnt+'.radius', 1)
 
         cmds.parent(self.jnt, self.jnt_global_grp)
         joint.orient_joint(self.jnt)
@@ -56,14 +56,14 @@ class Base(rig.Bone):
         """ Duplicate controller shapes and
         place them based on guide's and joint's transform """
 
-        self.ctrl = cmds.duplicate('Base_tempShape', name=self.ctrl_name)[0]
-        jntPos = cmds.xform(self.jnt, q=1, t=1, ws=1)
-        locRot = cmds.xform(self.loc, q=1, ro=1, ws=1)
+        cmds.duplicate('Base_tempShape', name=self.ctrl)
+        jnt_pos = cmds.xform(self.jnt, q=1, t=1, ws=1)
+        loc_rot = cmds.xform(self.loc, q=1, ro=1, ws=1)
 
         # use offset group to clear out rotation on ctrl
         self.ctrl_offset = cmds.group(em=1, name=self.ctrl_offset)
-        cmds.move(jntPos[0], jntPos[1], jntPos[2], self.ctrl_offset)
-        cmds.rotate(locRot[0], locRot[1], locRot[2], self.ctrl_offset)
+        cmds.move(jnt_pos[0], jnt_pos[1], jnt_pos[2], self.ctrl_offset)
+        cmds.rotate(loc_rot[0], loc_rot[1], loc_rot[2], self.ctrl_offset)
 
         # ctrl has transform relative to offset group, which is 0
         cmds.parent(self.ctrl, self.ctrl_offset, relative=1)
@@ -73,8 +73,3 @@ class Base(rig.Bone):
         """ Add all necessary constraints for the controller """
 
         cmds.parentConstraint(self.ctrl, self.jnt)
-
-
-
-
-

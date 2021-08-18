@@ -5,8 +5,8 @@ from utility import joint, outliner
 
 class Limb(rig.Bone):
     """ This module create a Limb rig which is used in arm or leg """
-    
-    def __init__(self, side, name, rig_type='Limb', start_pos=[0, 0, 0], interval=2, limb_type='Null'):
+
+    def __init__(self, side, name, rig_type='Limb', pos=[0, 0, 0], interval=2, limb_type='Null'):
         """ Initialize Limb class with side, name and type of the limb
         
         :param side: str
@@ -14,7 +14,7 @@ class Limb(rig.Bone):
         :param limb_type: str, 'Arm', 'Leg' or 'Null'
         """
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.interval = interval
         self.scale = 0.4
 
@@ -24,10 +24,11 @@ class Limb(rig.Bone):
         # unique to limb
         self.set_limb_type(limb_type)
 
+        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, self.ctrls, self.fk_ctrls, self.fk_offsets = ([] for _ in range(7))
+
         rig.Bone.__init__(self, side, name, rig_type)
 
     def set_limb_type(self, limb_type):
-
         if limb_type == 'Arm':
             self.limb_components = ['shoulder', 'elbow', 'wrist']
             self.direction = 'Horizontal'
@@ -40,19 +41,15 @@ class Limb(rig.Bone):
 
     def assign_secondary_naming(self):
         # initialize mulitple names
-        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, \
-        self.ctrls, self.fk_ctrls, self.fk_offsets\
-            = ([] for i in range(7))  
-        
         for component in self.limb_components:
-            self.locs.append     ('{}{}_loc'.format(self.base_name, component))
-            self.jnts.append     ('{}{}_jnt'.format(self.base_name, component))
-            self.ik_jnts.append   ('{}{}_ik_jnt'.format(self.base_name, component))
-            self.fk_jnts.append   ('{}{}_fk_jnt'.format(self.base_name, component))
-            self.ctrls.append    ('{}{}_ctrl'.format(self.base_name, component))
-            self.fk_ctrls.append  ('{}{}_fk_ctrl'.format(self.base_name, component))
+            self.locs.append('{}{}_loc'.format(self.base_name, component))
+            self.jnts.append('{}{}_jnt'.format(self.base_name, component))
+            self.ik_jnts.append('{}{}_ik_jnt'.format(self.base_name, component))
+            self.fk_jnts.append('{}{}_fk_jnt'.format(self.base_name, component))
+            self.ctrls.append('{}{}_ctrl'.format(self.base_name, component))
+            self.fk_ctrls.append('{}{}_fk_ctrl'.format(self.base_name, component))
             self.fk_offsets.append('{}{}_fk_offset'.format(self.base_name, component))
-            
+
         # ik has different ctrl name
         self.ik_ctrl = '{}_ik_ctrl'.format(self.base_name)
         self.ik_pole = '{}_ikpole_ctrl'.format(self.base_name)
@@ -64,10 +61,10 @@ class Limb(rig.Bone):
 
     @staticmethod
     def set_controller_shape():
-        limb_fk_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbFK_tempShape')
-        #cmds.scale(0.2, 0.2, 0.2, limb_fk_shape)
+        cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbFK_tempShape')
+        # cmds.scale(0.2, 0.2, 0.2, limb_fk_shape)
 
-        limb_ik_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbIK_tempShape')
+        cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbIK_tempShape')
 
         limb_ik_pole_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='LimbIKPole_tempShape')
         selection = cmds.select('LimbIKPole_tempShape.cv[6]', 'LimbIKPole_tempShape.cv[0]')
@@ -75,10 +72,12 @@ class Limb(rig.Bone):
         cmds.move(-0.5, 0, 0, selection)
         cmds.rotate(0, 90, 0, limb_ik_pole_shape)
 
-        arrow_pts = [[2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0], [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0], [2.0, 0.0, -1.0],
-                       [2.0, 0.0, -2.0], [1.0, 0.0, -2.0], [1.0, 0.0, -3.0], [2.0, 0.0, -3.0], [0.0, 0.0, -5.0], [-2.0, 0.0, -3.0], [-1.0, 0.0, -3.0], [-1.0, 0.0, -2.0],
-                       [-2.0, 0.0, -2.0], [-2.0, 0.0, -1.0], [-3.0, 0.0, -1.0], [-3.0, 0.0, -2.0], [-5.0, 0.0, 0.0], [-3.0, 0.0, 2.0], [-3.0, 0.0, 1.0], [-2.0, 0.0, 1.0],
-                       [-2.0, 0.0, 2.0], [-1.0, 0.0, 2.0], [-1.0, 0.0, 3.0], [-2.0, 0.0, 3.0], [0.0, 0.0, 5.0], [2.0, 0.0, 3.0], [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]]
+        arrow_pts = [
+            [2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0], [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0], [2.0, 0.0, -1.0],
+            [2.0, 0.0, -2.0], [1.0, 0.0, -2.0], [1.0, 0.0, -3.0], [2.0, 0.0, -3.0], [0.0, 0.0, -5.0], [-2.0, 0.0, -3.0], [-1.0, 0.0, -3.0], [-1.0, 0.0, -2.0],
+            [-2.0, 0.0, -2.0], [-2.0, 0.0, -1.0], [-3.0, 0.0, -1.0], [-3.0, 0.0, -2.0], [-5.0, 0.0, 0.0], [-3.0, 0.0, 2.0], [-3.0, 0.0, 1.0], [-2.0, 0.0, 1.0],
+            [-2.0, 0.0, 2.0], [-1.0, 0.0, 2.0], [-1.0, 0.0, 3.0], [-2.0, 0.0, 3.0], [0.0, 0.0, 5.0], [2.0, 0.0, 3.0], [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]
+        ]
         switch_shape = cmds.curve(p=arrow_pts, degree=1, name='Switch_tempShape')
         cmds.scale(0.3, 0.3, 0.3, switch_shape)
 
@@ -95,7 +94,7 @@ class Limb(rig.Bone):
         # Root
         limb_root = cmds.spaceLocator(n=self.locs[0])
         cmds.parent(limb_root, grp, relative=1)
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], limb_root, relative=1)
+        cmds.move(self.pos[0], self.pos[1], self.pos[2], limb_root, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, limb_root)
 
         # Middle
@@ -151,7 +150,7 @@ class Limb(rig.Bone):
         # Root
         root_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrls[0])[0]
         cmds.move(root_pos[0], root_pos[1], root_pos[2], root_fk_ctrl, absolute=1)
-            
+
         root_offset = cmds.group(em=1, name=self.fk_offsets[0])
         cmds.move(root_pos[0], root_pos[1], root_pos[2], root_offset)
         cmds.parent(root_fk_ctrl, root_offset)
@@ -161,7 +160,7 @@ class Limb(rig.Bone):
         # Mid
         mid_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrls[1])[0]
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_fk_ctrl, absolute=1)
-            
+
         mid_offset = cmds.group(em=1, name=self.fk_offsets[1])
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_offset)
         cmds.parent(mid_fk_ctrl, mid_offset)
@@ -223,7 +222,7 @@ class Limb(rig.Bone):
 
     def add_constraint(self):
         # Result Joint + IK/FK Switch
-        for i, type in enumerate(self.limb_components):
+        for i, _ in enumerate(self.limb_components):
             if i == 0:
                 cmds.parentConstraint(self.ik_jnts[i], self.fk_jnts[i], self.jnts[i])
                 cmds.setDrivenKeyframe('{}_parentConstraint1.{}W0'.format(self.jnts[i], self.ik_jnts[i]), currentDriver='{}.FK_IK'.format(self.switch_ctrl), driverValue=1, value=1)
@@ -247,7 +246,8 @@ class Limb(rig.Bone):
         cmds.setDrivenKeyframe(self.ik_pole+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=0, value=0)
 
         # FK Setup
-        for i, component in enumerate(self.limb_components): cmds.orientConstraint(self.fk_ctrls[i], self.fk_jnts[i], mo=1)
+        for i, component in enumerate(self.limb_components):
+            cmds.orientConstraint(self.fk_ctrls[i], self.fk_jnts[i], mo=1)
         cmds.setAttr(self.fk_jnts[0]+'.visibility', 0)
 
         # IK Setup

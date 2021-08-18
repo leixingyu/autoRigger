@@ -7,14 +7,14 @@ from . import rig
 class Leg(rig.Bone):
     """ This module create a biped leg rig"""
 
-    def __init__(self, side, name, rig_type='Leg', start_pos=[0, 8.4, 0], distance=4, interval=0.5, height=0.4):
+    def __init__(self, side, name, rig_type='Leg', pos=[0, 8.4, 0], distance=4, interval=0.5, height=0.4):
         """ Initialize Leg class with side and name
 
         :param side: str
         :param name: str
         """
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.distance = distance
         self.interval = interval
         self.height = height
@@ -25,7 +25,7 @@ class Leg(rig.Bone):
         self.limb = limb.Limb(
             side=self._side,
             name=name,
-            start_pos=self.start_pos,
+            pos=self.pos,
             interval=self.distance,
             limb_type='Leg'
         )
@@ -33,10 +33,10 @@ class Leg(rig.Bone):
         self.foot = foot.Foot(
             side=self._side,
             name=name,
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1] - 2 * self.distance,
-                self.start_pos[2]],
+            pos=[
+                self.pos[0],
+                self.pos[1] - 2 * self.distance,
+                self.pos[2]],
             interval=self.interval,
             height=self.height
         )
@@ -97,26 +97,25 @@ class Leg(rig.Bone):
 class LegFront(rig.Bone):
     """ This module creates a quadruped front leg rig"""
 
-    def __init__(self, side, name, rig_type='FrontLeg', start_pos=[0, 5, 3], distance=1.5, height=0.2):
+    def __init__(self, side, name, rig_type='FrontLeg', pos=[0, 5, 3], distance=1.5, height=0.2):
         """ Initialize LegFront with side and name
 
         :param side: str
         :param name: str
         """
-        self.start_pos = start_pos
+        self.pos = pos
         self.distance = distance
         self.height = height
         self.scale = 0.4
 
         # names
-        self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for i in range(4))
+        self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for _ in range(4))
         self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
         self.leg_ik = None
         self.foot_ik = None
         self.toe_ik = None
 
         rig.Bone.__init__(self, side, name, rig_type)
-
 
     def assign_secondary_naming(self):
         for component in self.limb_components:
@@ -129,7 +128,6 @@ class LegFront(rig.Bone):
         self.leg_ik = '{}leg_ik'.format(self.base_name)
         self.foot_ik = '{}foot_ik'.format(self.base_name)
         self.toe_ik = '{}toe_ik'.format(self.base_name)
-
 
     @staticmethod
     def set_controller_shape():
@@ -150,7 +148,7 @@ class LegFront(rig.Bone):
         # Shoulder
         shoulder = cmds.spaceLocator(n=self.locs[0])
         cmds.parent(shoulder, grp, relative=1)
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], shoulder, relative=1)
+        cmds.move(self.pos[0], self.pos[1], self.pos[2], shoulder, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, shoulder)
 
         # Elbow
@@ -238,7 +236,7 @@ class LegFront(rig.Bone):
         shoulder_pos = cmds.xform(self.jnts[0], q=1, ws=1, t=1)
         elbow_pos = cmds.xform(self.jnts[1], q=1, ws=1, t=1)
         wrist_pos = cmds.xform(self.jnts[2], q=1, ws=1, t=1)
-        straighten_len = ((shoulder_pos[0]-elbow_pos[0]) ** 2+(shoulder_pos[1]-elbow_pos[1]) ** 2+(shoulder_pos[2]-elbow_pos[2]) ** 2) ** 0.5+ \
+        straighten_len = ((shoulder_pos[0]-elbow_pos[0])**2+(shoulder_pos[1]-elbow_pos[1])**2+(shoulder_pos[2]-elbow_pos[2])**2)**0.5 + \
                         ((wrist_pos[0]-elbow_pos[0]) ** 2+(wrist_pos[1]-elbow_pos[1]) ** 2+(wrist_pos[2]-elbow_pos[2]) ** 2) ** 0.5
 
         # create measurement
@@ -320,14 +318,14 @@ class LegFront(rig.Bone):
 class LegBack(rig.Bone):
     """ This module creates a quadruped back leg rig"""
 
-    def __init__(self, side, name, rig_type='BackLeg', start_pos=[0, 5, -3], distance=1.5, height=0.2):
+    def __init__(self, side, name, rig_type='BackLeg', pos=[0, 5, -3], distance=1.5, height=0.2):
         """ Initialize LegFront with side and name
 
         :param side: str
         :param name: str
         """
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.distance = distance
         self.height = height
         self.scale = 0.4
@@ -375,7 +373,7 @@ class LegBack(rig.Bone):
         # Hip
         hip = cmds.spaceLocator(n=self.locs[0])
         cmds.parent(hip, grp, relative=1)
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], hip, relative=1)
+        cmds.move(self.pos[0], self.pos[1], self.pos[2], hip, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, hip)
 
         # Knee

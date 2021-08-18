@@ -5,14 +5,14 @@ from . import rig, hand, limb
 class Arm(rig.Bone):
     """ This module creates an Arm rig with a limb and a hand"""
 
-    def __init__(self, side, name, rig_type='Arm', start_pos=[0, 10, 0], distance=2, interval=0.5, gap=2):
+    def __init__(self, side, name, rig_type='Arm', pos=[0, 10, 0], distance=2, interval=0.5, gap=2):
         """  Initialize Arm class with side and base_name
 
         :param side: str
         :param name: str
         """
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.distance = distance
         self.interval = interval
         self.gap = gap
@@ -24,7 +24,7 @@ class Arm(rig.Bone):
             side=self._side,
             name=name,
             limb_type='Arm',
-            start_pos=self.start_pos,
+            pos=self.pos,
             interval=self.distance
         )
 
@@ -33,8 +33,7 @@ class Arm(rig.Bone):
             self.hand = hand.Hand(
                 side=self._side,
                 name=name,
-                start_pos=[self.start_pos[0]+2 * self.distance+self.gap,
-                           self.start_pos[1], self.start_pos[2]],
+                pos=[self.pos[0]+2 * self.distance+self.gap, self.pos[1], self.pos[2]],
                 interval=self.interval,
                 distance=self.gap
             )
@@ -42,8 +41,7 @@ class Arm(rig.Bone):
             self.hand = hand.Hand(
                 side=self._side,
                 name=name,
-                start_pos=[self.start_pos[0]-2 * self.distance-self.gap,
-                           self.start_pos[1], self.start_pos[2]],
+                pos=[self.pos[0]-2 * self.distance-self.gap, self.pos[1], self.pos[2]],
                 interval=self.interval,
                 distance=self.gap
             )
@@ -73,7 +71,7 @@ class Arm(rig.Bone):
     def add_constraint(self):
         self.limb.add_constraint()
         self.hand.add_constraint()
-        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.jnt_name, mo=1)
+        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.jnt, mo=1)
 
     def lock_controller(self):
         self.limb.lock_controller()

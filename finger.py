@@ -12,7 +12,7 @@ class Finger(rig.Bone):
             side,
             name,
             rig_type='Finger',
-            start_pos=[0, 0, 0],
+            pos=[0, 0, 0],
             interval=0.5,
             segment=4,
             finger_type='Other'
@@ -28,7 +28,7 @@ class Finger(rig.Bone):
         self.segment = segment
         self.finger_type = finger_type
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.interval = interval
 
         self.ctrl_spacer = 1
@@ -37,10 +37,11 @@ class Finger(rig.Bone):
 
         self.finger_shape = None
 
+        self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for _ in range(4))  # ik has different ctrl name
+
         rig.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
-        self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for i in range(4))  # ik has different ctrl name
         for i in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, i))
             self.jnts.append('{}{}_jnt'.format(self.base_name, i))
@@ -74,7 +75,7 @@ class Finger(rig.Bone):
             # root locator of finger parent to the locator group
             if i is 0:
                 cmds.parent(finger, grp, relative=1)
-                cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], finger, absolute=1)
+                cmds.move(self.pos[0], self.pos[1], self.pos[2], finger, absolute=1)
                 cmds.scale(self.scale, self.scale, self.scale, finger)
             # non-root locator parent to the previous locator
             else:
@@ -103,6 +104,7 @@ class Finger(rig.Bone):
             jnt_pos = cmds.xform(self.jnts[i], q=1, t=1, ws=1)
             jnt_rot = cmds.xform(self.jnts[i], q=1, ro=1, ws=1)
 
+            ctrl = None
             if self.finger_type == 'Other':
                 ctrl = cmds.duplicate(self.finger_shape, name=self.ctrls[i])[0]
                 cmds.move(

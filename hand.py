@@ -9,7 +9,7 @@ from utility import outliner
 class Hand(rig.Bone):
     """ This module creates a Hand rig with multiple fingers and a wrist """
 
-    def __init__(self, side, name, rig_type='Hand', finger_count=5, start_pos=[0, 0, 0], interval=0.5, distance=2):
+    def __init__(self, side, name, rig_type='Hand', finger_count=5, pos=[0, 0, 0], interval=0.5, distance=2):
         """ Initialize Hand class
 
         :param side: str
@@ -22,7 +22,7 @@ class Hand(rig.Bone):
         rig.Bone.__init__(self, side, name, rig_type)
 
         self.finger_count = finger_count
-        self.start_pos = start_pos
+        self.pos = pos
         self.interval = interval
         self.distance = distance
 
@@ -34,7 +34,7 @@ class Hand(rig.Bone):
             side_factor = -1
 
         # Finger Locators
-        z_value = self.start_pos[2]
+        z_value = self.pos[2]
         offsets = [
             z_value + 2 * self.interval,
             z_value + self.interval,
@@ -46,9 +46,9 @@ class Hand(rig.Bone):
         thumb = finger.Finger(
             side=self._side,
             name='thumb',
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1],
+            pos=[
+                self.pos[0],
+                self.pos[1],
                 offsets[0]
             ],
             interval=0.3,
@@ -58,9 +58,9 @@ class Hand(rig.Bone):
         index = finger.Finger(
             side=self._side,
             name='index',
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1],
+            pos=[
+                self.pos[0],
+                self.pos[1],
                 offsets[1]
             ],
             interval=0.5
@@ -69,9 +69,9 @@ class Hand(rig.Bone):
         middle = finger.Finger(
             side=self._side,
             name='middle',
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1],
+            pos=[
+                self.pos[0],
+                self.pos[1],
                 offsets[2]
             ],
             interval=0.55
@@ -80,9 +80,9 @@ class Hand(rig.Bone):
         ring = finger.Finger(
             side=self._side,
             name='ring',
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1],
+            pos=[
+                self.pos[0],
+                self.pos[1],
                 offsets[3]
             ],
             interval=0.5
@@ -91,9 +91,9 @@ class Hand(rig.Bone):
         pinky = finger.Finger(
             side=self._side,
             name='pinky',
-            start_pos=[
-                self.start_pos[0],
-                self.start_pos[1],
+            pos=[
+                self.pos[0],
+                self.pos[1],
                 offsets[4]
             ],
             interval=0.4
@@ -103,10 +103,10 @@ class Hand(rig.Bone):
         self.wrist = base.Base(
             side=self._side,
             name='wrist',
-            start_pos=[
-                self.start_pos[0] - side_factor * self.distance,
-                self.start_pos[1],
-                self.start_pos[2]
+            pos=[
+                self.pos[0] - side_factor * self.distance,
+                self.pos[1],
+                self.pos[2]
             ]
         )
 
@@ -155,12 +155,8 @@ class Hand(rig.Bone):
             obj.add_constraint()
 
         for obj in self.constraint_list:
-            cmds.parentConstraint(self.wrist.jnt_name, obj, mo=1)
+            cmds.parentConstraint(self.wrist.jnt, obj, mo=1)
 
     def color_controller(self):
         for obj in self.finger_list:
             obj.color_controller()
-
-
-
-

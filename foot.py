@@ -6,14 +6,14 @@ from utility import outliner, other
 class Foot(rig.Bone):
     """ This module creates a foot rig """
     
-    def __init__(self, side, name, rig_type='Foot', start_pos=[0, 0, 0], interval=0.5, height=0.4):
+    def __init__(self, side, name, rig_type='Foot', pos=[0, 0, 0], interval=0.5, height=0.4):
         """ Initialize Foot class with side and name
         
         :param side: str
         :param name: str
         """
 
-        self.start_pos = start_pos
+        self.pos = pos
         self.interval = interval
         self.height = height
         self.scale = 0.2
@@ -46,10 +46,9 @@ class Foot(rig.Bone):
         self.fk_ctrl = '{}{}_ctrl'.format(self.base_name, 'fk')
         self.switch_ctrl = '{}{}_ctrl'.format(self.base_name, 'switch')
 
-
     @staticmethod
     def set_controller_shape():
-        foot_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')[0]
+        cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')[0]
         selection = cmds.select('Foot_tempShape.cv[0:2]')
         cmds.move(0, 0, -1.5, selection, relative=1)
         # cmds.scale(1.8, 1.8, 1.8, foot_shape)
@@ -66,7 +65,7 @@ class Foot(rig.Bone):
 
         # Result Foot
         cmds.spaceLocator(n=self.ankle_loc)
-        cmds.move(self.start_pos[0], self.start_pos[1], self.start_pos[2], self.ankle_loc, absolute=1)
+        cmds.move(self.pos[0], self.pos[1], self.pos[2], self.ankle_loc, absolute=1)
         cmds.scale(self.scale, self.scale, self.scale, self.ankle_loc)
 
         cmds.spaceLocator(n=self.ball_loc)
@@ -141,16 +140,16 @@ class Foot(rig.Bone):
 
     def place_controller(self):
         # IK Setup
-        cmds.duplicate('Foot_tempShape', name=self.ctrl_name)
-        cmds.addAttr(self.ctrl_name, longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=1)
-        cmds.addAttr(self.ctrl_name, longName='foot_Bank', attributeType='double', defaultValue=0, minValue=-20, maxValue=20, keyable=1)
+        cmds.duplicate('Foot_tempShape', name=self.ctrl)
+        cmds.addAttr(self.ctrl, longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=1)
+        cmds.addAttr(self.ctrl, longName='foot_Bank', attributeType='double', defaultValue=0, minValue=-20, maxValue=20, keyable=1)
 
         foot_pos = cmds.xform(self.ball_jnt, q=1, t=1, ws=1)
-        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2]+1, self.ctrl_name)
-        cmds.makeIdentity(self.ctrl_name, apply=1, t=1, r=1, s=1)
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2]+1, self.ctrl)
+        cmds.makeIdentity(self.ctrl, apply=1, t=1, r=1, s=1)
 
         heel_loc = cmds.xform(self.heel_jnt, q=1, t=1, ws=1)
-        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '%s.scalePivot' % self.ctrl_name, '%s.rotatePivot' % self.ctrl_name, absolute=1)
+        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '%s.scalePivot' % self.ctrl, '%s.rotatePivot' % self.ctrl, absolute=1)
 
         # FK Setup
         cmds.duplicate('FootFK_tempShape', name=self.fk_ctrl)
@@ -170,7 +169,7 @@ class Foot(rig.Bone):
         cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        outliner.batch_parent([self.switch_ctrl, self.ctrl_name, self.fk_ctrl], self.ctrl_global_grp)
+        outliner.batch_parent([self.switch_ctrl, self.ctrl, self.fk_ctrl], self.ctrl_global_grp)
 
     def add_constraint(self):
         # FK Setup
@@ -181,30 +180,30 @@ class Foot(rig.Bone):
         cmds.orientConstraint(self.fk_toe_jnt, self.toe_jnt)
 
         # IK Setup
-        cmds.parentConstraint(self.ctrl_name, self.inner_jnt, sr='z', mo=1)
+        cmds.parentConstraint(self.ctrl, self.inner_jnt, sr='z', mo=1)
         cmds.orientConstraint(self.rev_ball_jnt, self.ankle_jnt, mo=1)
         cmds.orientConstraint(self.rev_toe_jnt, self.ball_jnt, mo=1)
         cmds.pointConstraint(self.rev_ankle_jnt, self.ankle_jnt, mo=1)
 
         # Foot Roll
-        cmds.setDrivenKeyframe(self.heel_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.heel_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=-10, value=-25)
+        cmds.setDrivenKeyframe(self.heel_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.heel_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=-10, value=-25)
 
-        cmds.setDrivenKeyframe(self.rev_ball_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.rev_ball_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=20, value=25)
+        cmds.setDrivenKeyframe(self.rev_ball_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.rev_ball_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=20, value=25)
 
-        cmds.setDrivenKeyframe(self.rev_toe_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=20, value=0)
-        cmds.setDrivenKeyframe(self.rev_toe_jnt+'.rotateX', currentDriver=self.ctrl_name+'.foot_Roll', driverValue=40, value=25)
+        cmds.setDrivenKeyframe(self.rev_toe_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=20, value=0)
+        cmds.setDrivenKeyframe(self.rev_toe_jnt+'.rotateX', currentDriver=self.ctrl+'.foot_Roll', driverValue=40, value=25)
 
         # Foot Bank
-        cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=0, value=0)
         if self._side == 'R':
-            cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=-20, value=-30)
-            cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=20, value=30)
+            cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=-20, value=-30)
+            cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=20, value=30)
         else:
-            cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=-20, value=30)
-            cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl_name+'.foot_Bank', driverValue=20, value=-30)
+            cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=-20, value=30)
+            cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrl+'.foot_Bank', driverValue=20, value=-30)
 
         # Result Foot Setup
         cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.ankle_jnt, self.rev_ball_jnt), currentDriver=self.switch_ctrl+'.FK_IK', driverValue=1, value=1)
@@ -230,7 +229,7 @@ class Foot(rig.Bone):
         # switch will follow ankle movement
         cmds.parentConstraint(self.ankle_jnt, self.switch_ctrl, mo=1)
 
-        cmds.setDrivenKeyframe(self.ctrl_name+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.ctrl_name+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.ctrl+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.ctrl+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=0, value=0)
         cmds.setDrivenKeyframe(self.fk_ctrl+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=1, value=0)
         cmds.setDrivenKeyframe(self.fk_ctrl+'.visibility', currentDriver=self.switch_ctrl+'.FK_IK', driverValue=0, value=1)

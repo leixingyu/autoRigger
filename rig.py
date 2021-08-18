@@ -11,9 +11,9 @@ class Bone(object):
         :param name: str
         """
 
+        self._rig_type = rig_type
         self._side = side
         self._name = name
-        self._rig_type = rig_type
         self.base_name = '{}_{}_{}'.format(self._rig_type, self._side, self._name)
 
         self.loc_global_grp = '_Locators'
@@ -21,11 +21,11 @@ class Bone(object):
         self.jnt_global_grp = '_Joints'
         self.mesh_global_grp = '_Meshes'
 
-        self.loc_name = '{}_loc'.format(self.base_name)
+        self.loc = '{}_loc'.format(self.base_name)
         self.loc_grp = '{}_locGrp'.format(self.base_name)
-        self.jnt_name = '{}_jnt'.format(self.base_name)
+        self.jnt = '{}_jnt'.format(self.base_name)
         self.jnt_grp = '{}_jntGrp'.format(self.base_name)
-        self.ctrl_name = '{}_ctrl'.format(self.base_name)
+        self.ctrl = '{}_ctrl'.format(self.base_name)
         self.ctrl_grp = '{}_ctrlGrp'.format(self.base_name)
         self.ctrl_offset = '{}_offset'.format(self.base_name)
 
