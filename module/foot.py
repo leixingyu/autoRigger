@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 from . import rig
-from utility import outliner, other
+from utility.setup import outliner
+from utility.util import other
 
 
 class Foot(rig.Bone):

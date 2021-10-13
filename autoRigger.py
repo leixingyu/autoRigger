@@ -4,11 +4,11 @@
 from enum import Enum, IntEnum, unique
 import os
 import warnings
-from utility.Qt import QtCore, QtGui, QtWidgets
-from utility.Qt import _loadUi
-from utility import setup
-from . import base, finger, foot, spine, limb, hand, arm, leg, biped, tail, quadruped
-
+from utility._vendor.Qt import QtCore, QtGui, QtWidgets
+from utility._vendor.Qt import _loadUi
+from utility.setup import setup
+from .module import base, biped, arm, spine, leg, foot, tail, hand, finger, \
+    limb, quadruped
 
 __author__ = "Xingyu Lei"
 __maintainer__ = "Xingyu Lei"

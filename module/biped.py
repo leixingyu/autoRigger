@@ -1,6 +1,6 @@
 import maya.cmds as cmds
-from utility import outliner
-from . import base, rig, arm, leg, spine
+from utility.setup import outliner
+from . import base, arm, spine, leg, rig
 
 
 class Biped(rig.Bone):

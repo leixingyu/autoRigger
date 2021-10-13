@@ -1,6 +1,6 @@
 import maya.cmds as cmds
-from . import base, rig, tail, spine, leg
-from utility import outliner
+from . import base, spine, leg, tail, rig
+from utility.setup import outliner
 
 
 class Quadruped(rig.Bone):

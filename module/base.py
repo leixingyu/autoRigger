@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from utility import joint
+from utility.rigging import joint
 from . import rig
 
 

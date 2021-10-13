@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from . import rig, hand, limb
+from . import hand, rig, limb
 
 
 class Arm(rig.Bone):

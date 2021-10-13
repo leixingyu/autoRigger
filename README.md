@@ -23,7 +23,7 @@ facial rigging demo: https://www.youtube.com/watch?v=Vnmq4ok0KUs
 
     Or, unzip to custom directory, and add to PYTHONPATH system variable 
     
-2. Install the maya-utility module in the same directory: https://github.com/sheldonlei/maya-utility
+2. Install the maya-utility module in the same directory: https://github.com/leixingyu/maya-utility
 
     (Example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**utility**)
 
@@ -69,11 +69,6 @@ autoRigger.show()
   <summary>Update 0.4.0 (4/21/2019)</summary>
   <p>*integrated Body and Facial Rigging System</p>
   <p>*added Face Picker</p>
-</details>
-
-<details>
-  <summary>Update 0.3.0 (3/24/2019)</summary>
-  <p>*included Beta Facial Rigging System</p>
 </details>
 
 <details>

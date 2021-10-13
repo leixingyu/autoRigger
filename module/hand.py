@@ -1,6 +1,7 @@
 import maya.cmds as cmds
-from . import rig, base, finger
-from utility import outliner
+from . import base, rig, finger
+from utility.setup import outliner
+
 
 # TODO: make so the finger count is not hard coded
 # FIXME: lets get rid of the side factor and use direction instead

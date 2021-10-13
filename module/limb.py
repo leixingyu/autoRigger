@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 from . import rig
-from utility import joint, outliner
+from utility.setup import outliner
+from utility.rigging import joint
 
 
 class Limb(rig.Bone):

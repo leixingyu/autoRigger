@@ -1,5 +1,4 @@
 import maya.cmds as cmds
-from . import base
 
 
 class Head(create_locator.Bone):
