@@ -1,8 +1,16 @@
 import maya.cmds as cmds
 
+from utility.algorithm import strGenerator
+reload(strGenerator)
+from autoRigger import util
+
+TMP_PREFIX = 'tmp_'
+
 
 class Bone(object):
     """ Abstract class for joint """
+
+    namer = strGenerator.StrGenerator(TMP_PREFIX, 8)
 
     def __init__(self, side, name, rig_type):
         """ Initialize Base class with side and name
@@ -14,12 +22,10 @@ class Bone(object):
         self._rig_type = rig_type
         self._side = side
         self._name = name
-        self.base_name = '{}_{}_{}'.format(self._rig_type, self._side, self._name)
 
-        self.loc_global_grp = '_Locators'
-        self.ctrl_global_grp = '_Controllers'
-        self.jnt_global_grp = '_Joints'
-        self.mesh_global_grp = '_Meshes'
+        self._shape = None
+
+        self.base_name = '{}_{}_{}'.format(self._rig_type, self._side, self._name)
 
         self.loc = '{}_loc'.format(self.base_name)
         self.loc_grp = '{}_locGrp'.format(self.base_name)
@@ -30,18 +36,11 @@ class Bone(object):
         self.ctrl_offset = '{}_offset'.format(self.base_name)
 
         self.assign_secondary_naming()
-        self.create_outliner_grp()
+        util.create_outliner_grp()
 
     def assign_secondary_naming(self):
         """ Create secondary naming convention for complex module """
-
         pass
-
-    def create_outliner_grp(self):
-        """ Create different groups in the outliner """
-        for grp in [self.loc_global_grp, self.ctrl_global_grp, self.jnt_global_grp, self.mesh_global_grp]:
-            if not cmds.ls(grp):
-                cmds.group(em=1, name=grp)
 
     @staticmethod
     def set_controller_shape():
@@ -106,14 +105,14 @@ class Bone(object):
     def delete_guide(self):
         """ Delete all locator guides to de-clutter the scene """
 
-        grp = cmds.ls(self.loc_grp)
+        grp = cmds.ls('*_loc')
         cmds.delete(grp)
 
     @staticmethod
     def delete_shape():
         """ Delete control template shape to de-clutter the scene """
 
-        shapes = cmds.ls('*_tempShape*')
+        shapes = cmds.ls('{}*'.format(TMP_PREFIX))
         cmds.delete(shapes)
 
     def lock_controller(self):

@@ -1,10 +1,13 @@
 import maya.cmds as cmds
-from . import rig
+
+from autoRigger.module.base import bone
+from autoRigger import util
+
 from utility.setup import outliner
 from utility.rigging import joint
 
 
-class Limb(rig.Bone):
+class Limb(bone.Bone):
     """ This module create a Limb rig which is used in arm or leg """
 
     def __init__(self, side, name, rig_type='Limb', pos=[0, 0, 0], interval=2, limb_type='Null'):
@@ -27,7 +30,7 @@ class Limb(rig.Bone):
 
         self.locs, self.jnts, self.ik_jnts, self.fk_jnts, self.ctrls, self.fk_ctrls, self.fk_offsets = ([] for _ in range(7))
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def set_limb_type(self, limb_type):
         if limb_type == 'Arm':
@@ -60,18 +63,16 @@ class Limb(rig.Bone):
         self.switch_ctrl = '{}_switch_ctrl'.format(self.base_name)
         self.switch_offset = '{}_switch_offset'.format(self.base_name)
 
-    @staticmethod
-    def set_controller_shape():
-        cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbFK_tempShape')
+    def set_controller_shape(self):
+        self._shape = list(range(4))
+
+        self._shape[0] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbFK_tempShape')[0]
         # cmds.scale(0.2, 0.2, 0.2, limb_fk_shape)
 
-        cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbIK_tempShape')
+        self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='LimbIK_tempShape')[0]
 
-        limb_ik_pole_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='LimbIKPole_tempShape')
-        selection = cmds.select('LimbIKPole_tempShape.cv[6]', 'LimbIKPole_tempShape.cv[0]')
-        cmds.scale(0.5, 0.5, 0.5, selection)
-        cmds.move(-0.5, 0, 0, selection)
-        cmds.rotate(0, 90, 0, limb_ik_pole_shape)
+        self._shape[2] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='LimbIKPole_tempShape')[0]
+        cmds.rotate(0, 90, 0, self._shape[2])
 
         arrow_pts = [
             [2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0], [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0], [2.0, 0.0, -1.0],
@@ -79,8 +80,8 @@ class Limb(rig.Bone):
             [-2.0, 0.0, -2.0], [-2.0, 0.0, -1.0], [-3.0, 0.0, -1.0], [-3.0, 0.0, -2.0], [-5.0, 0.0, 0.0], [-3.0, 0.0, 2.0], [-3.0, 0.0, 1.0], [-2.0, 0.0, 1.0],
             [-2.0, 0.0, 2.0], [-1.0, 0.0, 2.0], [-1.0, 0.0, 3.0], [-2.0, 0.0, 3.0], [0.0, 0.0, 5.0], [2.0, 0.0, 3.0], [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]
         ]
-        switch_shape = cmds.curve(p=arrow_pts, degree=1, name='Switch_tempShape')
-        cmds.scale(0.3, 0.3, 0.3, switch_shape)
+        self._shape[3] = cmds.curve(p=arrow_pts, degree=1, name='Switch_tempShape')
+        cmds.scale(0.3, 0.3, 0.3, self._shape[3])
 
     def create_locator(self):
         grp = cmds.group(em=1, n=self.loc_grp)
@@ -109,7 +110,7 @@ class Limb(rig.Bone):
         cmds.move(self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0, limb_top, relative=1)  # move limb joint along +x axis
 
         # Cleanup
-        cmds.parent(grp, self.loc_global_grp)
+        cmds.parent(grp, util.G_LOC_GRP)
         return grp
 
     def create_joint(self):
@@ -138,7 +139,7 @@ class Limb(rig.Bone):
             cmds.setAttr(ik_jnt+'.radius', 1)
 
         # Cleanup
-        outliner.batch_parent([self.jnts[0], self.ik_jnts[0], self.fk_jnts[0]], self.jnt_global_grp)
+        outliner.batch_parent([self.jnts[0], self.ik_jnts[0], self.fk_jnts[0]], util.G_JNT_GRP)
         joint.orient_joint([self.jnts[0], self.ik_jnts[0], self.fk_jnts[0]])
         return cmds.ls(self.jnts[0])
 
@@ -149,7 +150,7 @@ class Limb(rig.Bone):
         # FK Setup
 
         # Root
-        root_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrls[0])[0]
+        root_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[0])[0]
         cmds.move(root_pos[0], root_pos[1], root_pos[2], root_fk_ctrl, absolute=1)
 
         root_offset = cmds.group(em=1, name=self.fk_offsets[0])
@@ -159,7 +160,7 @@ class Limb(rig.Bone):
         cmds.makeIdentity(root_fk_ctrl, apply=1, t=1, r=1, s=1)
 
         # Mid
-        mid_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrls[1])[0]
+        mid_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[1])[0]
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_fk_ctrl, absolute=1)
 
         mid_offset = cmds.group(em=1, name=self.fk_offsets[1])
@@ -169,7 +170,7 @@ class Limb(rig.Bone):
         cmds.makeIdentity(mid_fk_ctrl, apply=1, t=1, r=1, s=1)
 
         # Top
-        top_fk_ctrl = cmds.duplicate('LimbFK_tempShape', name=self.fk_ctrls[2])[0]
+        top_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[2])[0]
         cmds.move(top_pos[0], top_pos[1], top_pos[2], top_fk_ctrl, absolute=1)
 
         top_offset = cmds.group(em=1, name=self.fk_offsets[2])
@@ -184,7 +185,7 @@ class Limb(rig.Bone):
         # IK Setup
 
         # Root
-        ik_ctrl = cmds.duplicate('LimbIK_tempShape', name=self.ik_ctrl)[0]
+        ik_ctrl = cmds.duplicate(self._shape[1], name=self.ik_ctrl)[0]
         cmds.move(top_pos[0], top_pos[1], top_pos[2], ik_ctrl, absolute=1)
 
         offset_grp = cmds.group(em=1, name=self.ik_offset)
@@ -194,7 +195,7 @@ class Limb(rig.Bone):
         cmds.makeIdentity(ik_ctrl, apply=1, t=1, r=1, s=1)
 
         # Pole
-        pole_ctrl = cmds.duplicate('LimbIKPole_tempShape', name=self.ik_pole)
+        pole_ctrl = cmds.duplicate(self._shape[2], name=self.ik_pole)
         if self.direction == 'Vertical':
             cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]+3, pole_ctrl, absolute=1)
         elif self.direction == 'Horizontal':
@@ -207,7 +208,7 @@ class Limb(rig.Bone):
         cmds.makeIdentity(pole_ctrl, apply=1, t=1, r=1, s=1)
 
         # IK/FK Switch Setup
-        cmds.duplicate('Switch_tempShape', name=self.switch_ctrl)
+        cmds.duplicate(self._shape[3], name=self.switch_ctrl)
         cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_ctrl, absolute=1)
         cmds.rotate(0, 0, 90, self.switch_ctrl, relative=1)
         cmds.addAttr(self.switch_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
@@ -219,7 +220,7 @@ class Limb(rig.Bone):
         cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        cmds.parent(self.switch_offset, self.ctrl_global_grp)
+        cmds.parent(self.switch_offset, util.G_CTRL_GRP)
 
     def add_constraint(self):
         # Result Joint + IK/FK Switch
