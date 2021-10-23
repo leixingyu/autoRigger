@@ -3,15 +3,31 @@ import maya.cmds as cmds
 from autoRigger import util
 from . import chain
 
+from utility.algorithm import algorithm
+
 
 class ChainEP(chain.Chain):
 
-    def __init__(self, side, name, segment, curve):
+    def __init__(self, side, name, segment, curve, cv=None):
 
         self.clusters = list()
         self.guide_curve = None
 
         chain.Chain.__init__(self, side, name, segment)
+
+        if not cv:
+            cv = self.segment
+
+        if cv < 2:
+            print('in-sufficient control points')
+            return
+
+        self.cvs = list()
+
+        percentages = algorithm.get_percentages(cv)
+        for p in percentages:
+            integer = int(round(p*(self.segment-1)))
+            self.cvs.append(integer)
 
         self.curve = curve
 
@@ -44,37 +60,31 @@ class ChainEP(chain.Chain):
                                   self.namer.tmp)
 
     def place_controller(self):
-        for index in range(self.segment):
+        for index in self.cvs:
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
+
             util.matchXform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
         return self.offsets[0]
 
-    def build_curve(self):
-        curve_points = []
-        for index, jnt in enumerate(self.jnts):
-            pos = cmds.xform(jnt, q=1, t=1, ws=1)
-            curve_points.append(pos)
-
-        cmds.curve(ep=curve_points, name=self.guide_curve)
-        cmds.setAttr(self.guide_curve+'.visibility', 0)
-        # turning off inherit transform avoid curve move/scale twice as much
-        cmds.inheritTransform(self.guide_curve, off=1)
-        cmds.parent(self.guide_curve, util.G_LOC_GRP)
-
-        cvs = cmds.ls(self.guide_curve+'.ep[0:]', fl=1)
-        for index, cv in enumerate(cvs):
-            cluster = cmds.pointCurveConstraint(cv, rpo=1, w=1)[0]
-            cmds.rename(cluster, self.clusters[index])
-            cmds.setAttr(self.clusters[index]+'.visibility', 0)
-
     def add_constraint(self):
-        self.build_curve()
 
-        for index, cluster in enumerate(self.clusters):
-            cmds.parent(cluster, self.ctrls[index])
-            cmds.parentConstraint(self.ctrls[index], self.jnts[index])
+        for i in range(len(self.cvs)-1):
+            head = self.cvs[i]
+            tail = self.cvs[i+1]
+            for j in range(head, tail+1):
+                gap = 1.00/(tail - head)
+
+                # why not using parent constraint?
+                # because sometimes it will break
+                cmds.pointConstraint(self.ctrls[head], self.jnts[j], w=1-((j-head) * gap), mo=1)
+                cmds.pointConstraint(self.ctrls[tail], self.jnts[j], w=(j-head) * gap, mo=1)
+
+                cmds.orientConstraint(self.ctrls[head], self.jnts[j], w=1-((j-head) * gap), mo=1)
+                cmds.orientConstraint(self.ctrls[tail], self.jnts[j], w=(j-head) * gap, mo=1)
+
+
 
