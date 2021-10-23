@@ -1,31 +1,25 @@
 import maya.cmds as cmds
 
-from autoRigger.module.base import bone
 from autoRigger import util
 from . import chain, chainFK, chainIK
 
 from utility.algorithm import vector
-reload(vector)
-from utility.setup import outliner
 from utility.rigging import joint
 
 
 class ChainFKIK(chain.Chain):
-    """ This module creates a quadruped tail rig"""
 
-    def __init__(self, side, name, length=4.0, segment=6, direction=[0, 1, 0]):
-        """ Initialize Tail class with side and name
-
-        :param side: str
-        :param name: str
-        """
+    def __init__(self, side, name, segment, length, direction):
 
         self.master_ctrl = None
 
-        chain.Chain.__init__(self, side, name, length, segment, direction)
+        chain.Chain.__init__(self, side, name, segment)
 
-        self.ik_chain = chainIK.ChainIK(side, name, length, segment, direction)
-        self.fk_chain = chainFK.ChainFK(side, name, length, segment, direction)
+        self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction)
+        self.fk_chain = chainFK.ChainFK(side, name, segment, length, direction)
+
+        self.interval = length / (self.segment-1)
+        self.dir = vector.Vector(direction).normalize()
 
     def assign_secondary_naming(self):
         for index in range(self.segment):

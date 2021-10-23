@@ -11,7 +11,7 @@ reload(vector)
 class Chain(bone.Bone):
     """ Abstract chain module """
 
-    def __init__(self, side, name, length=4.0, segment=6, direction=[0, 1, 0]):
+    def __init__(self, side, name, segment=6):
         """ Initialize Tail class with side and name
 
         :param side: str
@@ -19,8 +19,9 @@ class Chain(bone.Bone):
         """
 
         self.segment = segment
-        self.interval = length / (self.segment-1)
-        self.dir = vector.Vector(direction).normalize()
+        self.interval = None
+        self.dir = None
+        self.curve = None
 
         self.locs = list()
         self.jnts = list()
@@ -42,20 +43,7 @@ class Chain(bone.Bone):
         cmds.parent(self.locs[0], util.G_LOC_GRP)
         return self.locs[0]
 
-    def create_joint(self):
-        # FK jnt
-        cmds.select(clear=1)
-        for index, loc in enumerate(self.locs):
-            pos = cmds.xform(loc, q=1, t=1, ws=1)
-            cmds.joint(p=pos, name=self.jnts[index])
-
-        cmds.parent(self.jnts[0], util.G_JNT_GRP)
-        joint.orient_joint(self.jnts[0])
-
-        return self.jnts[0]
-
     def place_controller(self):
-        # FK
         for index in range(self.segment):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
@@ -70,3 +58,14 @@ class Chain(bone.Bone):
         # Cleanup
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
         return self.offsets[0]
+
+    def create_joint(self):
+        cmds.select(clear=1)
+        for index, loc in enumerate(self.locs):
+            pos = cmds.xform(loc, q=1, t=1, ws=1)
+            cmds.joint(p=pos, name=self.jnts[index])
+
+        cmds.parent(self.jnts[0], util.G_JNT_GRP)
+        joint.orient_joint(self.jnts[0])
+
+        return self.jnts[0]

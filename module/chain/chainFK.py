@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 
 from . import chain
+from autoRigger import util
 
 from utility.algorithm import vector
 reload(vector)
@@ -8,8 +9,11 @@ reload(vector)
 
 class ChainFK(chain.Chain):
 
-    def __init__(self, side, name, length=4.0, segment=6, direction=[0, 1, 0]):
-        chain.Chain.__init__(self, side, name, length, segment, direction)
+    def __init__(self, side, name, segment, length, direction):
+        chain.Chain.__init__(self, side, name, segment)
+
+        self.interval = length / (self.segment-1)
+        self.dir = vector.Vector(direction).normalize()
 
     def assign_secondary_naming(self):
         for index in range(self.segment):

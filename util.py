@@ -1,9 +1,36 @@
 import maya.cmds as cmds
 
+from utility.util import other
+
+
 G_LOC_GRP = '_Locators'
 G_CTRL_GRP = '_Controllers'
 G_JNT_GRP = '_Joints'
 G_MESH_GRP = '_Meshes'
+
+
+def create_locators_on_curve(curve, sample):
+    locs = list()
+
+    points, tangents = other.get_point_on_curve(curve, sample)
+
+    for index in range(len(points)):
+        point = points[index]
+        tangent = tangents[index]
+
+        loc = cmds.spaceLocator()
+        locs.append(loc)
+        temp_node = cmds.createNode('transform')
+
+        cmds.xform(temp_node,
+                   t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z])
+        cmds.xform(loc, t=[point.x, point.y, point.z])
+
+        constraint = cmds.aimConstraint(temp_node, loc)[0]
+
+        cmds.delete([temp_node, constraint])
+
+    return locs
 
 
 def create_outliner_grp():
