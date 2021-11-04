@@ -1,10 +1,26 @@
 import logging
 
 import maya.cmds as cmds
-from . import rig
+
+from .base import bone
+from .chain import chainFK
+from autoRigger import util
 
 
-class Finger(rig.Bone):
+class Finger(chainFK.ChainFK):
+
+    def __init__(
+            self,
+            side,
+            name='finger',
+            segment=4,
+            length=2.0,
+            direction=[1, 0, 0]):
+
+        chainFK.ChainFK.__init__(self, side, name, segment, length, direction)
+
+
+class Finger1(bone.Bone):
     """ This module creates one finger rig """
 
     def __init__(
@@ -12,7 +28,6 @@ class Finger(rig.Bone):
             side,
             name,
             rig_type='Finger',
-            pos=[0, 0, 0],
             interval=0.5,
             segment=4,
             finger_type='Other'
@@ -28,18 +43,17 @@ class Finger(rig.Bone):
         self.segment = segment
         self.finger_type = finger_type
 
-        self.pos = pos
         self.interval = interval
 
         self.ctrl_spacer = 1
         self.ctrl_scale = 1
         self.scale = 0.3
 
-        self.finger_shape = None
+        self._shape = None
 
         self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for _ in range(4))  # ik has different ctrl name
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
         for i in range(self.segment):
@@ -52,42 +66,37 @@ class Finger(rig.Bone):
     def set_controller_shape(self):
         # Finger Shape
         if self.finger_type == 'Other':
-            self.finger_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=6, name='Finger_tempShape')[0]
-            cmds.select('{}.cv[3]'.format(self.finger_shape), '{}.cv[5]'.format(self.finger_shape))
+            self._shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=6, name='Finger_tempShape')[0]
+            cmds.select('{}.cv[3]'.format(self._shape), '{}.cv[5]'.format(self._shape))
             cmds.scale(0.2, 0.2, 0.2, relative=1)
-            cmds.select('{}.cv[1]'.format(self.finger_shape), '{}.cv[4]'.format(self.finger_shape))
+            cmds.select('{}.cv[1]'.format(self._shape), '{}.cv[4]'.format(self._shape))
             cmds.move(0, 0, 1, relative=1)
-            cmds.scale(0.2, 0.2, 0.4, self.finger_shape)
-            cmds.rotate(90, 0, 0, self.finger_shape)
+            cmds.scale(0.2, 0.2, 0.4, self._shape)
+            cmds.rotate(90, 0, 0, self._shape)
 
         # Thumb Shape
         elif self.finger_type == 'Thumb':
-            self.finger_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='Finger_tempShape')[0]
-            cmds.scale(0.2, 0.2, 0.2, self.finger_shape)
+            self._shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='Finger_tempShape')[0]
+            cmds.scale(0.2, 0.2, 0.2, self._shape)
 
         # Global Scale
-        cmds.scale(self.ctrl_scale, self.ctrl_scale, self.ctrl_scale, self.finger_shape, relative=1)
+        cmds.scale(self.ctrl_scale, self.ctrl_scale, self.ctrl_scale, self._shape, relative=1)
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
-        for i in range(self.segment):
-            finger = cmds.spaceLocator(n=self.locs[i])
-            # root locator of finger parent to the locator group
-            if i is 0:
-                cmds.parent(finger, grp, relative=1)
-                cmds.move(self.pos[0], self.pos[1], self.pos[2], finger, absolute=1)
-                cmds.scale(self.scale, self.scale, self.scale, finger)
+        for index in range(self.segment):
+            finger = cmds.spaceLocator(n=self.locs[index])
+
             # non-root locator parent to the previous locator
-            else:
-                cmds.parent(finger, self.locs[i-1], relative=1)
+            if index:
+                cmds.parent(finger, self.locs[index-1], relative=1)
+
                 if self._side == 'L':  # move finger locator along +x axis
                     cmds.move(self.interval, 0, 0, finger, relative=1)
                 elif self._side == 'R':  # move finger locator along -x axis
                     cmds.move(-self.interval, 0, 0, finger, relative=1)
 
-        cmds.parent(grp, self.loc_global_grp)
-        cmds.select(clear=1)
-        return grp
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
+        return self.locs[0]
 
     def create_joint(self):
         cmds.select(clear=1)
@@ -96,7 +105,7 @@ class Finger(rig.Bone):
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
             jnt = cmds.joint(p=loc_pos, name=self.jnts[i])
             cmds.setAttr(jnt+'.radius', self.scale)
-        cmds.parent(self.jnts[0], self.jnt_global_grp)
+        cmds.parent(self.jnts[0], util.G_JNT_GRP)
         return cmds.ls(self.jnts[0])
 
     def place_controller(self):
@@ -106,7 +115,7 @@ class Finger(rig.Bone):
 
             ctrl = None
             if self.finger_type == 'Other':
-                ctrl = cmds.duplicate(self.finger_shape, name=self.ctrls[i])[0]
+                ctrl = cmds.duplicate(self._shape, name=self.ctrls[i])[0]
                 cmds.move(
                     jnt_pos[0],
                     jnt_pos[1] + self.ctrl_spacer,
@@ -123,7 +132,7 @@ class Finger(rig.Bone):
                 )
 
             elif self.finger_type == 'Thumb':
-                ctrl = cmds.duplicate(self.finger_shape, name=self.ctrls[i])[0]
+                ctrl = cmds.duplicate(self._shape, name=self.ctrls[i])[0]
                 cmds.move(jnt_pos[0], jnt_pos[1], jnt_pos[2], ctrl)
 
             else:
@@ -136,7 +145,7 @@ class Finger(rig.Bone):
             cmds.makeIdentity(ctrl, apply=1, t=1, r=1, s=1)
 
             if i == 0:
-                cmds.parent(offset_grp, self.ctrl_global_grp)
+                cmds.parent(offset_grp, util.G_CTRL_GRP)
             elif i != 0:
                 cmds.parent(offset_grp, self.ctrls[i-1])
 

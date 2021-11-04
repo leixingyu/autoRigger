@@ -22,7 +22,7 @@ class Base(bone.Bone):
 
     def set_controller_shape(self):
         # Base controller shape
-        self._shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Base_tempShape')[0]
+        self._shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
 
     def create_locator(self):
         """ Create the rig guides for placement purpose """
@@ -55,7 +55,6 @@ class Base(bone.Bone):
         """
 
         # TODO: check why use locator rotation instead of joint
-
         cmds.duplicate(self._shape, name=self.ctrl)
 
         # used to clear out ctrl transform offset
