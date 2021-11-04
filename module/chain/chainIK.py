@@ -58,7 +58,7 @@ class ChainIK(chain.Chain):
         cmds.setAttr(self.ik_curve+'.visibility', 0)
         # turning off inherit transform avoid curve move/scale twice as much
         cmds.inheritTransform(self.ik_curve, off=1)
-        cmds.parent(self.ik_curve, util.G_LOC_GRP)
+        cmds.parent(self.ik_curve, util.G_CTRL_GRP)
 
         cvs = cmds.ls(self.ik_curve+'.cv[0:]', fl=1)
         for index, cv in enumerate(cvs):
