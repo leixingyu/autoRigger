@@ -72,6 +72,7 @@ class ChainEP(chain.Chain):
 
     def add_constraint(self):
 
+        # smooth fall off constraint along the chain
         for i in range(len(self.cvs)-1):
             head = self.cvs[i]
             tail = self.cvs[i+1]

@@ -1,10 +1,8 @@
 import maya.cmds as cmds
 
 from . import chain
-from autoRigger import util
 
-from utility.algorithm import vector
-reload(vector)
+from utility.datatype import vector
 
 
 class ChainFK(chain.Chain):

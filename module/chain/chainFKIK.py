@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from autoRigger import util
 from . import chain, chainFK, chainIK
 
-from utility.algorithm import vector
+from utility.datatype import vector
 from utility.rigging import joint
 
 

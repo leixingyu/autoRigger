@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from autoRigger.module.base import bone
 from autoRigger import util
 
-from utility.algorithm import vector
+from utility.datatype import vector
 from utility.rigging import joint
 reload(vector)
 
