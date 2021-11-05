@@ -54,19 +54,11 @@ class Arm(bone.Bone):
         # Hand
         self.hand.create_locator()
 
-        self.move_locator()
-
-
-    def move_locator(self, pos=[0, 10, 0]):
-        # TODO:
-
-        util.move(self.limb.locs[0], pos)
-
         # move hand based on side
         if self._side == 'L':
-            util.move(self.hand.wrist.loc, [pos[0]+2 * self.distance+self.gap, pos[1], pos[2]])
-        else:
-            util.move(self.hand.wrist.loc, pos=[pos[0]-2 * self.distance-self.gap, pos[1], pos[2]])
+            util.move(self.hand.wrist.loc, pos=[2 * self.distance+self.gap, 0, 0])
+        elif self._side == 'R':
+            util.move(self.hand.wrist.loc, pos=[-2 * self.distance-self.gap, 0, 0])
 
         cmds.parent(self.hand.wrist.loc, self.limb.locs[-1])
 

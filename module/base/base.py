@@ -9,7 +9,7 @@ from autoRigger import util
 class Base(bone.Bone):
     """ This module creates a single joint rig """
 
-    def __init__(self, side, name, rig_type='Base', pos=[0, 0, 0]):
+    def __init__(self, side, name, rig_type='Base'):
         """ Initialize Base class with side and name
 
         :param side: str, 'M', 'L' or 'R'
@@ -17,7 +17,6 @@ class Base(bone.Bone):
         """
         bone.Bone.__init__(self, side, name, rig_type)
 
-        self.pos = pos
         self.scale = 0.2
 
     def set_controller_shape(self):
@@ -29,7 +28,6 @@ class Base(bone.Bone):
 
         cmds.spaceLocator(n=self.loc)
 
-        cmds.move(self.pos[0], self.pos[1], self.pos[2], self.loc, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, self.loc)
 
         cmds.parent(self.loc, util.G_LOC_GRP)

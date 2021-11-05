@@ -1,31 +1,33 @@
 import maya.cmds as cmds
-from . import foot, rig, limb
+
+from . import foot
+from .base import bone
+from .limb import limb
+from autoRigger import util
 from utility.setup import outliner
 from utility.rigging import joint
 
 
-class Leg(rig.Bone):
+class Leg(bone.Bone):
     """ This module create a biped leg rig"""
 
-    def __init__(self, side, name, rig_type='Leg', pos=[0, 8.4, 0], distance=4, interval=0.5, height=0.4):
+    def __init__(self, side, name, rig_type='Leg', distance=4, interval=0.5, height=0.4):
         """ Initialize Leg class with side and name
 
         :param side: str
         :param name: str
         """
 
-        self.pos = pos
         self.distance = distance
         self.interval = interval
         self.height = height
         self.scale = 0.2
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
         self.limb = limb.Limb(
             side=self._side,
             name=name,
-            pos=self.pos,
             interval=self.distance,
             limb_type='Leg'
         )
@@ -33,23 +35,17 @@ class Leg(rig.Bone):
         self.foot = foot.Foot(
             side=self._side,
             name=name,
-            pos=[
-                self.pos[0],
-                self.pos[1] - 2 * self.distance,
-                self.pos[2]],
             interval=self.interval,
             height=self.height
         )
 
     def create_locator(self):
-        # Limb
         self.limb.create_locator()
+        self.foot.create_locator()
 
-        # Foot
-        foot_grp = self.foot.create_locator()
+        util.move(self.foot.ankle_loc, [0, -2*self.distance, 0])
 
-        # Connect
-        cmds.parent(foot_grp, self.limb.locs[-1])
+        cmds.parent(self.foot.ankle_loc, self.limb.locs[-1])
 
     def set_controller_shape(self):
         self.limb.set_controller_shape()
@@ -94,16 +90,15 @@ class Leg(rig.Bone):
         self.foot.color_controller()
 
 
-class LegFront(rig.Bone):
+class LegFront(bone.Bone):
     """ This module creates a quadruped front leg rig"""
 
-    def __init__(self, side, name, rig_type='FrontLeg', pos=[0, 5, 3], distance=1.5, height=0.2):
+    def __init__(self, side, name, rig_type='FrontLeg', distance=1.5, height=0.2):
         """ Initialize LegFront with side and name
 
         :param side: str
         :param name: str
         """
-        self.pos = pos
         self.distance = distance
         self.height = height
         self.scale = 0.4
@@ -115,7 +110,7 @@ class LegFront(rig.Bone):
         self.foot_ik = None
         self.toe_ik = None
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
         for component in self.limb_components:
@@ -129,26 +124,24 @@ class LegFront(rig.Bone):
         self.foot_ik = '{}foot_ik'.format(self.base_name)
         self.toe_ik = '{}toe_ik'.format(self.base_name)
 
-    @staticmethod
-    def set_controller_shape():
+    def set_controller_shape(self):
+        self._shape = list(range(3))
+
         sphere = cmds.createNode('implicitSphere')
-        sphere_ctrl = cmds.rename(cmds.listRelatives(sphere, p=1), 'Shoulder_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, sphere_ctrl)
+        self._shape[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
+        cmds.scale(0.5, 0.5, 0.5, self._shape[0])
 
         pole = cmds.createNode('implicitSphere')
-        pole_ctrl = cmds.rename(cmds.listRelatives(pole, p=1), 'Pole_tempShape')
-        cmds.scale(0.2, 0.2, 0.2, pole_ctrl)
+        self._shape[1] = cmds.rename(cmds.listRelatives(pole, p=1), self.namer.tmp)
+        cmds.scale(0.2, 0.2, 0.2, self._shape[1])
 
-        ctrl_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Paw_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, ctrl_shape)
+        self._shape[2] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
+        cmds.scale(0.5, 0.5, 0.5, self._shape[2])
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
 
         # Shoulder
         shoulder = cmds.spaceLocator(n=self.locs[0])
-        cmds.parent(shoulder, grp, relative=1)
-        cmds.move(self.pos[0], self.pos[1], self.pos[2], shoulder, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, shoulder)
 
         # Elbow
@@ -171,8 +164,7 @@ class LegFront(rig.Bone):
         cmds.parent(toe, paw, relative=1)
         cmds.move(0, 0, 0.5 * self.distance, toe, relative=1)
 
-        cmds.parent(grp, self.loc_global_grp)
-        return grp
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def create_joint(self):
         cmds.select(clear=1)
@@ -182,14 +174,14 @@ class LegFront(rig.Bone):
             jnt = cmds.joint(p=loc_pos, name=self.jnts[index])
             cmds.setAttr(jnt+'.radius', self.scale)
 
-        cmds.parent(self.jnts[0], self.jnt_global_grp)
+        cmds.parent(self.jnts[0], util.G_JNT_GRP)
         joint.orient_joint(self.jnts[0])
         return self.jnts[0]
 
     def place_controller(self):
         # Shoulder
         shoulder = cmds.ls(self.jnts[0])
-        shoulder_ctrl = cmds.duplicate('Shoulder_tempShape', name=self.ctrls[0])[0]
+        shoulder_ctrl = cmds.duplicate(self._shape[0], name=self.ctrls[0])[0]
         shoulder_pos = cmds.xform(shoulder, q=1, ws=1, t=1)
         shoulder_rot = cmds.xform(shoulder, q=1, ws=1, ro=1)
 
@@ -200,7 +192,7 @@ class LegFront(rig.Bone):
 
         # Front foot
         paw = cmds.ls(self.jnts[3])
-        paw_ctrl = cmds.duplicate('Paw_tempShape', name=self.ctrls[3])[0]
+        paw_ctrl = cmds.duplicate(self._shape[2], name=self.ctrls[3])[0]
         paw_pos = cmds.xform(paw, q=1, ws=1, t=1)
         cmds.move(paw_pos[0], 0, paw_pos[2], paw_ctrl)
 
@@ -214,14 +206,14 @@ class LegFront(rig.Bone):
 
         # Elbow control - aka. pole vector
         elbow = cmds.ls(self.jnts[1])
-        pole_ctrl = cmds.duplicate('Pole_tempShape', name=self.ctrls[1])[0]
+        pole_ctrl = cmds.duplicate(self._shape[1], name=self.ctrls[1])[0]
         pole_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[1])
         elbow_pos = cmds.xform(elbow, q=1, ws=1, t=1)
         cmds.move(elbow_pos[0], elbow_pos[1], elbow_pos[2]-self.distance, pole_ctrl_offset)
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)
         cmds.parent(pole_ctrl_offset, paw_ctrl)
 
-        outliner.batch_parent([shoulder_ctrl_offset, paw_ctrl], self.ctrl_global_grp)
+        outliner.batch_parent([shoulder_ctrl_offset, paw_ctrl], util.G_CTRL_GRP)
 
     def build_ik(self):
         cmds.ikHandle(startJoint=self.jnts[0], endEffector=self.jnts[2], name=self.leg_ik, solver='ikRPsolver')
@@ -268,7 +260,7 @@ class LegFront(rig.Bone):
         cmds.setAttr(length_node+'.visibility', 0)
         cmds.setAttr(shoulder_loc+'.visibility', 0)
         cmds.setAttr(elbow_loc+'.visibility', 0)
-        outliner.batch_parent([length_node, shoulder_loc, elbow_loc], self.ctrl_global_grp)
+        outliner.batch_parent([length_node, shoulder_loc, elbow_loc], util.G_CTRL_GRP)
 
         cmds.parentConstraint(self.ctrls[0], shoulder_loc)
         cmds.parentConstraint(self.ctrls[3], elbow_loc, mo=1)
@@ -315,17 +307,16 @@ class LegFront(rig.Bone):
         self.add_measurement()
 
 
-class LegBack(rig.Bone):
+class LegBack(bone.Bone):
     """ This module creates a quadruped back leg rig"""
 
-    def __init__(self, side, name, rig_type='BackLeg', pos=[0, 5, -3], distance=1.5, height=0.2):
+    def __init__(self, side, name, rig_type='BackLeg', distance=1.5, height=0.2):
         """ Initialize LegFront with side and name
 
         :param side: str
         :param name: str
         """
 
-        self.pos = pos
         self.distance = distance
         self.height = height
         self.scale = 0.4
@@ -338,7 +329,7 @@ class LegBack(rig.Bone):
         self.toe_ik = None
         self.helper_ik = None
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
         for component in self.limb_components:
@@ -354,26 +345,23 @@ class LegBack(rig.Bone):
         self.toe_ik = '{}toe_ik'.format(self.base_name)
         self.helper_ik = '{}helper_ik'.format(self.base_name)
 
-    @staticmethod
-    def set_controller_shape():
+    def set_controller_shape(self):
+        self._shape = list(range(3))
+
         sphere = cmds.createNode('implicitSphere')
-        sphere_ctrl = cmds.rename(cmds.listRelatives(sphere, p=1), 'Hip_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, sphere_ctrl)
+        self._shape[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
+        cmds.scale(0.5, 0.5, 0.5, self._shape[0])
 
         pole = cmds.createNode('implicitSphere')
-        pole_ctrl = cmds.rename(cmds.listRelatives(pole, p=1), 'Pole_tempShape')
-        cmds.scale(0.2, 0.2, 0.2, pole_ctrl)
+        self._shape[1] = cmds.rename(cmds.listRelatives(pole, p=1), self.namer.tmp)
+        cmds.scale(0.2, 0.2, 0.2, self._shape[1])
 
-        ctrl_shape = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')
-        cmds.scale(0.5, 0.5, 0.5, ctrl_shape)
+        self._shape[2] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
+        cmds.scale(0.5, 0.5, 0.5, self._shape[2])
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
-
         # Hip
         hip = cmds.spaceLocator(n=self.locs[0])
-        cmds.parent(hip, grp, relative=1)
-        cmds.move(self.pos[0], self.pos[1], self.pos[2], hip, relative=1)
         cmds.scale(self.scale, self.scale, self.scale, hip)
 
         # Knee
@@ -396,8 +384,8 @@ class LegBack(rig.Bone):
         cmds.parent(toe, foot, relative=1)
         cmds.move(0, 0, 0.5 * self.distance, toe, relative=1)
 
-        cmds.parent(grp, self.loc_global_grp)
-        return grp
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
+        return self.locs[0]
 
     def create_joint(self):
         # Result joint chain
@@ -408,7 +396,7 @@ class LegBack(rig.Bone):
             jnt = cmds.joint(p=loc_pos, name=self.jnts[index])
             cmds.setAttr(jnt+'.radius', self.scale)
         joint.orient_joint(self.jnts[0])
-        cmds.parent(self.jnts[0], self.jnt_global_grp)
+        cmds.parent(self.jnts[0], util.G_JNT_GRP)
 
         # Helper joint chain
         cmds.select(clear=1)
@@ -418,7 +406,7 @@ class LegBack(rig.Bone):
             jnt = cmds.joint(p=loc_pos, name=self.jnt_helpers[index])
             cmds.setAttr(jnt+'.radius', 1)
         joint.orient_joint(self.jnt_helpers[0])
-        cmds.parent(self.jnt_helpers[0], self.jnt_global_grp)
+        cmds.parent(self.jnt_helpers[0], util.G_JNT_GRP)
         cmds.setAttr(self.jnt_helpers[0]+'.visibility', 0)
 
         return self.jnts[0]
@@ -426,7 +414,7 @@ class LegBack(rig.Bone):
     def place_controller(self):
         # Hip
         hip = cmds.ls(self.jnts[0])
-        hip_ctrl = cmds.duplicate('Hip_tempShape', name=self.ctrls[0])[0]
+        hip_ctrl = cmds.duplicate(self._shape[0], name=self.ctrls[0])[0]
         hip_pos = cmds.xform(hip, q=1, ws=1, t=1)
         hip_rot = cmds.xform(hip, q=1, ws=1, ro=1)
 
@@ -437,7 +425,7 @@ class LegBack(rig.Bone):
 
         # Back foot
         foot = cmds.ls(self.jnts[3])
-        foot_ctrl = cmds.duplicate('Foot_tempShape', name=self.ctrls[3])[0]
+        foot_ctrl = cmds.duplicate(self._shape[2], name=self.ctrls[3])[0]
         foot_pos = cmds.xform(foot, q=1, ws=1, t=1)
         cmds.move(foot_pos[0], 0, foot_pos[2], foot_ctrl)
         cmds.makeIdentity(foot_ctrl, apply=1, t=1, r=1, s=1)
@@ -450,14 +438,14 @@ class LegBack(rig.Bone):
 
         # Ankle control - poleVector
         ankle = cmds.ls(self.jnts[2])
-        pole_ctrl = cmds.duplicate('Pole_tempShape', name=self.ctrls[2])[0]
+        pole_ctrl = cmds.duplicate(self._shape[1], name=self.ctrls[2])[0]
         pole_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[2])
         ankle_pos = cmds.xform(ankle, q=1, ws=1, t=1)
         cmds.move(ankle_pos[0], ankle_pos[1], ankle_pos[2]+self.distance, pole_ctrl_offset)
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)
         cmds.parent(pole_ctrl_offset, foot_ctrl)
 
-        outliner.batch_parent([hip_ctrl_offset, foot_ctrl], self.ctrl_global_grp)
+        outliner.batch_parent([hip_ctrl_offset, foot_ctrl], util.G_CTRL_GRP)
 
     def build_ik(self):
         cmds.ikHandle(startJoint=self.jnts[0], endEffector=self.jnts[2], name=self.leg_ik, solver='ikRPsolver')
@@ -509,7 +497,7 @@ class LegBack(rig.Bone):
         cmds.setAttr(length_node+'.visibility', 0)
         cmds.setAttr(hip_loc+'.visibility', 0)
         cmds.setAttr(ankle_loc+'.visibility', 0)
-        outliner.batch_parent([length_node, hip_loc, ankle_loc], self.ctrl_global_grp)
+        outliner.batch_parent([length_node, hip_loc, ankle_loc], util.G_CTRL_GRP)
 
         cmds.parentConstraint(self.ctrls[0], hip_loc)
         cmds.parentConstraint(self.ctrls[3], ankle_loc, mo=1)

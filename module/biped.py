@@ -1,9 +1,12 @@
 import maya.cmds as cmds
+
+from . import arm, spine, leg
+from .base import base, bone
+from autoRigger import util
 from utility.setup import outliner
-from . import base, arm, spine, leg, rig
 
 
-class Biped(rig.Bone):
+class Biped(bone.Bone):
     """ This module creates a biped template rig
 
     The biped template consists of:
@@ -13,32 +16,48 @@ class Biped(rig.Bone):
     two legs
     """
 
-    def __init__(self, side, name, rig_type='Biped', pos=[0, 8.4, 0], spine_len=5.0):
+    def __init__(self, side, name, rig_type='Biped', spine_len=5.0):
         """ Initialize Biped class with side and name
 
         :param side: str
         :param name: str
         """
-        self.pos = pos
+        self.pos = [0, 8.4, 0]
         self.spine_len = spine_len
         self.scale = 0.2
 
-        self.left_arm = arm.Arm(side='L', name='arm', pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
-        self.right_arm = arm.Arm(side='R', name='arm', pos=[self.pos[0]-2, self.pos[1]+self.spine_len, self.pos[2]])
-        self.left_leg = leg.Leg(side='L', name='leg', pos=[self.pos[0]+1, self.pos[1], self.pos[2]])
-        self.right_leg = leg.Leg(side='R', name='leg', pos=[self.pos[0]-1, self.pos[1], self.pos[2]])
-        self.spine = spine.Spine(side='M', name='spine', pos=self.pos, length=self.spine_len)
-        self.neck = base.Base(side='M', name='neck', pos=[self.pos[0], self.pos[1]+self.spine_len+1, self.pos[2]])
-        self.head = base.Base(side='M', name='head', pos=[self.pos[0], self.pos[1]+self.spine_len+1.5, self.pos[2]])
-        self.tip = base.Base(side='M', name='tip', pos=[self.pos[0], self.pos[1]+self.spine_len+2, self.pos[2]])
+        self.left_arm = arm.Arm(side='L', name='arm')
+        self.right_arm = arm.Arm(side='R', name='arm')
+
+        self.left_leg = leg.Leg(side='L', name='leg')
+        self.right_leg = leg.Leg(side='R', name='leg')
+        self.spine = spine.Spine(side='M', name='spine', length=self.spine_len)
+        self.neck = base.Base(side='M', name='neck')
+        self.head = base.Base(side='M', name='head')
+        self.tip = base.Base(side='M', name='tip')
 
         self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.neck, self.head, self.tip]
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def create_locator(self):
         for rig_component in self.rig_components:
             rig_component.create_locator()
+
+        self.move_locator()
+
+    def move_locator(self):
+        util.move(self.left_arm.limb.locs[0], pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
+        util.move(self.right_arm.limb.locs[0], pos=[self.pos[0]-2, self.pos[1]+self.spine_len, self.pos[2]])
+
+        util.move(self.left_leg.limb.locs[0], pos=[self.pos[0]+1, self.pos[1], self.pos[2]])
+        util.move(self.right_leg.limb.locs[0], pos=[self.pos[0]-1, self.pos[1], self.pos[2]])
+
+        util.move(self.spine.locs[0], pos=self.pos)
+
+        util.move(self.neck.loc, pos=[self.pos[0], self.pos[1]+self.spine_len+1, self.pos[2]])
+        util.move(self.head.loc, pos=[self.pos[0], self.pos[1]+self.spine_len+1.5, self.pos[2]])
+        util.move(self.tip.loc, pos=[self.pos[0], self.pos[1]+self.spine_len+2, self.pos[2]])
 
     def set_controller_shape(self):
         for rig_component in self.rig_components:
@@ -93,5 +112,5 @@ class Biped(rig.Bone):
             rig_component.color_controller()
 
     def delete_guide(self):
-        loc = cmds.ls(self.loc_global_grp)
+        loc = cmds.ls(util.G_LOC_GRP)
         cmds.delete(loc)

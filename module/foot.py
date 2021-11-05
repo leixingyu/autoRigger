@@ -1,25 +1,26 @@
 import maya.cmds as cmds
-from . import rig
+
+from .base import bone
+from autoRigger import util
 from utility.setup import outliner
-from utility.util import other
+from utility.rigging import nurbs
 
 
-class Foot(rig.Bone):
+class Foot(bone.Bone):
     """ This module creates a foot rig """
     
-    def __init__(self, side, name, rig_type='Foot', pos=[0, 0, 0], interval=0.5, height=0.4):
+    def __init__(self, side, name, rig_type='Foot', interval=0.5, height=0.4):
         """ Initialize Foot class with side and name
         
         :param side: str
         :param name: str
         """
 
-        self.pos = pos
         self.interval = interval
         self.height = height
         self.scale = 0.2
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
     def assign_secondary_naming(self):
         self.ankle_loc = '{}{}_loc'.format(self.base_name, 'ankle')
@@ -47,26 +48,22 @@ class Foot(rig.Bone):
         self.fk_ctrl = '{}{}_ctrl'.format(self.base_name, 'fk')
         self.switch_ctrl = '{}{}_ctrl'.format(self.base_name, 'switch')
 
-    @staticmethod
-    def set_controller_shape():
-        cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name='Foot_tempShape')[0]
-        selection = cmds.select('Foot_tempShape.cv[0:2]')
-        cmds.move(0, 0, -1.5, selection, relative=1)
-        # cmds.scale(1.8, 1.8, 1.8, foot_shape)
+    def set_controller_shape(self):
+        self._shape = list(range(3))
 
-        foot_fk_shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name='FootFK_tempShape')
-        cmds.rotate(0, 90, 0, foot_fk_shape, relative=1)
-        cmds.scale(0.4, 0.4, 0.4, foot_fk_shape)
+        self._shape[0] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
 
-        foot_switch_shape = other.make_curve_by_text(text='FK/IK', name='FootSwitch_tempShape')
-        cmds.rotate(-90, 0, 0, foot_switch_shape, relative=1)
+        self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
+        cmds.rotate(0, 90, 0, self._shape[1], relative=1)
+        cmds.scale(0.4, 0.4, 0.4, self._shape[1])
+
+        self._shape[2] = nurbs.make_curve_by_text(text='FK/IK', name=self.namer.tmp)
+        cmds.rotate(-90, 0, 0, self._shape[2], relative=1)
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
 
         # Result Foot
         cmds.spaceLocator(n=self.ankle_loc)
-        cmds.move(self.pos[0], self.pos[1], self.pos[2], self.ankle_loc, absolute=1)
         cmds.scale(self.scale, self.scale, self.scale, self.ankle_loc)
 
         cmds.spaceLocator(n=self.ball_loc)
@@ -87,7 +84,7 @@ class Foot(rig.Bone):
 
         cmds.spaceLocator(n=self.outer_loc)
         cmds.parent(self.outer_loc, self.ball_loc, relative=1)
-        if self._side is 'L':
+        if self._side == 'L':
             cmds.move(self.interval, 0, 0, self.outer_loc, relative=1)
         else: 
             cmds.move(-self.interval, 0, 0, self.outer_loc, relative=1)
@@ -97,10 +94,8 @@ class Foot(rig.Bone):
         cmds.move(0, 0, -1.5 * self.interval, self.heel_loc, relative=1)
 
         # Cleanup
-        cmds.parent(self.ankle_loc, grp)
-        cmds.parent(grp, self.loc_global_grp)
-        return grp
-        
+        cmds.parent(self.ankle_loc, util.G_LOC_GRP)
+
     def create_joint(self):
         # Result Foot
         cmds.select(clear=1)
@@ -137,11 +132,11 @@ class Foot(rig.Bone):
         cmds.setAttr(self.fk_ankle_jnt+'.visibility', 0)
 
         # Cleanup
-        outliner.batch_parent([self.fk_ankle_jnt, self.inner_jnt, self.ankle_jnt], self.jnt_global_grp)
+        outliner.batch_parent([self.fk_ankle_jnt, self.inner_jnt, self.ankle_jnt], util.G_JNT_GRP)
 
     def place_controller(self):
         # IK Setup
-        cmds.duplicate('Foot_tempShape', name=self.ctrl)
+        cmds.duplicate(self._shape[0], name=self.ctrl)
         cmds.addAttr(self.ctrl, longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=1)
         cmds.addAttr(self.ctrl, longName='foot_Bank', attributeType='double', defaultValue=0, minValue=-20, maxValue=20, keyable=1)
 
@@ -153,12 +148,12 @@ class Foot(rig.Bone):
         cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '%s.scalePivot' % self.ctrl, '%s.rotatePivot' % self.ctrl, absolute=1)
 
         # FK Setup
-        cmds.duplicate('FootFK_tempShape', name=self.fk_ctrl)
+        cmds.duplicate(self._shape[1], name=self.fk_ctrl)
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], self.fk_ctrl)
         cmds.makeIdentity(self.fk_ctrl, apply=1, t=1, r=1, s=1)
 
         # IK/FK Switch Setup
-        cmds.duplicate('FootSwitch_tempShape', name=self.switch_ctrl)
+        cmds.duplicate(self._shape[2], name=self.switch_ctrl)
         if self._side == "L":
             cmds.move(foot_pos[0]+2, foot_pos[1], foot_pos[2], self.switch_ctrl)
 
@@ -170,7 +165,7 @@ class Foot(rig.Bone):
         cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        outliner.batch_parent([self.switch_ctrl, self.ctrl, self.fk_ctrl], self.ctrl_global_grp)
+        outliner.batch_parent([self.switch_ctrl, self.ctrl, self.fk_ctrl], util.G_CTRL_GRP)
 
     def add_constraint(self):
         # FK Setup

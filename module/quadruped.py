@@ -1,9 +1,12 @@
 import maya.cmds as cmds
-from . import base, spine, leg, tail, rig
+
+from autoRigger import util
+from . import spine, leg, tail
+from .base import base, bone
 from utility.setup import outliner
 
 
-class Quadruped(rig.Bone):
+class Quadruped(bone.Bone):
     """ This module creates a quadruped template rig
 
     The quadruped template consists of:
@@ -14,35 +17,27 @@ class Quadruped(rig.Bone):
     one tail
     """
 
-    def __init__(self, side='NA', rig_type='Quadruped', name='standard', pos=[0, 0, 0]):
+    def __init__(self, side='NA', rig_type='Quadruped', name='standard'):
         """ Initialize Quadruped class with side and name
 
         :param side: str
         :param name: str
         """
 
-        rig.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name, rig_type)
 
-        self.left_arm = leg.LegFront(
-            side='L',
-            name='standard',
-            pos=[
-                1 + pos[0],
-                5 + pos[1],
-                3 + pos[2]]
-        )
+        self.left_arm = leg.LegFront(side='L', name='standard')
+        self.right_arm = leg.LegFront(side='R', name='standard')
 
-        self.right_arm = leg.LegFront(side='R', name='standard', pos=[-1+pos[0], 5+pos[1], 3+pos[2]])
+        self.left_leg = leg.LegBack(side='L', name='standard')
+        self.right_leg = leg.LegBack(side='R', name='standard')
 
-        self.left_leg = leg.LegBack(side='L', name='standard', pos=[1+pos[0], 5+pos[1], -3+pos[2]])
-        self.right_leg = leg.LegBack(side='R', name='standard', pos=[-1+pos[0], 5+pos[1], -3+pos[2]])
+        self.spine = spine.SpineQuad(side='M', name='spine')
+        self.tail = tail.Tail(side='M', name='tail')
 
-        self.spine = spine.SpineQuad(side='M', name='spine', pos=[pos[0], 6+pos[1], -3+pos[2]])
-        self.tail = tail.Tail(side='M', name='tail', pos=[pos[0], 6+pos[1], -4+pos[2]])
-
-        self.neck_root = base.Base(side='M', name='neck_root', pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
-        self.head = base.Base(side='M', name='head', pos=[pos[0], 7.5+pos[1], 4+pos[2]])
-        self.tip = base.Base(side='M', name='tip', pos=[pos[0], 7.5+pos[1], 6+pos[2]])
+        self.neck_root = base.Base(side='M', name='neck_root')
+        self.head = base.Base(side='M', name='head')
+        self.tip = base.Base(side='M', name='tip')
 
         self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.tail, self.neck_root, self.head, self.tip]
 
@@ -50,8 +45,25 @@ class Quadruped(rig.Bone):
         for rig_component in self.rig_components:
             rig_component.create_locator()
 
+        self.move_locator()
+
         cmds.rotate(90, 0, 0, self.head.loc)
         cmds.rotate(90, 0, 0, self.tip.loc)
+
+    def move_locator(self):
+        pos = [0, 0, 0]
+
+        util.move(self.left_arm.locs[0], pos=[1 + pos[0], 5 + pos[1], 3 + pos[2]])
+        util.move(self.right_arm.locs[0], pos=[-1+pos[0], 5+pos[1], 3+pos[2]])
+        util.move(self.left_leg.locs[0], pos=[1+pos[0], 5+pos[1], -3+pos[2]])
+        util.move(self.right_leg.locs[0], pos=[-1+pos[0], 5+pos[1], -3+pos[2]])
+
+        util.move(self.spine.locs[0], pos=[pos[0], 6+pos[1], -3+pos[2]])
+        util.move(self.tail.locs[0], pos=[pos[0], 6+pos[1], -4+pos[2]])
+
+        util.move(self.neck_root.loc, pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
+        util.move(self.head.loc, pos=[pos[0], 7.5+pos[1], 4+pos[2]])
+        util.move(self.tip.loc, pos=[pos[0], 7.5+pos[1], 6+pos[2]])
 
     def set_controller_shape(self):
         for rig_component in self.rig_components:
@@ -111,5 +123,5 @@ class Quadruped(rig.Bone):
             rig_component.color_controller()
 
     def delete_guide(self):
-        loc = cmds.ls(self.loc_global_grp)
+        loc = cmds.ls(util.G_LOC_GRP)
         cmds.delete(loc)
