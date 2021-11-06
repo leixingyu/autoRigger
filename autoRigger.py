@@ -1,28 +1,24 @@
-#!/usr/bin/env python
 """ AutoRigger provides procedural approach for maya rigging """
 
-from enum import Enum, IntEnum, unique
 import os
 import warnings
+from enum import Enum, IntEnum, unique
+
+from .module import spine, spineQuad, foot, hand
+from .module.template import biped, quadruped
+from .module.chain import tail, finger
+from .module.limb.arm import arm
+from .module.limb.leg import leg, legBack, legFront
+from .module.limb import limb
+from .module.base import base
+
 from utility._vendor.Qt import QtCore, QtGui, QtWidgets
 from utility._vendor.Qt import _loadUi
 from utility.setup import setup
 
-from .module import spine, foot, hand
-from .module.template import biped, quadruped
-from .module.chain import tail, finger
-from .module.limb.arm import arm
-from .module.limb.leg import leg
-from .module.limb import limb
-from .module.base import base
-
-__author__ = "Xingyu Lei"
-__maintainer__ = "Xingyu Lei"
-__email__ = "wzaxzt@gmail.com"
-__status__ = "development"
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-UI_PATH = r'ui\autoRigger.ui'
+UI_PATH = os.path.join('ui', 'autoRigger.ui')
 
 
 @unique
@@ -67,8 +63,8 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.setWindowFlags(QtCore.Qt.Window)
 
         # Reset list icon and item
-        self.items = []
-        self.to_build = []
+        self.items = list()
+        self.to_build = list()
 
         self.connect_signals()
 
@@ -96,7 +92,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         
         for component in RigComponents:
             icon = QtGui.QIcon()
-            icon.addFile(os.path.join(CURRENT_PATH + r'\ui', component.value + '.png'))
+            icon.addFile(os.path.join(CURRENT_PATH, 'ui', component.value + '.png'))
 
             item = QtWidgets.QListWidgetItem()
             item.setText(component.value)
@@ -107,7 +103,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """ Clear and Re-generate Rig component items in the list widget """
         
         self.clear_items(self.ui_listWidget)
-        components = []
+        components = list()
         tab_index = self.ui_tabWidget.currentIndex()
 
         # Biped
@@ -151,7 +147,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         base_name = self.ui_nameEdit.text() if self.ui_nameEdit.text() else 'null'
 
         # Side
-        side = ['L', 'R', 'M'][self.ui_sideCBox.currentIndex()]
+        side = ['l', 'r', 'm'][self.ui_sideCBox.currentIndex()]
 
         # Start Position
         pos_x = int(self.ui_worldX.text()) if self.ui_worldX.text() else 0
@@ -177,13 +173,13 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         elif item == RigComponents.BIPED.value:
             obj = biped.Biped(side, base_name)
         elif item == RigComponents.LEG_FRONT.value:
-            obj = leg.LegFront(side, base_name)
+            obj = legFront.LegFront(side, base_name)
         elif item == RigComponents.LEG_BACK.value:
-            obj = leg.LegBack(side, base_name)
+            obj = legBack.LegBack(side, base_name)
         elif item == RigComponents.TAIL.value:
             obj = tail.Tail(side, base_name)
         elif item == RigComponents.SPINE_QUAD.value:
-            obj = spine.SpineQuad(side, base_name)
+            obj = spineQuad.SpineQuad(side, base_name)
         elif item == RigComponents.QUAD.value:
             obj = quadruped.Quadruped(side, base_name)
         else:
@@ -201,7 +197,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         
         for item in self.to_build:
             item.build_rig()
-        self.to_build = []
+        self.to_build = list()
 
     def clear_items(self, widget):
         """ This clears all items in the list widget without deleting them 
@@ -223,7 +219,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldZ.setText('')
 
     def empty_scene(self):
-        self.to_build = []
+        self.to_build = list()
         from maya import cmds
         loc_grp = '_Locators'
         ctrl_grp = '_Controllers'

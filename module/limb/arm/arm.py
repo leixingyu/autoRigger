@@ -3,7 +3,6 @@ import maya.cmds as cmds
 from autoRigger.module import hand
 from autoRigger.module.limb import limb
 from autoRigger.module.base import bone
-
 from autoRigger import util
 
 
@@ -26,28 +25,13 @@ class Arm(bone.Bone):
 
         bone.Bone.__init__(self, side, name)
 
-        self.limb = limb.Limb(
-            side=self._side,
-            name=name,
-            ltype='Arm',
-            interval=self.distance
-        )
+        self.limb = limb.Limb(side=self._side, name=name, ltype='arm', interval=self.distance)
 
         self.hand = None
-        if self._side == 'L':
-            self.hand = hand.Hand(
-                side=self._side,
-                name=name,
-                interval=self.interval,
-                distance=self.gap
-            )
-        elif self._side == 'R':
-            self.hand = hand.Hand(
-                side=self._side,
-                name=name,
-                interval=self.interval,
-                distance=self.gap
-            )
+        if self._side == 'l':
+            self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
+        elif self._side == 'r':
+            self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
 
     def create_locator(self):
         # Limb
@@ -57,9 +41,9 @@ class Arm(bone.Bone):
         self.hand.create_locator()
 
         # move hand based on side
-        if self._side == 'L':
+        if self._side == 'l':
             util.move(self.hand.wrist.loc, pos=[2 * self.distance+self.gap, 0, 0])
-        elif self._side == 'R':
+        elif self._side == 'r':
             util.move(self.hand.wrist.loc, pos=[-2 * self.distance-self.gap, 0, 0])
 
         cmds.parent(self.hand.wrist.loc, self.limb.locs[-1])

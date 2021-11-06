@@ -21,7 +21,12 @@ class SpineQuad(bone.Bone):
         self.segment = segment
         self.scale = 0.4
 
-        self.locs, self.jnts, self.clusters, self.ctrls, self.ctrl_offsets = ([] for _ in range(5))
+        self.locs = list()
+        self.jnts = list()
+        self.clusters = list()
+        self.ctrls = list()
+        self.ctrl_offsets = list()
+
         self.master_ctrl = None
         self.master_offset = None
         self.ik_curve = None

@@ -48,10 +48,9 @@ class Hand(bone.Bone):
             finger.create_locator()
 
         self.wrist.create_locator()
-
         # move around the locators
         side_factor = 1
-        if self._side == 'R':
+        if self._side == 'r':
             side_factor = -1
 
         util.move(self.thumb.locs[0], [0, 0, 2 * self.interval])

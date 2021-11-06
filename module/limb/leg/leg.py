@@ -25,19 +25,8 @@ class Leg(bone.Bone):
 
         bone.Bone.__init__(self, side, name)
 
-        self.limb = limb.Limb(
-            side=self._side,
-            name=name,
-            interval=self.distance,
-            ltype='Leg'
-        )
-
-        self.foot = foot.Foot(
-            side=self._side,
-            name=name,
-            interval=self.interval,
-            height=self.height
-        )
+        self.limb = limb.Limb(side=self._side, name=name, interval=self.distance, ltype='leg')
+        self.foot = foot.Foot(side=self._side, name=name, interval=self.interval, height=self.height)
 
     def create_locator(self):
         self.limb.create_locator()

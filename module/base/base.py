@@ -1,9 +1,8 @@
 import maya.cmds as cmds
 
-from utility.rigging import joint
-
 from autoRigger.module.base import bone
 from autoRigger import util
+from utility.rigging import joint
 
 
 class Base(bone.Bone):
@@ -59,7 +58,7 @@ class Base(bone.Bone):
 
         # used to clear out ctrl transform offset
         self.ctrl_offset = cmds.group(em=1, name=self.ctrl_offset)
-        util.matchXform(self.ctrl_offset, self.jnt)
+        util.match_xform(self.ctrl_offset, self.jnt)
 
         # ctrl has transform relative to offset group, which is 0
         cmds.parent(self.ctrl, self.ctrl_offset, relative=1)

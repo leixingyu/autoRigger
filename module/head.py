@@ -1,6 +1,9 @@
 import maya.cmds as cmds
 
 
+#TODO: re-write this
+
+
 class Head(create_locator.Bone):
     def __init__(self, id, side='NA'):
         create_locator.Bone.__init__(self, side, id)

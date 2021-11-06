@@ -61,7 +61,7 @@ def move_to(obj, pos):
     return cmds.move(pos[0], pos[1], pos[2], obj, absolute=1)
 
 
-def matchXform(source, target):
+def match_xform(source, target):
     """
     Match source rotation and translation to the target
 

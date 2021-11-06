@@ -31,15 +31,15 @@ class Biped(bone.Bone):
         self.spine_len = spine_len
         self.scale = 0.2
 
-        self.left_arm = arm.Arm(side='L', name='arm')
-        self.right_arm = arm.Arm(side='R', name='arm')
+        self.left_arm = arm.Arm(side='l', name='arm')
+        self.right_arm = arm.Arm(side='r', name='arm')
 
-        self.left_leg = leg.Leg(side='L', name='leg')
-        self.right_leg = leg.Leg(side='R', name='leg')
-        self.spine = spine.Spine(side='M', name='spine', length=self.spine_len)
-        self.neck = base.Base(side='M', name='neck')
-        self.head = base.Base(side='M', name='head')
-        self.tip = base.Base(side='M', name='tip')
+        self.left_leg = leg.Leg(side='l', name='leg')
+        self.right_leg = leg.Leg(side='r', name='leg')
+        self.spine = spine.Spine(side='m', name='spine', length=self.spine_len)
+        self.neck = base.Base(side='m', name='neck')
+        self.head = base.Base(side='m', name='head')
+        self.tip = base.Base(side='m', name='tip')
 
         self.rig_components = [
             self.left_arm,

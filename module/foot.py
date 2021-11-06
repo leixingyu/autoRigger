@@ -15,7 +15,6 @@ class Foot(bone.Bone):
         :param side: str
         :param name: str
         """
-
         self._rtype = 'foot'
 
         self.interval = interval
@@ -63,7 +62,6 @@ class Foot(bone.Bone):
         cmds.rotate(-90, 0, 0, self._shape[2], relative=1)
 
     def create_locator(self):
-
         # Result Foot
         cmds.spaceLocator(n=self.ankle_loc)
         cmds.scale(self.scale, self.scale, self.scale, self.ankle_loc)
@@ -147,7 +145,7 @@ class Foot(bone.Bone):
         cmds.makeIdentity(self.ctrl, apply=1, t=1, r=1, s=1)
 
         heel_loc = cmds.xform(self.heel_jnt, q=1, t=1, ws=1)
-        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '%s.scalePivot' % self.ctrl, '%s.rotatePivot' % self.ctrl, absolute=1)
+        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '{}.scalePivot'.format(self.ctrl), '{}.rotatePivot'.format(self.ctrl), absolute=1)
 
         # FK Setup
         cmds.duplicate(self._shape[1], name=self.fk_ctrl)

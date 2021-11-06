@@ -19,7 +19,7 @@ class Quadruped(bone.Bone):
     one tail
     """
 
-    def __init__(self, side='NA', name='standard'):
+    def __init__(self, side='na', name='standard'):
         """ Initialize Quadruped class with side and name
 
         :param side: str
@@ -29,18 +29,18 @@ class Quadruped(bone.Bone):
 
         bone.Bone.__init__(self, side, name)
 
-        self.left_arm = legFront.LegFront(side='L', name='standard')
-        self.right_arm = legFront.LegFront(side='R', name='standard')
+        self.left_arm = legFront.LegFront(side='l', name='standard')
+        self.right_arm = legFront.LegFront(side='r', name='standard')
 
-        self.left_leg = legBack.LegBack(side='L', name='standard')
-        self.right_leg = legBack.LegBack(side='R', name='standard')
+        self.left_leg = legBack.LegBack(side='l', name='standard')
+        self.right_leg = legBack.LegBack(side='r', name='standard')
 
-        self.spine = spineQuad.SpineQuad(side='M', name='spine')
-        self.tail = tail.Tail(side='M', name='tail')
+        self.spine = spineQuad.SpineQuad(side='m', name='spine')
+        self.tail = tail.Tail(side='m', name='tail')
 
-        self.neck_root = base.Base(side='M', name='neck_root')
-        self.head = base.Base(side='M', name='head')
-        self.tip = base.Base(side='M', name='tip')
+        self.neck = base.Base(side='m', name='neck')
+        self.head = base.Base(side='m', name='head')
+        self.tip = base.Base(side='m', name='tip')
 
         self.rig_components = [
             self.left_arm,
@@ -49,7 +49,7 @@ class Quadruped(bone.Bone):
             self.right_leg,
             self.spine,
             self.tail,
-            self.neck_root,
+            self.neck,
             self.head,
             self.tip
         ]
@@ -59,9 +59,6 @@ class Quadruped(bone.Bone):
             rig_component.create_locator()
 
         self.move_locator()
-
-        cmds.rotate(90, 0, 0, self.head.loc)
-        cmds.rotate(90, 0, 0, self.tip.loc)
 
     def move_locator(self):
         pos = [0, 0, 0]
@@ -74,9 +71,12 @@ class Quadruped(bone.Bone):
         util.move(self.spine.locs[0], pos=[pos[0], 6+pos[1], -3+pos[2]])
         util.move(self.tail.locs[0], pos=[pos[0], 6+pos[1], -4+pos[2]])
 
-        util.move(self.neck_root.loc, pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
+        util.move(self.neck.loc, pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
         util.move(self.head.loc, pos=[pos[0], 7.5+pos[1], 4+pos[2]])
         util.move(self.tip.loc, pos=[pos[0], 7.5+pos[1], 6+pos[2]])
+
+        cmds.rotate(90, 0, 0, self.head.loc)
+        cmds.rotate(90, 0, 0, self.tip.loc)
 
     def set_controller_shape(self):
         for rig_component in self.rig_components:
@@ -90,7 +90,7 @@ class Quadruped(bone.Bone):
         spine_root = self.spine.create_joint()
         tail_root = self.tail.create_joint()
 
-        neck_root = self.neck_root.create_joint()
+        neck_root = self.neck.create_joint()
         head = self.head.create_joint()
         tip = self.tip.create_joint()
 
@@ -127,8 +127,8 @@ class Quadruped(bone.Bone):
         cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
 
         # parent head up
-        cmds.parent(self.neck_root.ctrl_offset, self.spine.ctrls[-1])
-        cmds.parent(self.head.ctrl_offset, self.neck_root.ctrl)
+        cmds.parent(self.neck.ctrl_offset, self.spine.ctrls[-1])
+        cmds.parent(self.head.ctrl_offset, self.neck.ctrl)
         cmds.parent(self.tip.ctrl_offset, self.head.ctrl)
 
     def color_controller(self):

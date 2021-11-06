@@ -22,7 +22,11 @@ class LegFront(bone.Bone):
         self.scale = 0.4
 
         # names
-        self.locs, self.jnts, self.ctrls, self.ctrl_offsets = ([] for _ in range(4))
+        self.locs = list()
+        self.jnts = list()
+        self.ctrls = list()
+        self.ctrl_offsets = list()
+
         self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
         self.leg_ik = None
         self.foot_ik = None
@@ -223,5 +227,3 @@ class LegFront(bone.Bone):
 
         # Scalable rig setup
         self.add_measurement()
-
-

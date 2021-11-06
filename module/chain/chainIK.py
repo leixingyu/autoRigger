@@ -2,7 +2,6 @@ import maya.cmds as cmds
 
 from autoRigger import util
 from . import chain
-
 from utility.datatype import vector
 
 
@@ -39,7 +38,7 @@ class ChainIK(chain.Chain):
         for index in range(self.segment):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
-            util.matchXform(self.offsets[index], self.jnts[index])
+            util.match_xform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index],
                         relative=1)
@@ -104,4 +103,3 @@ class ChainIK(chain.Chain):
         cmds.setAttr(self.ik+'.dWorldUpType', 4)
         cmds.connectAttr(self.ctrls[0]+'.worldMatrix[0]', self.ik+'.dWorldUpMatrix', f=1)
         cmds.connectAttr(self.ctrls[-1]+'.worldMatrix[0]', self.ik+'.dWorldUpMatrixEnd', f=1)
-

@@ -22,7 +22,12 @@ class LegBack(bone.Bone):
         self.scale = 0.4
 
         # names
-        self.locs, self.jnts, self.ctrls, self.ctrl_offsets, self.jnt_helpers = ([] for i in range(5))
+        self.locs = list()
+        self.jnts = list()
+        self.ctrls = list()
+        self.ctrl_offsets = list()
+        self.jnt_helpers = list()
+
         self.limb_components = ['hip', 'knee', 'ankle', 'paw', 'toe']
         self.leg_ik = None
         self.foot_ik = None

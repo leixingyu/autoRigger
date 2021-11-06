@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
 from utility.algorithm import strGenerator
-reload(strGenerator)
 from autoRigger import util
+
 
 TMP_PREFIX = 'tmp_'
 
@@ -15,11 +15,10 @@ class Bone(object):
     def __init__(self, side, name):
         """ Initialize Base class with side and name
 
-        :param side: str, 'M', 'L' or 'R'
+        :param side: str. 'm', 'l' or 'r'
         :param name: str
         """
 
-        #self._rtype = None
         self._side = side
         self._name = name
 
@@ -38,10 +37,8 @@ class Bone(object):
         self.assign_secondary_naming()
         util.create_outliner_grp()
 
-
     def create_namespace(self):
         pass
-
 
     def assign_secondary_naming(self):
         """ Create secondary naming convention for complex module """
@@ -70,9 +67,9 @@ class Bone(object):
         for loc in locs:
             if cmds.nodeType(loc) in ['transform']:
                 cmds.setAttr(loc + '.overrideEnabled', 1)
-                if self._side == 'L':
+                if self._side == 'l':
                     cmds.setAttr(loc + '.overrideColor', 6)
-                elif self._side == 'R':
+                elif self._side == 'r':
                     cmds.setAttr(loc + '.overrideColor', 13)
                 else:
                     cmds.setAttr(loc + '.overrideColor', 17)
@@ -95,9 +92,9 @@ class Bone(object):
         for ctrl in ctrls:
             if cmds.nodeType(ctrl) in ['nurbsCurve', 'transform']:
                 cmds.setAttr(ctrl + '.overrideEnabled', 1)
-                if self._side == 'L':
+                if self._side == 'l':
                     cmds.setAttr(ctrl + '.overrideColor', 6)
-                elif self._side == 'R':
+                elif self._side == 'r':
                     cmds.setAttr(ctrl + '.overrideColor', 13)
                 else:
                     cmds.setAttr(ctrl + '.overrideColor', 17)

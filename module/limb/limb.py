@@ -2,7 +2,6 @@ import maya.cmds as cmds
 
 from autoRigger.module.base import bone
 from autoRigger import util
-
 from utility.setup import outliner
 from utility.rigging import joint
 
@@ -10,12 +9,12 @@ from utility.rigging import joint
 class Limb(bone.Bone):
     """ This module create a Limb rig which is used in arm or leg """
 
-    def __init__(self, side, name, interval=2, ltype='Null'):
+    def __init__(self, side, name, interval=2, ltype='null'):
         """ Initialize Limb class with side, name and type of the limb
         
         :param side: str
         :param name: str
-        :param ltype: str, 'Arm', 'Leg' or 'Null'
+        :param ltype: str, 'arm', 'leg' or 'null'
         """
 
         self._rtype = 'limb'
@@ -23,26 +22,32 @@ class Limb(bone.Bone):
         self.interval = interval
         self.scale = 0.4
 
-        self.limb_components = []
+        self.limb_components = list()
         self.direction = None
 
         # unique to limb
         self.set_limb_type(ltype)
 
-        self.locs, self.jnts, self.ik_jnts, self.fk_jnts, self.ctrls, self.fk_ctrls, self.fk_offsets = ([] for _ in range(7))
+        self.locs = list()
+        self.jnts = list()
+        self.ik_jnts = list()
+        self.fk_jnts = list()
+        self.ctrls = list()
+        self.fk_ctrls = list()
+        self.fk_offsets = list()
 
         bone.Bone.__init__(self, side, name)
 
     def set_limb_type(self, ltype):
-        if ltype == 'Arm':
+        if ltype == 'arm':
             self.limb_components = ['shoulder', 'elbow', 'wrist']
-            self.direction = 'Horizontal'
-        elif ltype == 'Leg':
+            self.direction = 'horizontal'
+        elif ltype == 'leg':
             self.limb_components = ['clavicle', 'knee', 'ankle']
-            self.direction = 'Vertical'
+            self.direction = 'vertical'
         else:
             self.limb_components = ['root', 'middle', 'top']
-            self.direction = 'Vertical'
+            self.direction = 'vertical'
 
     def assign_secondary_naming(self):
         # initialize mulitple names
@@ -88,10 +93,10 @@ class Limb(bone.Bone):
         grp = cmds.group(em=1, n=self.loc_grp)
 
         side_factor, horizontal_factor, vertical_factor = 1, 1, 0
-        if self._side == 'R':
+        if self._side == 'r':
             side_factor = -1
 
-        if self.direction == 'Vertical':
+        if self.direction == 'vertical':
             horizontal_factor, vertical_factor = 0, 1
 
         # Root
@@ -196,9 +201,9 @@ class Limb(bone.Bone):
 
         # Pole
         pole_ctrl = cmds.duplicate(self._shape[2], name=self.ik_pole)
-        if self.direction == 'Vertical':
+        if self.direction == 'vertical':
             cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]+3, pole_ctrl, absolute=1)
-        elif self.direction == 'Horizontal':
+        elif self.direction == 'horizontal':
             cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]-3, pole_ctrl, absolute=1)
             cmds.rotate(0, 180, 0, pole_ctrl, relative=1)
 
@@ -255,7 +260,7 @@ class Limb(bone.Bone):
         # IK Setup
         # Set Preferred Angles #
         middle_ik_jnt = self.ik_jnts[1]
-        if self.direction == 'Vertical':
+        if self.direction == 'vertical':
             cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
             cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
             cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
@@ -264,7 +269,7 @@ class Limb(bone.Bone):
                 cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
                 cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
                 cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
-            elif self._side == 'R':
+            elif self._side == 'r':
                 cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
                 cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
                 cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
@@ -286,7 +291,7 @@ class Limb(bone.Bone):
         # FIXME: locking seems to be wrong
 
         fk_mid_ctrl = cmds.ls(self.fk_ctrls[1], transforms=1)[0]
-        if self.direction == 'Horizontal':
+        if self.direction == 'horizontal':
             cmds.setAttr(fk_mid_ctrl+'.rz', l=1, k=0)
             cmds.setAttr(fk_mid_ctrl+'.rx', l=1, k=0)
         else:

@@ -1,7 +1,5 @@
 from autoRigger.module.chain import chainFKIK
 
-pos = [0, 6, -4]
-
 
 class Tail(chainFKIK.ChainFKIK):
 

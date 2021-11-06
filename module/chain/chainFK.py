@@ -1,7 +1,6 @@
 import maya.cmds as cmds
 
 from . import chain
-
 from utility.datatype import vector
 
 
@@ -27,4 +26,3 @@ class ChainFK(chain.Chain):
     def add_constraint(self):
         for index, jnt in enumerate(self.jnts):
             cmds.parentConstraint(self.ctrls[index], jnt)
-
