@@ -72,8 +72,3 @@ class Arm(bone.Bone):
         self.limb.color_controller()
         self.hand.color_controller()
 
-    def delete_guide(self):
-        limb_grp = cmds.ls(self.limb.loc_grp)
-        cmds.delete(limb_grp)
-        hand_grp = cmds.ls(self.hand.loc_grp)
-        cmds.delete(hand_grp)

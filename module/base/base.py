@@ -57,12 +57,12 @@ class Base(bone.Bone):
         cmds.duplicate(self._shape, name=self.ctrl)
 
         # used to clear out ctrl transform offset
-        self.ctrl_offset = cmds.group(em=1, name=self.ctrl_offset)
-        util.match_xform(self.ctrl_offset, self.jnt)
+        cmds.group(em=1, name=self.offset)
+        util.match_xform(self.offset, self.jnt)
 
         # ctrl has transform relative to offset group, which is 0
-        cmds.parent(self.ctrl, self.ctrl_offset, relative=1)
-        cmds.parent(self.ctrl_offset, util.G_CTRL_GRP)
+        cmds.parent(self.ctrl, self.offset, relative=1)
+        cmds.parent(self.offset, util.G_CTRL_GRP)
 
     def add_constraint(self):
         """ Add all necessary constraints for the controller """

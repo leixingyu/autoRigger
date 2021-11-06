@@ -117,9 +117,9 @@ class Biped(bone.Bone):
         cmds.parent(self.right_arm.limb.switch_offset, self.spine.ctrls[-1])
 
         # Neck to Head chain #
-        cmds.parent(self.tip.ctrl_offset, self.head.ctrl_offset)
-        cmds.parent(self.head.ctrl_offset, self.neck.ctrl_offset)
-        cmds.parent(self.neck.ctrl_offset, self.spine.ctrls[-1])
+        cmds.parent(self.tip.offset, self.head.offset)
+        cmds.parent(self.head.offset, self.neck.offset)
+        cmds.parent(self.neck.offset, self.spine.ctrls[-1])
 
     def color_controller(self):
         for rig_component in self.rig_components:

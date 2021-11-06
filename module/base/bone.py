@@ -19,6 +19,8 @@ class Bone(object):
         :param name: str
         """
 
+        util.create_outliner_grp()
+
         self._side = side
         self._name = name
 
@@ -27,15 +29,11 @@ class Bone(object):
         self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
         self.loc = '{}_loc'.format(self.base_name)
-        self.loc_grp = '{}_locGrp'.format(self.base_name)
         self.jnt = '{}_jnt'.format(self.base_name)
-        self.jnt_grp = '{}_jntGrp'.format(self.base_name)
         self.ctrl = '{}_ctrl'.format(self.base_name)
-        self.ctrl_grp = '{}_ctrlGrp'.format(self.base_name)
-        self.ctrl_offset = '{}_offset'.format(self.base_name)
+        self.offset = '{}_offset'.format(self.base_name)
 
         self.assign_secondary_naming()
-        util.create_outliner_grp()
 
     def create_namespace(self):
         pass

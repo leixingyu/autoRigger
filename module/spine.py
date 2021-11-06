@@ -45,13 +45,10 @@ class Spine(bone.Bone):
         cmds.scale(0.5, 0.5, 0.5, self._shape[1])
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
-
         for i in range(self.segment):
             spine = cmds.spaceLocator(n=self.locs[i])
             # root locator of spine parent to the spine group
             if i == 0:
-                cmds.parent(spine, grp, relative=1)
                 cmds.scale(self.scale, self.scale, self.scale, spine)
             # spine locator parent to the previous locator
             else:
@@ -59,8 +56,8 @@ class Spine(bone.Bone):
                 # move spine locator along +y axis
                 cmds.move(0, self.interval, 0, spine, relative=1)
 
-        cmds.parent(grp, util.G_LOC_GRP)
-        return grp
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
+        return self.locs[0]
 
     def create_joint(self):
         cmds.select(clear=1)
@@ -74,7 +71,7 @@ class Spine(bone.Bone):
         return self.jnts[0]
     
     def place_controller(self):
-        grp = cmds.group(em=1, name=self.ctrl_grp)
+        grp = cmds.group(em=1, name=self.offset)
         
         for i, spine in enumerate(self.jnts):
             spine_pos = cmds.xform(spine, q=1, t=1, ws=1)

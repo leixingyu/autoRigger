@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from autoRigger.module.base import bone
 from autoRigger import util
 from utility.setup import outliner
-from utility.rigging import joint
+from utility.rigging import joint, nurbs
 
 
 class Limb(bone.Bone):
@@ -22,11 +22,13 @@ class Limb(bone.Bone):
         self.interval = interval
         self.scale = 0.4
 
-        self.limb_components = list()
-        self.direction = None
-
-        # unique to limb
-        self.set_limb_type(ltype)
+        self.limb_components = ['root', 'middle', 'top']
+        self.direction = 'vertical'
+        if ltype == 'arm':
+            self.limb_components = ['shoulder', 'elbow', 'wrist']
+            self.direction = 'horizontal'
+        elif ltype == 'leg':
+            self.limb_components = ['clavicle', 'knee', 'ankle']
 
         self.locs = list()
         self.jnts = list()
@@ -38,19 +40,8 @@ class Limb(bone.Bone):
 
         bone.Bone.__init__(self, side, name)
 
-    def set_limb_type(self, ltype):
-        if ltype == 'arm':
-            self.limb_components = ['shoulder', 'elbow', 'wrist']
-            self.direction = 'horizontal'
-        elif ltype == 'leg':
-            self.limb_components = ['clavicle', 'knee', 'ankle']
-            self.direction = 'vertical'
-        else:
-            self.limb_components = ['root', 'middle', 'top']
-            self.direction = 'vertical'
-
     def assign_secondary_naming(self):
-        # initialize mulitple names
+        # initialize multiple names
         for component in self.limb_components:
             self.locs.append('{}{}_loc'.format(self.base_name, component))
             self.jnts.append('{}{}_jnt'.format(self.base_name, component))
@@ -73,7 +64,6 @@ class Limb(bone.Bone):
         self._shape = list(range(4))
 
         self._shape[0] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
-        # cmds.scale(0.2, 0.2, 0.2, limb_fk_shape)
 
         self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
 
@@ -90,8 +80,6 @@ class Limb(bone.Bone):
         cmds.scale(0.3, 0.3, 0.3, self._shape[3])
 
     def create_locator(self):
-        grp = cmds.group(em=1, n=self.loc_grp)
-
         side_factor, horizontal_factor, vertical_factor = 1, 1, 0
         if self._side == 'r':
             side_factor = -1
@@ -100,23 +88,21 @@ class Limb(bone.Bone):
             horizontal_factor, vertical_factor = 0, 1
 
         # Root
-        limb_root = cmds.spaceLocator(n=self.locs[0])
-        cmds.parent(limb_root, grp, relative=1)
-        cmds.scale(self.scale, self.scale, self.scale, limb_root)
+        cmds.spaceLocator(n=self.locs[0])
+        cmds.scale(self.scale, self.scale, self.scale, self.locs[0])
 
         # Middle
-        limb_mid = cmds.spaceLocator(n=self.locs[1])
-        cmds.parent(limb_mid, limb_root, relative=1)
-        cmds.move(self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0, limb_mid, relative=1)  # move limb joint along +x axis
+        cmds.spaceLocator(n=self.locs[1])
+        cmds.parent(self.locs[1], self.locs[0], relative=1)
+        util.move(self.locs[1], [self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0])
 
         # Top
-        limb_top = cmds.spaceLocator(n=self.locs[2])
-        cmds.parent(limb_top, limb_mid, relative=1)
-        cmds.move(self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0, limb_top, relative=1)  # move limb joint along +x axis
+        cmds.spaceLocator(n=self.locs[2])
+        cmds.parent(self.locs[2], self.locs[1], relative=1)
+        util.move(self.locs[2], [self.interval*side_factor*horizontal_factor, -self.interval*vertical_factor, 0])
 
-        # Cleanup
-        cmds.parent(grp, util.G_LOC_GRP)
-        return grp
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
+        return self.locs[0]
 
     def create_joint(self):
         # Result joint
@@ -156,34 +142,23 @@ class Limb(bone.Bone):
 
         # Root
         root_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[0])[0]
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], root_fk_ctrl, absolute=1)
-
         root_offset = cmds.group(em=1, name=self.fk_offsets[0])
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], root_offset)
-        cmds.parent(root_fk_ctrl, root_offset)
-        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], root_offset)
-        cmds.makeIdentity(root_fk_ctrl, apply=1, t=1, r=1, s=1)
+
+        nurbs.clear_nurbs_transform(root_fk_ctrl, root_offset, root_pos, root_rot)
 
         # Mid
         mid_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[1])[0]
-        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_fk_ctrl, absolute=1)
-
         mid_offset = cmds.group(em=1, name=self.fk_offsets[1])
-        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], mid_offset)
-        cmds.parent(mid_fk_ctrl, mid_offset)
-        cmds.rotate(mid_rot[0], mid_rot[1], mid_rot[2], mid_offset)
-        cmds.makeIdentity(mid_fk_ctrl, apply=1, t=1, r=1, s=1)
+
+        nurbs.clear_nurbs_transform(mid_fk_ctrl, mid_offset, mid_pos, mid_rot)
 
         # Top
         top_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[2])[0]
-        cmds.move(top_pos[0], top_pos[1], top_pos[2], top_fk_ctrl, absolute=1)
-
         top_offset = cmds.group(em=1, name=self.fk_offsets[2])
-        cmds.move(top_pos[0], top_pos[1], top_pos[2], top_offset)
-        cmds.parent(top_fk_ctrl, top_offset)
-        cmds.rotate(top_rot[0], top_rot[1], top_rot[2], top_offset)
-        cmds.makeIdentity(top_fk_ctrl, apply=1, t=1, r=1, s=1)
 
+        nurbs.clear_nurbs_transform(top_fk_ctrl, top_offset, top_pos, top_rot)
+
+        # clean up
         cmds.parent(top_offset, mid_fk_ctrl)
         cmds.parent(mid_offset, root_fk_ctrl)
 
@@ -259,20 +234,11 @@ class Limb(bone.Bone):
 
         # IK Setup
         # Set Preferred Angles #
-        middle_ik_jnt = self.ik_jnts[1]
         if self.direction == 'vertical':
-            cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
-            cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
-            cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
+            joint.set_prefer_angle(self.ik_jnts[1], [0, 0, -1])
         else:
-            if self._side == 'L':
-                cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
-                cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
-                cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
-            elif self._side == 'r':
-                cmds.rotate(0, 0, 20, middle_ik_jnt, relative=1)
-                cmds.joint(middle_ik_jnt, edit=1, ch=1, setPreferredAngles=1)
-                cmds.rotate(0, 0, -20, middle_ik_jnt, relative=1)
+            joint.set_prefer_angle(self.ik_jnts[1], [0, 0, 1])
+
         cmds.setAttr(self.ik_jnts[0]+'.visibility', 0)
 
         # IK Handle #
@@ -286,14 +252,3 @@ class Limb(bone.Bone):
         cmds.pointConstraint(self.switch_ctrl, self.ik_jnts[0], mo=1)
         cmds.pointConstraint(self.switch_ctrl, self.fk_jnts[0], mo=1)
         outliner.batch_parent([self.ik_offset, self.ik_pole_offset, self.fk_offsets[0], ik_handle], self.switch_ctrl)
-
-    def lock_controller(self):
-        # FIXME: locking seems to be wrong
-
-        fk_mid_ctrl = cmds.ls(self.fk_ctrls[1], transforms=1)[0]
-        if self.direction == 'horizontal':
-            cmds.setAttr(fk_mid_ctrl+'.rz', l=1, k=0)
-            cmds.setAttr(fk_mid_ctrl+'.rx', l=1, k=0)
-        else:
-            cmds.setAttr(fk_mid_ctrl+'.rz', l=1, k=0)
-            cmds.setAttr(fk_mid_ctrl+'.ry', l=1, k=0)

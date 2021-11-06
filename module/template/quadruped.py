@@ -127,9 +127,9 @@ class Quadruped(bone.Bone):
         cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
 
         # parent head up
-        cmds.parent(self.neck.ctrl_offset, self.spine.ctrls[-1])
-        cmds.parent(self.head.ctrl_offset, self.neck.ctrl)
-        cmds.parent(self.tip.ctrl_offset, self.head.ctrl)
+        cmds.parent(self.neck.offset, self.spine.ctrls[-1])
+        cmds.parent(self.head.offset, self.neck.ctrl)
+        cmds.parent(self.tip.offset, self.head.ctrl)
 
     def color_controller(self):
         for rig_component in self.rig_components:
