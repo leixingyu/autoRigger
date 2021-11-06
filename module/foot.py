@@ -9,18 +9,20 @@ from utility.rigging import nurbs
 class Foot(bone.Bone):
     """ This module creates a foot rig """
     
-    def __init__(self, side, name, rig_type='Foot', interval=0.5, height=0.4):
+    def __init__(self, side, name, interval=0.5, height=0.4):
         """ Initialize Foot class with side and name
         
         :param side: str
         :param name: str
         """
 
+        self._rtype = 'foot'
+
         self.interval = interval
         self.height = height
         self.scale = 0.2
 
-        bone.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name)
 
     def assign_secondary_naming(self):
         self.ankle_loc = '{}{}_loc'.format(self.base_name, 'ankle')

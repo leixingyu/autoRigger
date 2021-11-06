@@ -12,20 +12,20 @@ class Bone(object):
 
     namer = strGenerator.StrGenerator(TMP_PREFIX, 8)
 
-    def __init__(self, side, name, rig_type):
+    def __init__(self, side, name):
         """ Initialize Base class with side and name
 
         :param side: str, 'M', 'L' or 'R'
         :param name: str
         """
 
-        self._rig_type = rig_type
+        #self._rtype = None
         self._side = side
         self._name = name
 
         self._shape = None
 
-        self.base_name = '{}_{}_{}'.format(self._rig_type, self._side, self._name)
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
         self.loc = '{}_loc'.format(self.base_name)
         self.loc_grp = '{}_locGrp'.format(self.base_name)
@@ -37,6 +37,11 @@ class Bone(object):
 
         self.assign_secondary_naming()
         util.create_outliner_grp()
+
+
+    def create_namespace(self):
+        pass
+
 
     def assign_secondary_naming(self):
         """ Create secondary naming convention for complex module """
@@ -122,6 +127,8 @@ class Bone(object):
 
     def build_guide(self):
         """ Create the entire rig guide setup """
+
+        self.create_namespace()
 
         self.set_locator_attr()
         self.create_locator()

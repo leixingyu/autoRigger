@@ -1,8 +1,10 @@
 import maya.cmds as cmds
 
 from autoRigger import util
-from . import spine, leg, tail
-from .base import base, bone
+from autoRigger.module import spineQuad
+from autoRigger.module.chain import tail
+from autoRigger.module.limb.leg import legFront, legBack
+from autoRigger.module.base import base, bone
 from utility.setup import outliner
 
 
@@ -17,29 +19,40 @@ class Quadruped(bone.Bone):
     one tail
     """
 
-    def __init__(self, side='NA', rig_type='Quadruped', name='standard'):
+    def __init__(self, side='NA', name='standard'):
         """ Initialize Quadruped class with side and name
 
         :param side: str
         :param name: str
         """
+        self._rtype = 'quad'
 
-        bone.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name)
 
-        self.left_arm = leg.LegFront(side='L', name='standard')
-        self.right_arm = leg.LegFront(side='R', name='standard')
+        self.left_arm = legFront.LegFront(side='L', name='standard')
+        self.right_arm = legFront.LegFront(side='R', name='standard')
 
-        self.left_leg = leg.LegBack(side='L', name='standard')
-        self.right_leg = leg.LegBack(side='R', name='standard')
+        self.left_leg = legBack.LegBack(side='L', name='standard')
+        self.right_leg = legBack.LegBack(side='R', name='standard')
 
-        self.spine = spine.SpineQuad(side='M', name='spine')
+        self.spine = spineQuad.SpineQuad(side='M', name='spine')
         self.tail = tail.Tail(side='M', name='tail')
 
         self.neck_root = base.Base(side='M', name='neck_root')
         self.head = base.Base(side='M', name='head')
         self.tip = base.Base(side='M', name='tip')
 
-        self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.tail, self.neck_root, self.head, self.tip]
+        self.rig_components = [
+            self.left_arm,
+            self.right_arm,
+            self.left_leg,
+            self.right_leg,
+            self.spine,
+            self.tail,
+            self.neck_root,
+            self.head,
+            self.tip
+        ]
 
     def create_locator(self):
         for rig_component in self.rig_components:

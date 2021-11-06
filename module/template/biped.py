@@ -1,7 +1,9 @@
 import maya.cmds as cmds
 
-from . import arm, spine, leg
-from .base import base, bone
+from autoRigger.module import spine
+from autoRigger.module.limb.arm import arm
+from autoRigger.module.limb.leg import leg
+from autoRigger.module.base import base, bone
 from autoRigger import util
 from utility.setup import outliner
 
@@ -16,12 +18,15 @@ class Biped(bone.Bone):
     two legs
     """
 
-    def __init__(self, side, name, rig_type='Biped', spine_len=5.0):
+    def __init__(self, side, name, spine_len=5.0):
         """ Initialize Biped class with side and name
 
         :param side: str
         :param name: str
         """
+
+        self._rtype = 'biped'
+
         self.pos = [0, 8.4, 0]
         self.spine_len = spine_len
         self.scale = 0.2
@@ -36,9 +41,18 @@ class Biped(bone.Bone):
         self.head = base.Base(side='M', name='head')
         self.tip = base.Base(side='M', name='tip')
 
-        self.rig_components = [self.left_arm, self.right_arm, self.left_leg, self.right_leg, self.spine, self.neck, self.head, self.tip]
+        self.rig_components = [
+            self.left_arm,
+            self.right_arm,
+            self.left_leg,
+            self.right_leg,
+            self.spine,
+            self.neck,
+            self.head,
+            self.tip
+        ]
 
-        bone.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name)
 
     def create_locator(self):
         for rig_component in self.rig_components:

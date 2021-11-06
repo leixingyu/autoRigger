@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-from . import finger
+from .chain import finger
 from .base import bone, base
 from autoRigger import util
 
@@ -16,7 +16,9 @@ class Hand(bone.Bone):
 
     def __init__(self, side, name, interval=0.5, distance=2):
 
-        bone.Bone.__init__(self, side, name, rig_type='hand')
+        self._rtype = 'hand'
+
+        bone.Bone.__init__(self, side, name)
 
         self.interval = interval
         self.distance = distance

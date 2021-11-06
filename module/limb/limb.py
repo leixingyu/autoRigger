@@ -10,13 +10,15 @@ from utility.rigging import joint
 class Limb(bone.Bone):
     """ This module create a Limb rig which is used in arm or leg """
 
-    def __init__(self, side, name, rig_type='Limb', interval=2, limb_type='Null'):
+    def __init__(self, side, name, interval=2, ltype='Null'):
         """ Initialize Limb class with side, name and type of the limb
         
         :param side: str
         :param name: str
-        :param limb_type: str, 'Arm', 'Leg' or 'Null'
+        :param ltype: str, 'Arm', 'Leg' or 'Null'
         """
+
+        self._rtype = 'limb'
 
         self.interval = interval
         self.scale = 0.4
@@ -25,17 +27,17 @@ class Limb(bone.Bone):
         self.direction = None
 
         # unique to limb
-        self.set_limb_type(limb_type)
+        self.set_limb_type(ltype)
 
         self.locs, self.jnts, self.ik_jnts, self.fk_jnts, self.ctrls, self.fk_ctrls, self.fk_offsets = ([] for _ in range(7))
 
-        bone.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name)
 
-    def set_limb_type(self, limb_type):
-        if limb_type == 'Arm':
+    def set_limb_type(self, ltype):
+        if ltype == 'Arm':
             self.limb_components = ['shoulder', 'elbow', 'wrist']
             self.direction = 'Horizontal'
-        elif limb_type == 'Leg':
+        elif ltype == 'Leg':
             self.limb_components = ['clavicle', 'knee', 'ankle']
             self.direction = 'Vertical'
         else:

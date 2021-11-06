@@ -1,4 +1,4 @@
-from .chain import chainFKIK
+from autoRigger.module.chain import chainFKIK
 
 pos = [0, 6, -4]
 

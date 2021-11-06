@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-from utility.util import other
+from utility.rigging import nurbs
 
 
 G_LOC_GRP = '_Locators'
@@ -12,7 +12,7 @@ G_MESH_GRP = '_Meshes'
 def create_locators_on_curve(curve, sample):
     locs = list()
 
-    points, tangents = other.get_point_on_curve(curve, sample)
+    points, tangents = nurbs.get_point_on_curve(curve, sample)
 
     for index in range(len(points)):
         point = points[index]
@@ -22,8 +22,7 @@ def create_locators_on_curve(curve, sample):
         locs.append(loc)
         temp_node = cmds.createNode('transform')
 
-        cmds.xform(temp_node,
-                   t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z])
+        cmds.xform(temp_node, t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z])
         cmds.xform(loc, t=[point.x, point.y, point.z])
 
         constraint = cmds.aimConstraint(temp_node, loc)[0]

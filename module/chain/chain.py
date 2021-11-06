@@ -17,6 +17,7 @@ class Chain(bone.Bone):
         :param side: str
         :param name: str
         """
+        self._rtype = 'chain'
 
         self.segment = segment
         self.interval = None
@@ -28,7 +29,7 @@ class Chain(bone.Bone):
         self.ctrls = list()
         self.offsets = list()
 
-        bone.Bone.__init__(self, side, name, rig_type='chain')
+        bone.Bone.__init__(self, side, name)
 
     def create_locator(self):
         for index in range(self.segment):

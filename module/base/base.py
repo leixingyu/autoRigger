@@ -9,13 +9,15 @@ from autoRigger import util
 class Base(bone.Bone):
     """ This module creates a single joint rig """
 
-    def __init__(self, side, name, rig_type='Base'):
+    def __init__(self, side, name):
         """ Initialize Base class with side and name
 
         :param side: str, 'M', 'L' or 'R'
         :param name: str
         """
-        bone.Bone.__init__(self, side, name, rig_type)
+        self._rtype = 'base'
+
+        bone.Bone.__init__(self, side, name)
 
         self.scale = 0.2
 

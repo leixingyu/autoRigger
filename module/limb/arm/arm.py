@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
-from . import hand
-from .limb import limb
-from .base import bone
+from autoRigger.module import hand
+from autoRigger.module.limb import limb
+from autoRigger.module.base import bone
 
 from autoRigger import util
 
@@ -10,24 +10,26 @@ from autoRigger import util
 class Arm(bone.Bone):
     """ This module creates an Arm rig with a limb and a hand"""
 
-    def __init__(self, side, name, rig_type='Arm', distance=2, interval=0.5, gap=2):
+    def __init__(self, side, name, distance=2, interval=0.5, gap=2):
         """  Initialize Arm class with side and base_name
 
         :param side: str
         :param name: str
         """
 
+        self._rtype = 'arm'
+
         self.distance = distance
         self.interval = interval
         self.gap = gap
         self.scale = 0.2
 
-        bone.Bone.__init__(self, side, name, rig_type)
+        bone.Bone.__init__(self, side, name)
 
         self.limb = limb.Limb(
             side=self._side,
             name=name,
-            limb_type='Arm',
+            ltype='Arm',
             interval=self.distance
         )
 

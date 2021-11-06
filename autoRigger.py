@@ -7,8 +7,14 @@ import warnings
 from utility._vendor.Qt import QtCore, QtGui, QtWidgets
 from utility._vendor.Qt import _loadUi
 from utility.setup import setup
-from .module import base, biped, arm, spine, leg, foot, tail, hand, finger, \
-    limb, quadruped
+
+from .module import spine, foot, hand
+from .module.template import biped, quadruped
+from .module.chain import tail, finger
+from .module.limb.arm import arm
+from .module.limb.leg import leg
+from .module.limb import limb
+from .module.base import base
 
 __author__ = "Xingyu Lei"
 __maintainer__ = "Xingyu Lei"
@@ -216,7 +222,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldY.setText('')
         self.ui_worldZ.setText('')
 
-
     def empty_scene(self):
         self.to_build = []
         from maya import cmds
@@ -230,6 +235,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
                 cmds.delete(grp)
             except:
                 pass
+
 
 def show():
     window = AutoRiggerWindow()
