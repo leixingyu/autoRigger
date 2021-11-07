@@ -12,7 +12,9 @@ class ChainFK(chain.Chain):
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()
 
-    def assign_secondary_naming(self):
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
+
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, index))
             self.jnts.append('{}{}fk_jnt'.format(self.base_name, index))

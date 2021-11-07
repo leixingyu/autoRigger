@@ -14,19 +14,14 @@ class Chain(bone.Bone):
         :param side: str
         :param name: str
         """
+        bone.Bone.__init__(self, side, name)
+
         self._rtype = 'chain'
 
         self.segment = segment
         self.interval = None
         self.dir = None
         self.curve = None
-
-        self.locs = list()
-        self.jnts = list()
-        self.ctrls = list()
-        self.offsets = list()
-
-        bone.Bone.__init__(self, side, name)
 
     def create_locator(self):
         for index in range(self.segment):

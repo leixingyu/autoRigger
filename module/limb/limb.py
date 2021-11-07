@@ -16,6 +16,7 @@ class Limb(bone.Bone):
         :param name: str
         :param ltype: str, 'arm', 'leg' or 'null'
         """
+        bone.Bone.__init__(self, side, name)
 
         self._rtype = 'limb'
 
@@ -30,17 +31,14 @@ class Limb(bone.Bone):
         elif ltype == 'leg':
             self.limb_components = ['clavicle', 'knee', 'ankle']
 
-        self.locs = list()
-        self.jnts = list()
         self.ik_jnts = list()
         self.fk_jnts = list()
-        self.ctrls = list()
         self.fk_ctrls = list()
         self.fk_offsets = list()
 
-        bone.Bone.__init__(self, side, name)
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
-    def assign_secondary_naming(self):
         # initialize multiple names
         for component in self.limb_components:
             self.locs.append('{}{}_loc'.format(self.base_name, component))

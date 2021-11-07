@@ -14,10 +14,9 @@ class Base(bone.Bone):
         :param side: str, 'M', 'L' or 'R'
         :param name: str
         """
-        self._rtype = 'base'
-
         bone.Bone.__init__(self, side, name)
 
+        self._rtype = 'base'
         self.scale = 0.2
 
     def set_controller_shape(self):
@@ -27,25 +26,23 @@ class Base(bone.Bone):
     def create_locator(self):
         """ Create the rig guides for placement purpose """
 
-        cmds.spaceLocator(n=self.loc)
+        cmds.spaceLocator(n=self.locs[0])
+        cmds.scale(self.scale, self.scale, self.scale, self.locs[0])
+        cmds.parent(self.locs[0], util.G_LOC_GRP)
 
-        cmds.scale(self.scale, self.scale, self.scale, self.loc)
-
-        cmds.parent(self.loc, util.G_LOC_GRP)
-
-        return self.loc
+        return self.locs[0]
 
     def create_joint(self):
         """ Create the rig joints based on the guide's transform """
 
         cmds.select(clear=1)
-        loc_pos = cmds.xform(self.loc, q=1, t=1, ws=1)
+        loc_pos = cmds.xform(self.locs[0], q=1, t=1, ws=1)
 
-        cmds.joint(p=loc_pos, name=self.jnt)
+        cmds.joint(p=loc_pos, name=self.jnts[0])
 
-        cmds.parent(self.jnt, util.G_JNT_GRP)
-        joint.orient_joint(self.jnt)
-        return self.jnt
+        cmds.parent(self.jnts[0], util.G_JNT_GRP)
+        joint.orient_joint(self.jnts[0])
+        return self.jnts[0]
 
     def place_controller(self):
         """
@@ -53,18 +50,18 @@ class Base(bone.Bone):
         place them based on guide's and joint's transform
         """
 
-        # TODO: check why use locator rotation instead of joint
-        cmds.duplicate(self._shape, name=self.ctrl)
+        # TODO: use nurbs clear transform on this
+        cmds.duplicate(self._shape, name=self.ctrls[0])
 
         # used to clear out ctrl transform offset
-        cmds.group(em=1, name=self.offset)
-        util.match_xform(self.offset, self.jnt)
+        cmds.group(em=1, name=self.offsets[0])
+        util.match_xform(self.offsets[0], self.jnts[0])
 
         # ctrl has transform relative to offset group, which is 0
-        cmds.parent(self.ctrl, self.offset, relative=1)
-        cmds.parent(self.offset, util.G_CTRL_GRP)
+        cmds.parent(self.ctrls[0], self.offsets[0], relative=1)
+        cmds.parent(self.offsets[0], util.G_CTRL_GRP)
 
     def add_constraint(self):
         """ Add all necessary constraints for the controller """
 
-        cmds.parentConstraint(self.ctrl, self.jnt)
+        cmds.parentConstraint(self.ctrls[0], self.jnts[0])

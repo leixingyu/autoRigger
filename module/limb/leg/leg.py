@@ -15,7 +15,7 @@ class Leg(bone.Bone):
         :param side: str
         :param name: str
         """
-
+        bone.Bone.__init__(self, side, name)
         self._rtype = 'leg'
 
         self.distance = distance
@@ -23,10 +23,12 @@ class Leg(bone.Bone):
         self.height = height
         self.scale = 0.2
 
-        bone.Bone.__init__(self, side, name)
-
         self.limb = limb.Limb(side=self._side, name=name, interval=self.distance, ltype='leg')
         self.foot = foot.Foot(side=self._side, name=name, interval=self.interval, height=self.height)
+
+    def create_namespace(self):
+        self.limb.create_namespace()
+        self.foot.create_namespace()
 
     def create_locator(self):
         self.limb.create_locator()

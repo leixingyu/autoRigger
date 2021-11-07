@@ -15,15 +15,13 @@ class Arm(bone.Bone):
         :param side: str
         :param name: str
         """
-
+        bone.Bone.__init__(self, side, name)
         self._rtype = 'arm'
 
         self.distance = distance
         self.interval = interval
         self.gap = gap
         self.scale = 0.2
-
-        bone.Bone.__init__(self, side, name)
 
         self.limb = limb.Limb(side=self._side, name=name, ltype='arm', interval=self.distance)
 
@@ -32,6 +30,10 @@ class Arm(bone.Bone):
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
         elif self._side == 'r':
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
+
+    def create_namespace(self):
+        self.limb.create_namespace()
+        self.hand.create_namespace()
 
     def create_locator(self):
         # Limb
@@ -42,11 +44,11 @@ class Arm(bone.Bone):
 
         # move hand based on side
         if self._side == 'l':
-            util.move(self.hand.wrist.loc, pos=[2 * self.distance+self.gap, 0, 0])
+            util.move(self.hand.wrist.locs[0], pos=[2 * self.distance+self.gap, 0, 0])
         elif self._side == 'r':
-            util.move(self.hand.wrist.loc, pos=[-2 * self.distance-self.gap, 0, 0])
+            util.move(self.hand.wrist.locs[0], pos=[-2 * self.distance-self.gap, 0, 0])
 
-        cmds.parent(self.hand.wrist.loc, self.limb.locs[-1])
+        cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])
 
     def set_controller_shape(self):
         self.limb.set_controller_shape()
@@ -63,7 +65,7 @@ class Arm(bone.Bone):
     def add_constraint(self):
         self.limb.add_constraint()
         self.hand.add_constraint()
-        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.ctrl, mo=1)
+        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.ctrls[0], mo=1)
 
     def lock_controller(self):
         self.limb.lock_controller()

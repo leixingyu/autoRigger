@@ -2,6 +2,21 @@ import maya.cmds as cmds
 
 from .base import bone
 from autoRigger import util
+from autoRigger.module.chain import chainIK
+
+
+class SpineIK(chainIK.ChainIK):
+    """ This module creates a biped spine rig"""
+
+    def __init__(self, side, name, length=6.0, segment=6):
+        """ Initialize Spine class with side and name
+
+        :param side: str
+        :param name: str
+        """
+        chainIK.ChainIK.__init__(self, side, name, segment, length, direction=[0, 1, 0])
+
+        self._rtype = 'spine'
 
 
 class Spine(bone.Bone):
@@ -13,6 +28,7 @@ class Spine(bone.Bone):
         :param side: str
         :param name: str
         """
+        bone.Bone.__init__(self, side, name)
         self._rtype = 'spine'
 
         self.interval = length/(segment-1)
@@ -21,14 +37,16 @@ class Spine(bone.Bone):
 
         self.locs, self.jnts, self.ctrls, self.clusters = ([] for i in range(4))
 
-        bone.Bone.__init__(self, side, name)
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
-    def assign_secondary_naming(self):
         for i in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, i))
             self.jnts.append('{}{}_jnt'.format(self.base_name, i))
             self.ctrls.append('{}{}_ctrl'.format(self.base_name, i))
+            self.offsets.append('{}{}_offset'.format(self.base_name, i))
             self.clusters.append('{}{}_cluster'.format(self.base_name, i))
+
         # ik has different ctrl name
         self.ik_curve = '{}ik_curve'.format(self.base_name)
         self.ik = '{}_ik'.format(self.base_name)
@@ -71,29 +89,23 @@ class Spine(bone.Bone):
         return self.jnts[0]
     
     def place_controller(self):
-        grp = cmds.group(em=1, name=self.offset)
+        grp = cmds.group(em=1, name=self.offsets[0])
         
         for i, spine in enumerate(self.jnts):
             spine_pos = cmds.xform(spine, q=1, t=1, ws=1)
-            spine_ctrl = cmds.duplicate(self._shape[1], name=self.ctrls[i])[0]
+            cmds.duplicate(self._shape[0], name=self.ctrls[i])
             if i == 0:
-                self.global_ctrl = cmds.duplicate(self._shape[0], name=self.ctrl)[0]
-                cmds.move(spine_pos[0], spine_pos[1], spine_pos[2], self.global_ctrl)
-                cmds.makeIdentity(self.global_ctrl, apply=1, t=1, r=1, s=1)
-                cmds.parent(spine_ctrl, self.global_ctrl, relative=1)
+                cmds.move(spine_pos[0], spine_pos[1], spine_pos[2], self.ctrls[i])
+                cmds.makeIdentity(self.ctrls[i], apply=1, t=1, r=1, s=1)
             elif i != 0:
-                cmds.parent(spine_ctrl, self.ctrls[i-1])
-            cmds.move(spine_pos[0], spine_pos[1], spine_pos[2]-5, spine_ctrl)
-            cmds.move(spine_pos[0], spine_pos[1], spine_pos[2], spine_ctrl+'.scalePivot', spine_ctrl+'.rotatePivot', absolute=1)
-            cmds.makeIdentity(spine_ctrl, apply=1, t=1, r=1, s=1)
+                cmds.parent(self.ctrls[i], self.ctrls[i-1])
 
-            # parent line shape under curve transform (combine curve shape)
-            line = cmds.curve(degree=1, point=[(spine_pos[0], spine_pos[1], spine_pos[2]), (spine_pos[0], spine_pos[1], spine_pos[2]-5)], name='{}line{}_ctrl'.format(self.base_name, i))
-            line_shape = cmds.listRelatives(line, shapes=1)
-            cmds.parent(line_shape, spine_ctrl, relative=1, shape=1)
-            cmds.delete(line)
+                cmds.move(spine_pos[0], spine_pos[1], spine_pos[2]-5, self.ctrls[i])
+                cmds.move(spine_pos[0], spine_pos[1], spine_pos[2], self.ctrls[i]+'.scalePivot',
+                          self.ctrls[i]+'.rotatePivot', absolute=1)
+            cmds.makeIdentity(self.ctrls[i], apply=1, t=1, r=1, s=1)
 
-        cmds.parent(self.ctrl, grp)
+        cmds.parent(self.ctrls[0], grp)
         cmds.parent(grp, util.G_CTRL_GRP)
         return grp
 
@@ -103,6 +115,7 @@ class Spine(bone.Bone):
         for i, spine in enumerate(self.jnts):
             spine_pos = cmds.xform(spine, q=1, t=1, ws=1)
             curve_points.append(spine_pos)
+
         cmds.curve(p=curve_points, name=self.ik_curve)
         cmds.setAttr(self.ik_curve+'.visibility', 0)
         # turning off inherit transform avoid curve move/scale twice as much
@@ -130,10 +143,3 @@ class Spine(bone.Bone):
             spine_ctrl = cmds.ls(self.ctrls[i])
             cmds.pointConstraint(spine_ctrl, spine_cluster)
         cmds.connectAttr(self.ctrls[-1]+'.rotateY', '{}.twist'.format(self.ik))
-
-    def lock_controller(self):
-        for ctrl in self.ctrls:
-            for transform in 'ts':
-                for axis in 'xyz':
-                    cmds.setAttr(ctrl+'.'+transform+axis, l=1, k=0)
-

@@ -15,34 +15,30 @@ class SpineQuad(bone.Bone):
         :param side: str
         :param name: str
         """
+        bone.Bone.__init__(self, side, name)
         self._rtype = 'qspine'
 
         self.interval = length / (segment-1)
         self.segment = segment
         self.scale = 0.4
 
-        self.locs = list()
-        self.jnts = list()
         self.clusters = list()
-        self.ctrls = list()
-        self.ctrl_offsets = list()
 
         self.master_ctrl = None
         self.master_offset = None
         self.ik_curve = None
         self.ik = None
 
-        bone.Bone.__init__(self, side, name)
-
-    def assign_secondary_naming(self):
-
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
+        
         for i in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, i))
             self.jnts.append('{}{}_jnt'.format(self.base_name, i))
 
         for name in ['root', 'mid', 'top']:
             self.ctrls.append('{}{}_ctrl'.format(self.base_name, name))
-            self.ctrl_offsets.append('{}{}_offset'.format(self.base_name, name))
+            self.offsets.append('{}{}_offset'.format(self.base_name, name))
             self.clusters.append('{}{}_cluster'.format(self.base_name, name))
 
         # ik has different name
@@ -101,18 +97,18 @@ class SpineQuad(bone.Bone):
         # root ctrl is positioned at the root joint
         # root ctrl needs to be accessed outside for parenting
         cmds.duplicate(self._shapes[1], name=self.ctrls[0])
-        cmds.group(em=1, name=self.ctrl_offsets[0])
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], self.ctrl_offsets[0])
-        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], self.ctrl_offsets[0])
-        cmds.parent(self.ctrls[0], self.ctrl_offsets[0], relative=1)
+        cmds.group(em=1, name=self.offsets[0])
+        cmds.move(root_pos[0], root_pos[1], root_pos[2], self.offsets[0])
+        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], self.offsets[0])
+        cmds.parent(self.ctrls[0], self.offsets[0], relative=1)
 
         # top ctrl is positioned at the top joint
         # top ctrl needs to be accessed outside for parenting
         cmds.duplicate(self._shapes[1], name=self.ctrls[-1])
-        cmds.group(em=1, name=self.ctrl_offsets[-1])
-        cmds.move(top_pos[0], top_pos[1], top_pos[2], self.ctrl_offsets[-1])
-        cmds.rotate(top_rot[0], top_rot[1], top_rot[2], self.ctrl_offsets[-1])
-        cmds.parent(self.ctrls[-1], self.ctrl_offsets[-1], relative=1)
+        cmds.group(em=1, name=self.offsets[-1])
+        cmds.move(top_pos[0], top_pos[1], top_pos[2], self.offsets[-1])
+        cmds.rotate(top_rot[0], top_rot[1], top_rot[2], self.offsets[-1])
+        cmds.parent(self.ctrls[-1], self.offsets[-1], relative=1)
 
         # mid ctrl is positioned at the middle joint / or middle two joint
         if self.segment % 2 != 0:
@@ -128,13 +124,13 @@ class SpineQuad(bone.Bone):
             mid_rot = [(mid_upper_rot[0]+mid_lower_rot[0]) / 2, (mid_upper_rot[1]+mid_lower_rot[1]) / 2, (mid_upper_rot[2]+mid_lower_rot[2]) / 2]
 
         cmds.duplicate(self._shapes[1], name=self.ctrls[1])
-        cmds.group(em=1, name=self.ctrl_offsets[1])
-        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], self.ctrl_offsets[1])
-        cmds.rotate(mid_rot[0], mid_rot[1], mid_rot[2], self.ctrl_offsets[1])
-        cmds.parent(self.ctrls[1], self.ctrl_offsets[1], relative=1)
+        cmds.group(em=1, name=self.offsets[1])
+        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], self.offsets[1])
+        cmds.rotate(mid_rot[0], mid_rot[1], mid_rot[2], self.offsets[1])
+        cmds.parent(self.ctrls[1], self.offsets[1], relative=1)
 
         # Cleanup
-        outliner.batch_parent([self.ctrl_offsets[0], self.ctrl_offsets[1], self.ctrl_offsets[-1]], self.master_ctrl)
+        outliner.batch_parent([self.offsets[0], self.offsets[1], self.offsets[-1]], self.master_ctrl)
         cmds.parent(self.master_offset, util.G_CTRL_GRP)
         return self.master_ctrl
 
@@ -171,7 +167,7 @@ class SpineQuad(bone.Bone):
 
         # create curve length node and multiply node
         init_len = cmds.getAttr(self.ik_curve+'Info.arcLength')
-        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, name=self.ctrl+'Stretch')
+        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, name=self.ctrls[0]+'Stretch')
         cmds.setAttr(stretch_node+'.operation', 2)
         cmds.setAttr(stretch_node+'.input2X', init_len)
         cmds.connectAttr(self.ik_curve+'Info.arcLength', stretch_node+'.input1X')

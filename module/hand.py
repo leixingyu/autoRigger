@@ -16,9 +16,9 @@ class Hand(bone.Bone):
 
     def __init__(self, side, name, interval=0.5, distance=2):
 
-        self._rtype = 'hand'
-
         bone.Bone.__init__(self, side, name)
+
+        self._rtype = 'hand'
 
         self.interval = interval
         self.distance = distance
@@ -43,6 +43,12 @@ class Hand(bone.Bone):
 
         self.wrist.set_controller_shape()
 
+    def create_namespace(self):
+        for finger in self.fingers:
+            finger.create_namespace()
+
+        self.wrist.create_namespace()
+
     def create_locator(self):
         for finger in self.fingers:
             finger.create_locator()
@@ -58,11 +64,11 @@ class Hand(bone.Bone):
         util.move(self.ring.locs[0], [0, 0, -1 * self.interval])
         util.move(self.pinky.locs[0], [0, 0, -2 * self.interval])
 
-        util.move(self.wrist.loc, [-side_factor * self.distance, 0, 0])
+        util.move(self.wrist.locs[0], [-side_factor * self.distance, 0, 0])
 
-        outliner.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.loc)
+        outliner.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
 
-        return self.wrist.loc
+        return self.wrist.locs[0]
 
     def create_joint(self):
         fingers = [finger.create_joint() for finger in self.fingers]
@@ -85,7 +91,7 @@ class Hand(bone.Bone):
             obj.add_constraint()
 
         for obj in self.constraints:
-            cmds.parentConstraint(self.wrist.jnt, obj, mo=1)
+            cmds.parentConstraint(self.wrist.jnts[0], obj, mo=1)
 
     def color_controller(self):
         self.wrist.color_controller()

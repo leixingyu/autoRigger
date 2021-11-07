@@ -1,7 +1,7 @@
 """ AutoRigger provides procedural approach for maya rigging """
 
 import os
-import warnings
+import logging
 from enum import Enum, IntEnum, unique
 
 from .module import spine, spineQuad, foot, hand
@@ -182,9 +182,11 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             obj = spineQuad.SpineQuad(side, base_name)
         elif item == RigComponents.QUAD.value:
             obj = quadruped.Quadruped(side, base_name)
-        else:
-            warnings.warn("object name not found, using base component instead")
+        elif item == RigComponents.BASE.value:
             obj = base.Base(side, base_name)
+        else:
+            logging.error("object name not found, using base component instead")
+            return
 
         # obj.set_locator_attr([pos_x, pos_y, pos_z])
         obj.build_guide()

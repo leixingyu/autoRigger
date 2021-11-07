@@ -15,6 +15,8 @@ class LegBack(bone.Bone):
         :param side: str
         :param name: str
         """
+        bone.Bone.__init__(self, side, name)
+
         self._rtype = 'back'
 
         self.distance = distance
@@ -22,10 +24,6 @@ class LegBack(bone.Bone):
         self.scale = 0.4
 
         # names
-        self.locs = list()
-        self.jnts = list()
-        self.ctrls = list()
-        self.ctrl_offsets = list()
         self.jnt_helpers = list()
 
         self.limb_components = ['hip', 'knee', 'ankle', 'paw', 'toe']
@@ -34,15 +32,15 @@ class LegBack(bone.Bone):
         self.toe_ik = None
         self.helper_ik = None
 
-        bone.Bone.__init__(self, side, name)
-
-    def assign_secondary_naming(self):
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
+        
         for component in self.limb_components:
             self.locs.append('{}{}_loc'.format(self.base_name, component))
             self.jnts.append('{}{}_jnt'.format(self.base_name, component))
             self.jnt_helpers.append('{}{}helper_jnt'.format(self.base_name, component))
             self.ctrls.append('{}{}_ctrl'.format(self.base_name, component))
-            self.ctrl_offsets.append('{}{}_offset'.format(self.base_name, component))
+            self.offsets.append('{}{}_offset'.format(self.base_name, component))
 
         # ik has different ctrl name
         self.leg_ik = '{}leg_ik'.format(self.base_name)
@@ -123,7 +121,7 @@ class LegBack(bone.Bone):
         hip_pos = cmds.xform(hip, q=1, ws=1, t=1)
         hip_rot = cmds.xform(hip, q=1, ws=1, ro=1)
 
-        hip_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[0])
+        hip_ctrl_offset = cmds.group(em=1, name=self.offsets[0])
         cmds.move(hip_pos[0], hip_pos[1], hip_pos[2], hip_ctrl_offset)
         cmds.rotate(hip_rot[0], hip_rot[1], hip_rot[2], hip_ctrl_offset)
         cmds.parent(hip_ctrl, hip_ctrl_offset, relative=1)
@@ -144,7 +142,7 @@ class LegBack(bone.Bone):
         # Ankle control - poleVector
         ankle = cmds.ls(self.jnts[2])
         pole_ctrl = cmds.duplicate(self._shape[1], name=self.ctrls[2])[0]
-        pole_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[2])
+        pole_ctrl_offset = cmds.group(em=1, name=self.offsets[2])
         ankle_pos = cmds.xform(ankle, q=1, ws=1, t=1)
         cmds.move(ankle_pos[0], ankle_pos[1], ankle_pos[2]+self.distance, pole_ctrl_offset)
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)
@@ -246,7 +244,7 @@ class LegBack(bone.Bone):
         # Pole vector constraint
         cmds.poleVectorConstraint(self.ctrls[2], self.leg_ik)
         cmds.poleVectorConstraint(self.ctrls[2], self.helper_ik)
-        cmds.parent(self.ctrl_offsets[2], swivel_pivot_grp)
+        cmds.parent(self.offsets[2], swivel_pivot_grp)
 
         # Scalable rig setup
         self.add_measurement()

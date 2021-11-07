@@ -25,9 +25,9 @@ class Quadruped(bone.Bone):
         :param side: str
         :param name: str
         """
-        self._rtype = 'quad'
-
         bone.Bone.__init__(self, side, name)
+
+        self._rtype = 'quad'
 
         self.left_arm = legFront.LegFront(side='l', name='standard')
         self.right_arm = legFront.LegFront(side='r', name='standard')
@@ -54,6 +54,10 @@ class Quadruped(bone.Bone):
             self.tip
         ]
 
+    def create_namespace(self):
+        for rig_component in self.rig_components:
+            rig_component.create_namespace()
+
     def create_locator(self):
         for rig_component in self.rig_components:
             rig_component.create_locator()
@@ -71,12 +75,12 @@ class Quadruped(bone.Bone):
         util.move(self.spine.locs[0], pos=[pos[0], 6+pos[1], -3+pos[2]])
         util.move(self.tail.locs[0], pos=[pos[0], 6+pos[1], -4+pos[2]])
 
-        util.move(self.neck.loc, pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
-        util.move(self.head.loc, pos=[pos[0], 7.5+pos[1], 4+pos[2]])
-        util.move(self.tip.loc, pos=[pos[0], 7.5+pos[1], 6+pos[2]])
+        util.move(self.neck.locs[0], pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
+        util.move(self.head.locs[0], pos=[pos[0], 7.5+pos[1], 4+pos[2]])
+        util.move(self.tip.locs[0], pos=[pos[0], 7.5+pos[1], 6+pos[2]])
 
-        cmds.rotate(90, 0, 0, self.head.loc)
-        cmds.rotate(90, 0, 0, self.tip.loc)
+        cmds.rotate(90, 0, 0, self.head.locs[0])
+        cmds.rotate(90, 0, 0, self.tip.locs[0])
 
     def set_controller_shape(self):
         for rig_component in self.rig_components:
@@ -119,17 +123,17 @@ class Quadruped(bone.Bone):
             rig_component.add_constraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        outliner.batch_parent([self.left_arm.ctrl_offsets[0], self.right_arm.ctrl_offsets[0]], self.spine.ctrls[-1])
-        outliner.batch_parent([self.left_leg.ctrl_offsets[0], self.right_leg.ctrl_offsets[0]], self.spine.ctrls[0])
+        outliner.batch_parent([self.left_arm.offsets[0], self.right_arm.offsets[0]], self.spine.ctrls[-1])
+        outliner.batch_parent([self.left_leg.offsets[0], self.right_leg.offsets[0]], self.spine.ctrls[0])
         cmds.parentConstraint(self.spine.ctrls[0], self.tail.master_ctrl, mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
         cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
 
         # parent head up
-        cmds.parent(self.neck.offset, self.spine.ctrls[-1])
-        cmds.parent(self.head.offset, self.neck.ctrl)
-        cmds.parent(self.tip.offset, self.head.ctrl)
+        cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])
+        cmds.parent(self.head.offsets[0], self.neck.ctrls[0])
+        cmds.parent(self.tip.offsets[0], self.head.ctrls[0])
 
     def color_controller(self):
         for rig_component in self.rig_components:

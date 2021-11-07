@@ -15,6 +15,8 @@ class LegFront(bone.Bone):
         :param side: str
         :param name: str
         """
+        bone.Bone.__init__(self, side, name)
+
         self._rtype = 'front'
 
         self.distance = distance
@@ -22,24 +24,19 @@ class LegFront(bone.Bone):
         self.scale = 0.4
 
         # names
-        self.locs = list()
-        self.jnts = list()
-        self.ctrls = list()
-        self.ctrl_offsets = list()
-
         self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
         self.leg_ik = None
         self.foot_ik = None
         self.toe_ik = None
 
-        bone.Bone.__init__(self, side, name)
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
-    def assign_secondary_naming(self):
         for component in self.limb_components:
             self.locs.append('{}{}_loc'.format(self.base_name, component))
             self.jnts.append('{}{}_jnt'.format(self.base_name, component))
             self.ctrls.append('{}{}_ctrl'.format(self.base_name, component))
-            self.ctrl_offsets.append('{}{}_offset'.format(self.base_name, component))
+            self.offsets.append('{}{}_offset'.format(self.base_name, component))
 
         # ik has different ctrl name
         self.leg_ik = '{}leg_ik'.format(self.base_name)
@@ -107,7 +104,7 @@ class LegFront(bone.Bone):
         shoulder_pos = cmds.xform(shoulder, q=1, ws=1, t=1)
         shoulder_rot = cmds.xform(shoulder, q=1, ws=1, ro=1)
 
-        shoulder_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[0])
+        shoulder_ctrl_offset = cmds.group(em=1, name=self.offsets[0])
         cmds.move(shoulder_pos[0], shoulder_pos[1], shoulder_pos[2], shoulder_ctrl_offset)
         cmds.rotate(shoulder_rot[0], shoulder_rot[1], shoulder_rot[2], shoulder_ctrl_offset)
         cmds.parent(shoulder_ctrl, shoulder_ctrl_offset, relative=1)
@@ -129,7 +126,7 @@ class LegFront(bone.Bone):
         # Elbow control - aka. pole vector
         elbow = cmds.ls(self.jnts[1])
         pole_ctrl = cmds.duplicate(self._shape[1], name=self.ctrls[1])[0]
-        pole_ctrl_offset = cmds.group(em=1, name=self.ctrl_offsets[1])
+        pole_ctrl_offset = cmds.group(em=1, name=self.offsets[1])
         elbow_pos = cmds.xform(elbow, q=1, ws=1, t=1)
         cmds.move(elbow_pos[0], elbow_pos[1], elbow_pos[2]-self.distance, pole_ctrl_offset)
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)

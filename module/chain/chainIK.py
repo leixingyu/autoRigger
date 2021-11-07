@@ -8,17 +8,17 @@ from utility.datatype import vector
 class ChainIK(chain.Chain):
 
     def __init__(self, side, name, segment, length, direction):
-
+        chain.Chain.__init__(self, side, name, segment)
         self.clusters = list()
         self.ik_curve = None
         self.ik = None
 
-        chain.Chain.__init__(self, side, name, segment)
-
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()
 
-    def assign_secondary_naming(self):
+    def create_namespace(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
+
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, index))
             self.jnts.append('{}{}ik_jnt'.format(self.base_name, index))
@@ -73,6 +73,7 @@ class ChainIK(chain.Chain):
 
     def add_constraint(self):
         self.build_ik()
+
         for index, cluster in enumerate(self.clusters):
             cmds.parent(cluster+'Handle', self.ctrls[index])
 
@@ -91,7 +92,7 @@ class ChainIK(chain.Chain):
 
         # create curve length node and multiply node
         init_len = cmds.getAttr(self.ik_curve+'Info.arcLength')
-        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, name=self.ctrl+'Stretch')
+        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, name=self.ctrls[0]+'Stretch')
         cmds.setAttr(stretch_node+'.operation', 2)
         cmds.setAttr(stretch_node+'.input2X', init_len)
         cmds.connectAttr(self.ik_curve+'Info.arcLength', stretch_node+'.input1X')

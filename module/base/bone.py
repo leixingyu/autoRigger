@@ -23,27 +23,26 @@ class Bone(object):
 
         self._side = side
         self._name = name
+        self._rtype = None
 
         self._shape = None
 
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
-
-        self.loc = '{}_loc'.format(self.base_name)
-        self.jnt = '{}_jnt'.format(self.base_name)
-        self.ctrl = '{}_ctrl'.format(self.base_name)
-        self.offset = '{}_offset'.format(self.base_name)
-
-        self.assign_secondary_naming()
+        self.base_name = None
+        self.locs = list()
+        self.jnts = list()
+        self.ctrls = list()
+        self.offsets = list()
 
     def create_namespace(self):
-        pass
+        """ Create naming convention for complex module """
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
-    def assign_secondary_naming(self):
-        """ Create secondary naming convention for complex module """
-        pass
+        self.locs.append('{}_loc'.format(self.base_name))
+        self.jnts.append('{}_jnt'.format(self.base_name))
+        self.ctrls.append('{}_ctrl'.format(self.base_name))
+        self.offsets.append('{}_offset'.format(self.base_name))
 
-    @staticmethod
-    def set_controller_shape():
+    def set_controller_shape(self):
         """ Setting up controller curve shapes as templates """
 
         pass
@@ -59,7 +58,9 @@ class Bone(object):
         pass
 
     def color_locator(self):
-        """ Color-code the guide locators based on left, right, middle side """
+        """
+        Color-code the guide locators based on left, right, middle side
+        """
 
         locs = cmds.ls('{}*_loc'.format(self.base_name))
         for loc in locs:
@@ -78,13 +79,17 @@ class Bone(object):
         pass
 
     def place_controller(self):
-        """ Duplicate controller shapes and
-        place them based on guide's and joint's transform """
+        """
+        Duplicate controller shapes and
+        place them based on guide's and joint's transform
+        """
 
         pass
 
     def color_controller(self):
-        """ Colorize the controller based on left, right, middle side """
+        """
+        Colorize the controller based on left, right, middle side
+        """
 
         ctrls = cmds.ls('{}*_ctrl'.format(self.base_name))
         for ctrl in ctrls:
@@ -121,16 +126,18 @@ class Bone(object):
         pass
 
     def build_guide(self):
-        """ Create the entire rig guide setup """
-
+        """
+        Create the entire rig guide setup
+        """
         self.create_namespace()
-
         self.set_locator_attr()
         self.create_locator()
         self.color_locator()
 
     def build_rig(self):
-        """ Build the full rig based on the guide, without skinning """
+        """
+        Build the full rig based on the guide, without skinning
+        """
 
         self.create_joint()
         self.set_controller_shape()

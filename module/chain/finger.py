@@ -11,7 +11,8 @@ class Finger(chainFK.ChainFK):
             length=2.0):
 
         direction = [-1, 0, 0]
-        if side == 'L':
+        if side == 'l':
             direction = [1, 0, 0]
 
         chainFK.ChainFK.__init__(self, side, name, segment, length, direction)
+        self._rtype = 'finger'

@@ -11,9 +11,8 @@ class ChainFKIK(chain.Chain):
 
     def __init__(self, side, name, segment, length, direction):
 
-        self.master_ctrl = None
-
         chain.Chain.__init__(self, side, name, segment)
+        self.master_ctrl = None
 
         self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction)
         self.fk_chain = chainFK.ChainFK(side, name, segment, length, direction)
@@ -21,7 +20,12 @@ class ChainFKIK(chain.Chain):
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()
 
-    def assign_secondary_naming(self):
+    def create_namespace(self):
+        self.ik_chain.create_namespace()
+        self.fk_chain.create_namespace()
+
+
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, index))
             self.jnts.append('{}{}_jnt'.format(self.base_name, index))
