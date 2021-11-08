@@ -43,9 +43,7 @@ class Chain(bone.Bone):
             cmds.group(em=1, name=self.offsets[index])
             utility.setup.outliner.match_xform(self.offsets[index], self.jnts[index])
 
-            cmds.parent(self.ctrls[index], self.offsets[index],
-                        relative=1)
-
+            cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
             if index:
                 cmds.parent(self.offsets[index], self.ctrls[index-1])
 

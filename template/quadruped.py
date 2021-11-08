@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 from autoRigger import util
-from autoRigger.module import spineQuad
+from autoRigger.chain.spine import spineQuad
 from autoRigger.chain import tail
 from autoRigger.chain.limb.leg import legFront
 from autoRigger.chain.limb.leg import legBack

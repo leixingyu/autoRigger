@@ -4,7 +4,8 @@ import os
 import logging
 from enum import Enum, IntEnum, unique
 
-from .module import spine, spineQuad, foot, hand
+from .module import foot, hand
+from .chain.spine import spine, spineQuad
 from .template import biped, quadruped
 from .chain import finger
 from .chain.limb import limbFKIK

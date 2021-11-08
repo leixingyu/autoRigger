@@ -37,10 +37,7 @@ class Arm(bone.Bone):
         self.hand.create_namespace()
 
     def create_locator(self):
-        # Limb
         self.limb.create_locator()
-
-        # Hand
         self.hand.create_locator()
 
         # move hand based on side

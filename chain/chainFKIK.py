@@ -9,13 +9,13 @@ from utility.rigging import joint
 
 class ChainFKIK(chain.Chain):
 
-    def __init__(self, side, name, segment, length, direction):
+    def __init__(self, side, name, segment, length, direction, is_stretch=1):
 
         chain.Chain.__init__(self, side, name, segment)
         self.master_ctrl = None
         self.master_offset = None
 
-        self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction)
+        self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction, is_stretch)
         self.fk_chain = chainFK.ChainFK(side, name, segment, length, direction)
 
         # master controller location
