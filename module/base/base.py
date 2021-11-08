@@ -2,7 +2,7 @@ import maya.cmds as cmds
 
 from autoRigger.module.base import bone
 from autoRigger import util
-from utility.rigging import joint
+from utility.rigging import joint, nurbs
 
 
 class Base(bone.Bone):
@@ -52,13 +52,9 @@ class Base(bone.Bone):
 
         # TODO: use nurbs clear transform on this
         cmds.duplicate(self._shape, name=self.ctrls[0])
-
-        # used to clear out ctrl transform offset
         cmds.group(em=1, name=self.offsets[0])
-        util.match_xform(self.offsets[0], self.jnts[0])
 
-        # ctrl has transform relative to offset group, which is 0
-        cmds.parent(self.ctrls[0], self.offsets[0], relative=1)
+        nurbs.clear_nurbs_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
 
     def add_constraint(self):

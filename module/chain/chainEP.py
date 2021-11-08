@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+import utility.setup.outliner
 from autoRigger import util
 from . import chain
 from utility.algorithm import algorithm
@@ -63,7 +64,7 @@ class ChainEP(chain.Chain):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
 
-            util.match_xform(self.offsets[index], self.jnts[index])
+            utility.setup.outliner.match_xform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)

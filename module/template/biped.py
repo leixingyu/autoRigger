@@ -113,12 +113,12 @@ class Biped(bone.Bone):
 
         # Connect
         # Leg driven by root spine control #
-        cmds.parent(self.left_leg.limb.switch_offset, self.spine.ctrls[0])
-        cmds.parent(self.right_leg.limb.switch_offset, self.spine.ctrls[0])
+        cmds.parent(self.left_leg.limb.master_offset, self.spine.ctrls[0])
+        cmds.parent(self.right_leg.limb.master_offset, self.spine.ctrls[0])
 
         # Arm driven by top spine control #
-        cmds.parent(self.left_arm.limb.switch_offset, self.spine.ctrls[-1])
-        cmds.parent(self.right_arm.limb.switch_offset, self.spine.ctrls[-1])
+        cmds.parent(self.left_arm.limb.master_offset, self.spine.ctrls[-1])
+        cmds.parent(self.right_arm.limb.master_offset, self.spine.ctrls[-1])
 
         # Neck to Head chain #
         cmds.parent(self.tip.offsets[0], self.head.offsets[0])

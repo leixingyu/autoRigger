@@ -1,9 +1,32 @@
 import maya.cmds as cmds
 
 from autoRigger.module.base import bone
+from autoRigger.module.chain import chain, chainIK, chainFK, chainFKIK
 from autoRigger import util
 from utility.setup import outliner
 from utility.rigging import joint, nurbs
+from utility.datatype import vector
+
+
+class Limb_(chainFKIK.ChainFKIK):
+
+    def __init__(self, side, name, segment=3, length=6, ltype='null'):
+        chain.Chain.__init__(self, side, name, segment)
+
+        self.master_ctrl = None
+
+        self.ltype = ltype
+        direction = [0, -1, 0]
+        if ltype == 'arm' and side == 'l':
+            direction = [1, 0, 0]
+        elif ltype == 'arm' and side == 'r':
+            direction = [-1, 0, 0]
+
+        self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction)
+        self.fk_chain = chainFK.ChainFK(side, name, segment, length, direction)
+
+        self.interval = length / (self.segment-1)
+        self.dir = vector.Vector(direction).normalize()
 
 
 class Limb(bone.Bone):
@@ -62,9 +85,7 @@ class Limb(bone.Bone):
         self._shape = list(range(4))
 
         self._shape[0] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
-
         self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
-
         self._shape[2] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
         cmds.rotate(0, 90, 0, self._shape[2])
 
@@ -133,69 +154,39 @@ class Limb(bone.Bone):
         return cmds.ls(self.jnts[0])
 
     def place_controller(self):
-        root_pos, mid_pos, top_pos = [cmds.xform(self.jnts[i], q=1, t=1, ws=1) for i in range(len(self.limb_components))]
-        root_rot, mid_rot, top_rot = [cmds.xform(self.jnts[i], q=1, ro=1, ws=1) for i in range(len(self.limb_components))]
-
         # FK Setup
+        for i in range(len(self.fk_ctrls)):
+            cmds.duplicate(self._shape[0], name=self.fk_ctrls[i])
+            cmds.group(em=1, name=self.fk_offsets[i])
+            nurbs.clear_nurbs_transform(self.fk_ctrls[i], self.fk_offsets[i], self.jnts[i])
 
-        # Root
-        root_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[0])[0]
-        root_offset = cmds.group(em=1, name=self.fk_offsets[0])
-
-        nurbs.clear_nurbs_transform(root_fk_ctrl, root_offset, root_pos, root_rot)
-
-        # Mid
-        mid_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[1])[0]
-        mid_offset = cmds.group(em=1, name=self.fk_offsets[1])
-
-        nurbs.clear_nurbs_transform(mid_fk_ctrl, mid_offset, mid_pos, mid_rot)
-
-        # Top
-        top_fk_ctrl = cmds.duplicate(self._shape[0], name=self.fk_ctrls[2])[0]
-        top_offset = cmds.group(em=1, name=self.fk_offsets[2])
-
-        nurbs.clear_nurbs_transform(top_fk_ctrl, top_offset, top_pos, top_rot)
-
-        # clean up
-        cmds.parent(top_offset, mid_fk_ctrl)
-        cmds.parent(mid_offset, root_fk_ctrl)
+        cmds.parent(self.fk_offsets[2], self.fk_ctrls[1])
+        cmds.parent(self.fk_offsets[1], self.fk_ctrls[0])
 
         # IK Setup
+        cmds.duplicate(self._shape[1], name=self.ik_ctrl)
+        cmds.group(em=1, name=self.ik_offset)
+        nurbs.clear_nurbs_transform(self.ik_ctrl, self.ik_offset, self.jnts[2])
 
-        # Root
-        ik_ctrl = cmds.duplicate(self._shape[1], name=self.ik_ctrl)[0]
-        cmds.move(top_pos[0], top_pos[1], top_pos[2], ik_ctrl, absolute=1)
-
-        offset_grp = cmds.group(em=1, name=self.ik_offset)
-        cmds.move(top_pos[0], top_pos[1], top_pos[2], offset_grp)
-        cmds.parent(ik_ctrl, offset_grp)
-        cmds.rotate(top_rot[0], top_rot[1], top_rot[2], offset_grp)
-        cmds.makeIdentity(ik_ctrl, apply=1, t=1, r=1, s=1)
-
-        # Pole
-        pole_ctrl = cmds.duplicate(self._shape[2], name=self.ik_pole)
+        cmds.duplicate(self._shape[2], name=self.ik_pole)
+        cmds.group(em=1, name=self.ik_pole_offset)
         if self.direction == 'vertical':
-            cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]+3, pole_ctrl, absolute=1)
+            util.move(self.ik_pole, [0, 3, 0])
         elif self.direction == 'horizontal':
-            cmds.move(mid_pos[0], mid_pos[1], mid_pos[2]-3, pole_ctrl, absolute=1)
-            cmds.rotate(0, 180, 0, pole_ctrl, relative=1)
-
-        offset_grp = cmds.group(em=1, name=self.ik_pole_offset)
-        cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], offset_grp)
-        cmds.parent(pole_ctrl, offset_grp)
-        cmds.makeIdentity(pole_ctrl, apply=1, t=1, r=1, s=1)
+            util.move(self.ik_pole, [0, -3, 0])
+        nurbs.clear_nurbs_transform(self.ik_pole, self.ik_pole_offset, self.jnts[1])
 
         # IK/FK Switch Setup
         cmds.duplicate(self._shape[3], name=self.switch_ctrl)
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_ctrl, absolute=1)
-        cmds.rotate(0, 0, 90, self.switch_ctrl, relative=1)
-        cmds.addAttr(self.switch_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
-
         cmds.group(em=1, name=self.switch_offset)
-        cmds.move(root_pos[0], root_pos[1], root_pos[2], self.switch_offset)
-        cmds.parent(self.switch_ctrl, self.switch_offset)
-        cmds.rotate(root_rot[0], root_rot[1], root_rot[2], self.switch_offset)
-        cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
+        cmds.addAttr(
+            self.switch_ctrl,
+            longName='FK_IK',
+            attributeType='double',
+            defaultValue=1, minValue=0, maxValue=1, keyable=1
+        )
+        cmds.rotate(0, 0, 90, self.switch_ctrl, relative=1)
+        nurbs.clear_nurbs_transform(self.switch_ctrl, self.switch_offset, self.jnts[0])
 
         # Cleanup
         cmds.parent(self.switch_offset, util.G_CTRL_GRP)
@@ -241,6 +232,7 @@ class Limb(bone.Bone):
 
         # IK Handle #
         ik_handle = cmds.ikHandle(startJoint=self.ik_jnts[0], endEffector=self.ik_jnts[-1], name='{}_ikhandle'.format(self.base_name), solver='ikRPsolver')[0]
+
         cmds.pointConstraint(self.ik_ctrl, ik_handle, mo=1)
         cmds.orientConstraint(self.ik_ctrl, self.ik_jnts[-1], mo=1)
         cmds.poleVectorConstraint(self.ik_pole, ik_handle)

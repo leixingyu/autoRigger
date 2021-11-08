@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+import utility.setup.outliner
 from autoRigger.module.base import bone
 from autoRigger import util
 from utility.rigging import joint
@@ -40,7 +41,7 @@ class Chain(bone.Bone):
         for index in range(self.segment):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
-            util.match_xform(self.offsets[index], self.jnts[index])
+            utility.setup.outliner.match_xform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index],
                         relative=1)

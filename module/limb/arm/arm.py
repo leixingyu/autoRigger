@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 from autoRigger.module import hand
-from autoRigger.module.limb import limb
+from autoRigger.module.chain import limbFKIK
 from autoRigger.module.base import bone
 from autoRigger import util
 
@@ -9,7 +9,7 @@ from autoRigger import util
 class Arm(bone.Bone):
     """ This module creates an Arm rig with a limb and a hand"""
 
-    def __init__(self, side, name, distance=2, interval=0.5, gap=2):
+    def __init__(self, side, name, distance=6, interval=0.5, gap=2):
         """  Initialize Arm class with side and base_name
 
         :param side: str
@@ -19,11 +19,12 @@ class Arm(bone.Bone):
         self._rtype = 'arm'
 
         self.distance = distance
+
         self.interval = interval
         self.gap = gap
         self.scale = 0.2
 
-        self.limb = limb.Limb(side=self._side, name=name, ltype='arm', interval=self.distance)
+        self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='arm', length=self.distance)
 
         self.hand = None
         if self._side == 'l':
@@ -44,9 +45,9 @@ class Arm(bone.Bone):
 
         # move hand based on side
         if self._side == 'l':
-            util.move(self.hand.wrist.locs[0], pos=[2 * self.distance+self.gap, 0, 0])
+            util.move(self.hand.wrist.locs[0], pos=[self.distance+self.gap, 0, 0])
         elif self._side == 'r':
-            util.move(self.hand.wrist.locs[0], pos=[-2 * self.distance-self.gap, 0, 0])
+            util.move(self.hand.wrist.locs[0], pos=[-self.distance-self.gap, 0, 0])
 
         cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])
 

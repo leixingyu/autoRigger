@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+import utility.setup.outliner
 from autoRigger import util
 from . import chain
 from utility.datatype import vector
@@ -38,7 +39,7 @@ class ChainIK(chain.Chain):
         for index in range(self.segment):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
-            util.match_xform(self.offsets[index], self.jnts[index])
+            utility.setup.outliner.match_xform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index],
                         relative=1)
@@ -68,6 +69,7 @@ class ChainIK(chain.Chain):
                       endEffector=self.jnts[self.segment-1],
                       name=self.ik, curve=self.ik_curve, createCurve=False,
                       parentCurve=1, roc=1, solver='ikSplineSolver')
+
         cmds.setAttr(self.ik+'.visibility', 0)
         cmds.parent(self.ik, util.G_CTRL_GRP)
 
