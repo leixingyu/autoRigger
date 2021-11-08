@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from utility.setup import outliner
 from autoRigger import util
 from utility.rigging import joint
-from . import chainIK
+from autoRigger.chain import chainIK
 
 
 class LimbIK(chainIK.ChainIK):

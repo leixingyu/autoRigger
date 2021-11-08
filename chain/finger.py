@@ -1,4 +1,4 @@
-from autoRigger.module.chain import chainFK
+from autoRigger.chain import chainFK
 
 
 class Finger(chainFK.ChainFK):

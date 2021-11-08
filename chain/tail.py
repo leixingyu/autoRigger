@@ -1,4 +1,4 @@
-from autoRigger.module.chain import chainFKIK
+from autoRigger.chain import chainFKIK
 
 
 class Tail(chainFKIK.ChainFKIK):

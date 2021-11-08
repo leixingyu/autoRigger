@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
-from .chain import finger
-from .base import bone, base
+from autoRigger.chain import finger
+from autoRigger.base import bone, base
 from autoRigger import util
 
 from utility.setup import outliner

@@ -2,9 +2,10 @@ import maya.cmds as cmds
 
 from autoRigger import util
 from autoRigger.module import spineQuad
-from autoRigger.module.chain import tail
-from autoRigger.module.limb.leg import legFront, legBack
-from autoRigger.module.base import base, bone
+from autoRigger.chain import tail
+from autoRigger.chain.limb.leg import legFront
+from autoRigger.chain.limb.leg import legBack
+from autoRigger.base import base, bone
 from utility.setup import outliner
 
 

@@ -1,4 +1,5 @@
-from . import chain, limbFK, limbIK, chainFKIK
+from autoRigger.chain import chain, chainFKIK
+from autoRigger.chain.limb import limbIK, limbFK
 from utility.datatype import vector
 
 

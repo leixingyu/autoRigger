@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
-from .base import bone
+from autoRigger.base import bone
 from autoRigger import util
-from autoRigger.module.chain import chainIK
+from ..chain import chainIK
 
 
 class SpineIK(chainIK.ChainIK):

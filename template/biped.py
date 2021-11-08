@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
 from autoRigger.module import spine
-from autoRigger.module.limb.arm import arm
-from autoRigger.module.limb.leg import leg
-from autoRigger.module.base import base, bone
+from autoRigger.chain.limb.arm import arm
+from autoRigger.chain.limb.leg import leg
+from autoRigger.base import base, bone
 from autoRigger import util
 from utility.setup import outliner
 

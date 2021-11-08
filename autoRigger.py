@@ -5,12 +5,13 @@ import logging
 from enum import Enum, IntEnum, unique
 
 from .module import spine, spineQuad, foot, hand
-from .module.template import biped, quadruped
-from .module.chain import tail, finger
-from .module.limb.arm import arm
-from .module.limb.leg import leg, legBack, legFront
-from .module.limb import limb
-from .module.base import base
+from .template import biped, quadruped
+from .chain import finger
+from .chain.limb import limbFKIK
+from .chain import tail
+from .chain.limb.arm import arm
+from .chain.limb.leg import leg, legBack, legFront
+from .base import base
 
 from utility._vendor.Qt import QtCore, QtGui, QtWidgets
 from utility._vendor.Qt import _loadUi
@@ -92,7 +93,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         
         for component in RigComponents:
             icon = QtGui.QIcon()
-            icon.addFile(os.path.join(CURRENT_PATH, 'ui', component.value + '.png'))
+            icon.addFile(os.path.join(CURRENT_PATH, 'ui', 'icon', component.value+'.png'))
 
             item = QtWidgets.QListWidgetItem()
             item.setText(component.value)
@@ -161,7 +162,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         elif item == RigComponents.HAND.value:
             obj = hand.Hand(side, base_name)
         elif item == RigComponents.LIMB.value:
-            obj = limb.Limb(side, base_name)
+            obj = limbFKIK.LimbFKIK(side, base_name)
         elif item == RigComponents.ARM.value:
             obj = arm.Arm(side, base_name)
         elif item == RigComponents.FOOT.value:

@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 import utility.setup.outliner
-from autoRigger.module.base import bone
+from autoRigger.base import bone
 from autoRigger import util
 from utility.rigging import joint
 

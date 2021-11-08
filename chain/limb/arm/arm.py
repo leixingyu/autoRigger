@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
 from autoRigger.module import hand
-from autoRigger.module.chain import limbFKIK
-from autoRigger.module.base import bone
+from autoRigger.chain.limb import limbFKIK
+from autoRigger.base import bone
 from autoRigger import util
 
 
