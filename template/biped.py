@@ -1,10 +1,11 @@
 import maya.cmds as cmds
 
-from autoRigger import util
-from autoRigger.base import base, bone
-from autoRigger.chain.spine import spine
-from autoRigger.chain.limb.arm import arm
-from autoRigger.chain.limb.leg import leg
+from ..constant import Side
+from .. import util
+from ..base import base, bone
+from ..chain.spine import spine
+from ..chain.limb.arm import arm
+from ..chain.limb.leg import leg
 
 
 class Biped(bone.Bone):
@@ -19,17 +20,16 @@ class Biped(bone.Bone):
 
         self.pos = [0, 8.4, 0]
         self.spine_len = spine_len
-        self.scale = 0.2
 
-        self.left_arm = arm.Arm(side='l', name='arm')
-        self.right_arm = arm.Arm(side='r', name='arm')
+        self.left_arm = arm.Arm(side=Side.LEFT, name='arm')
+        self.right_arm = arm.Arm(side=Side.RIGHT, name='arm')
 
-        self.left_leg = leg.Leg(side='l', name='leg')
-        self.right_leg = leg.Leg(side='r', name='leg')
-        self.spine = spine.Spine(side='m', name='spine', length=self.spine_len)
-        self.neck = base.Base(side='m', name='neck')
-        self.head = base.Base(side='m', name='head')
-        self.tip = base.Base(side='m', name='tip')
+        self.left_leg = leg.Leg(side=Side.LEFT, name='leg')
+        self.right_leg = leg.Leg(side=Side.RIGHT, name='leg')
+        self.spine = spine.Spine(side=Side.MIDDLE, name='spine', length=self.spine_len)
+        self.neck = base.Base(side=Side.MIDDLE, name='neck')
+        self.head = base.Base(side=Side.MIDDLE, name='head')
+        self.tip = base.Base(side=Side.MIDDLE, name='tip')
 
         self.rig_components = [
             self.left_arm,

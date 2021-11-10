@@ -24,12 +24,10 @@ class Chain(bone.Bone):
     def create_locator(self):
         for index in range(self.segment):
             cmds.spaceLocator(n=self.locs[index])
-
             if index:
                 cmds.parent(self.locs[index], self.locs[index-1], relative=1)
                 distance = (self.interval * self.dir).as_list
                 util.move(self.locs[index], distance)
-
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def place_controller(self):

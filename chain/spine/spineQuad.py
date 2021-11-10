@@ -20,7 +20,6 @@ class SpineQuad(bone.Bone):
 
         self.interval = length / (segment-1)
         self.segment = segment
-        self.scale = 0.4
 
         self.clusters = list()
 
@@ -29,9 +28,8 @@ class SpineQuad(bone.Bone):
         self.ik_curve = None
         self.ik = None
 
+    @bone.update_base_name
     def create_namespace(self):
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
-        
         for i in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, i))
             self.jnts.append('{}{}_jnt'.format(self.base_name, i))
@@ -52,17 +50,13 @@ class SpineQuad(bone.Bone):
         self._shapes = list(range(2))
 
         self._shapes[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
-        cmds.scale(0.3, 0.3, 0.3, self._shapes[0])
 
         self._shapes[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
-        cmds.scale(1, 1, 1, self._shapes[1])
 
     def create_locator(self):
         for i in range(self.segment):
             spine = cmds.spaceLocator(n=self.locs[i])
-            if i == 0:
-                cmds.scale(self.scale, self.scale, self.scale, spine)
-            else:
+            if i:
                 cmds.parent(spine, self.locs[i-1], relative=1)
                 # move spine locator along +z axis
                 cmds.move(0, 0, self.interval, spine, relative=1)
@@ -76,7 +70,6 @@ class SpineQuad(bone.Bone):
         for i, loc in enumerate(self.locs):
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
             jnt = cmds.joint(p=loc_pos, name=self.jnts[i])
-            cmds.setAttr(jnt+'.radius', self.scale)
 
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
         joint.orient_joint(self.jnts[0])

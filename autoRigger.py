@@ -2,8 +2,8 @@
 
 import os
 import logging
-from enum import Enum, IntEnum, unique
 
+from .constant import RigComponents, RigType, Side
 from .module import foot, hand
 from .chain.spine import spine, spineQuad
 from .template import biped, quadruped
@@ -21,33 +21,6 @@ from utility.setup import setup
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 UI_PATH = os.path.join('ui', 'autoRigger.ui')
-
-
-@unique
-class RigComponents(Enum):
-    BASE = 'base'
-    FINGER = 'biped-finger'
-    HAND = 'biped-hand'
-    LIMB = 'limb'
-    ARM = 'biped-arm'
-    FOOT = 'biped-foot'
-    LEG = 'biped-leg'
-    HEAD = 'biped-head'
-    SPINE = 'biped-spine'
-    BIPED = 'biped'
-    LEG_FRONT = 'quad-front'
-    LEG_BACK = 'quad-hind'
-    SPINE_QUAD = 'quad-spine'
-    TAIL = 'quad-tail'
-    QUAD = 'quad'
-
-
-@unique
-class RigType(IntEnum):
-    BIPED = 0
-    QUADRUPED = 1
-    BIRD = 2
-    CUSTOM = 3
 
 
 class AutoRiggerWindow(QtWidgets.QMainWindow):
@@ -149,7 +122,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         base_name = self.ui_nameEdit.text() if self.ui_nameEdit.text() else 'null'
 
         # Side
-        side = ['l', 'r', 'm'][self.ui_sideCBox.currentIndex()]
+        side = [Side.LEFT, Side.RIGHT, Side.MIDDLE][self.ui_sideCBox.currentIndex()]
 
         # Start Position
         pos_x = int(self.ui_worldX.text()) if self.ui_worldX.text() else 0

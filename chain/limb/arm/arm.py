@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+from ....constant import Side
 from autoRigger import util
 from autoRigger.module import hand
 from autoRigger.base import bone
@@ -18,13 +19,12 @@ class Arm(bone.Bone):
         self.distance = distance
         self.interval = interval
         self.gap = gap
-        self.scale = 0.2
 
         self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='arm', length=self.distance)
         self.hand = None
-        if self._side == 'l':
+        if self._side == Side.LEFT:
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
-        elif self._side == 'r':
+        elif self._side == Side.RIGHT:
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
 
     def create_namespace(self):
@@ -36,9 +36,9 @@ class Arm(bone.Bone):
         self.hand.create_locator()
 
         # move hand based on side
-        if self._side == 'l':
+        if self._side == Side.LEFT:
             util.move(self.hand.wrist.locs[0], pos=[self.distance+self.gap, 0, 0])
-        elif self._side == 'r':
+        elif self._side == Side.RIGHT:
             util.move(self.hand.wrist.locs[0], pos=[-self.distance-self.gap, 0, 0])
 
         cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])

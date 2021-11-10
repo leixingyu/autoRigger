@@ -1,3 +1,4 @@
+from ...constant import Side
 from autoRigger.chain import chain, chainFKIK
 from autoRigger.chain.limb import limbIK, limbFK
 from utility.datatype import vector
@@ -12,12 +13,11 @@ class LimbFKIK(chainFKIK.ChainFKIK):
         self._rtype = ltype
 
         self.direction = [0, -1, 0]
-        if ltype == 'arm' and side == 'l':
+        if ltype == 'arm' and side == Side.LEFT:
             self.direction = [1, 0, 0]
-        elif ltype == 'arm' and side == 'r':
+        elif ltype == 'arm' and side == Side.RIGHT:
             self.direction = [-1, 0, 0]
 
-        self.master_ctrl = None
         chain.Chain.__init__(self, side, name, segment=3)
         self.ik_chain = limbIK.LimbIK(side, name, length)
         self.fk_chain = limbFK.LimbFK(side, name, length)

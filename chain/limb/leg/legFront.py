@@ -21,7 +21,6 @@ class LegFront(bone.Bone):
 
         self.distance = distance
         self.height = height
-        self.scale = 0.4
 
         # names
         self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
@@ -29,9 +28,8 @@ class LegFront(bone.Bone):
         self.foot_ik = None
         self.toe_ik = None
 
+    @bone.update_base_name
     def create_namespace(self):
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
-
         for component in self.limb_components:
             self.locs.append('{}{}_loc'.format(self.base_name, component))
             self.jnts.append('{}{}_jnt'.format(self.base_name, component))
@@ -48,20 +46,16 @@ class LegFront(bone.Bone):
 
         sphere = cmds.createNode('implicitSphere')
         self._shape[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
-        cmds.scale(0.5, 0.5, 0.5, self._shape[0])
 
         pole = cmds.createNode('implicitSphere')
         self._shape[1] = cmds.rename(cmds.listRelatives(pole, p=1), self.namer.tmp)
-        cmds.scale(0.2, 0.2, 0.2, self._shape[1])
 
         self._shape[2] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
-        cmds.scale(0.5, 0.5, 0.5, self._shape[2])
 
     def create_locator(self):
 
         # Shoulder
         shoulder = cmds.spaceLocator(n=self.locs[0])
-        cmds.scale(self.scale, self.scale, self.scale, shoulder)
 
         # Elbow
         elbow = cmds.spaceLocator(n=self.locs[1])
@@ -91,7 +85,6 @@ class LegFront(bone.Bone):
             loc = cmds.ls(self.locs[index], transforms=1)
             loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
             jnt = cmds.joint(p=loc_pos, name=self.jnts[index])
-            cmds.setAttr(jnt+'.radius', self.scale)
 
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
         joint.orient_joint(self.jnts[0])

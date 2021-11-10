@@ -1,11 +1,12 @@
 import maya.cmds as cmds
 
-from autoRigger import util
-from autoRigger.chain.spine import spineQuad
-from autoRigger.chain import tail
-from autoRigger.chain.limb.leg import legFront
-from autoRigger.chain.limb.leg import legBack
-from autoRigger.base import base, bone
+from ..constant import Side
+from .. import util
+from ..chain.spine import spineQuad
+from ..chain import tail
+from ..chain.limb.leg import legFront
+from ..chain.limb.leg import legBack
+from ..base import base, bone
 from utility.setup import outliner
 
 
@@ -21,7 +22,7 @@ class Quadruped(bone.Bone):
     one tail
     """
 
-    def __init__(self, side='na', name='standard'):
+    def __init__(self, side, name='standard'):
         """ Initialize Quadruped class with side and name
 
         :param side: str
@@ -31,18 +32,18 @@ class Quadruped(bone.Bone):
 
         self._rtype = 'quad'
 
-        self.left_arm = legFront.LegFront(side='l', name='standard')
-        self.right_arm = legFront.LegFront(side='r', name='standard')
+        self.left_arm = legFront.LegFront(side=Side.LEFT, name='standard')
+        self.right_arm = legFront.LegFront(side=Side.RIGHT, name='standard')
 
-        self.left_leg = legBack.LegBack(side='l', name='standard')
-        self.right_leg = legBack.LegBack(side='r', name='standard')
+        self.left_leg = legBack.LegBack(side=Side.LEFT, name='standard')
+        self.right_leg = legBack.LegBack(side=Side.RIGHT, name='standard')
 
-        self.spine = spineQuad.SpineQuad(side='m', name='spine')
-        self.tail = tail.Tail(side='m', name='tail')
+        self.spine = spineQuad.SpineQuad(side=Side.MIDDLE, name='spine')
+        self.tail = tail.Tail(side=Side.MIDDLE, name='tail')
 
-        self.neck = base.Base(side='m', name='neck')
-        self.head = base.Base(side='m', name='head')
-        self.tip = base.Base(side='m', name='tip')
+        self.neck = base.Base(side=Side.MIDDLE, name='neck')
+        self.head = base.Base(side=Side.MIDDLE, name='head')
+        self.tip = base.Base(side=Side.MIDDLE, name='tip')
 
         self.rig_components = [
             self.left_arm,
@@ -64,6 +65,10 @@ class Quadruped(bone.Bone):
         for rig_component in self.rig_components:
             rig_component.create_locator()
         self.move_locator()
+
+    def color_locator(self):
+        for rig_component in self.rig_components:
+            rig_component.color_locator()
 
     def move_locator(self):
         pos = [0, 0, 0]

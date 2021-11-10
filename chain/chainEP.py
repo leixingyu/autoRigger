@@ -2,6 +2,7 @@ import maya.cmds as cmds
 
 from . import chain
 from autoRigger import util
+from autoRigger.base import bone
 from utility.algorithm import algorithm
 import utility.setup.outliner
 
@@ -30,6 +31,7 @@ class ChainEP(chain.Chain):
 
         self.curve = curve
 
+    @bone.update_base_name
     def assign_secondary_naming(self):
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, index))

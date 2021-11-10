@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+from ..constant import Side
 from autoRigger.chain import finger
 from autoRigger.base import bone, base
 from autoRigger import util
@@ -13,7 +14,7 @@ from utility.setup import outliner
 
 class Hand(bone.Bone):
     """
-    Hand rig mdule with multiple fingers and a wrist
+    Hand rig module with multiple fingers and a wrist
     """
 
     def __init__(self, side, name, interval=0.5, distance=2):
@@ -50,7 +51,7 @@ class Hand(bone.Bone):
         self.wrist.create_locator()
         # move around the locators
         side_factor = 1
-        if self._side == 'r':
+        if self._side == Side.RIGHT:
             side_factor = -1
 
         util.move(self.thumb.locs[0], [0, 0, 2 * self.interval])

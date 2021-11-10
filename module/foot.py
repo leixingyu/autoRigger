@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+from ..constant import Side
 from autoRigger import util
 from autoRigger.base import bone
 from utility.setup import outliner
@@ -17,15 +18,10 @@ class Foot(bone.Bone):
 
         self.interval = interval
         self.height = height
-        self.scale = 0.2
 
+    @bone.update_base_name
     def create_namespace(self):
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
-
-        self.locs.append('{}_loc'.format(self.base_name))
-        self.jnts.append('{}_jnt'.format(self.base_name))
-        self.ctrls.append('{}_ctrl'.format(self.base_name))
-        self.offsets.append('{}_offset'.format(self.base_name))
+        super(Foot, self).create_namespace()
 
         self.ankle_loc = '{}{}_loc'.format(self.base_name, 'ankle')
         self.ball_loc = '{}{}_loc'.format(self.base_name, 'ball')
@@ -59,7 +55,6 @@ class Foot(bone.Bone):
 
         self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=6, name=self.namer.tmp)[0]
         cmds.rotate(0, 90, 0, self._shape[1], relative=1)
-        cmds.scale(0.4, 0.4, 0.4, self._shape[1])
 
         self._shape[2] = nurbs.make_curve_by_text(text='FK/IK', name=self.namer.tmp)
         cmds.rotate(-90, 0, 0, self._shape[2], relative=1)
@@ -67,7 +62,6 @@ class Foot(bone.Bone):
     def create_locator(self):
         # Result Foot
         cmds.spaceLocator(n=self.ankle_loc)
-        cmds.scale(self.scale, self.scale, self.scale, self.ankle_loc)
 
         cmds.spaceLocator(n=self.ball_loc)
         cmds.parent(self.ball_loc, self.ankle_loc, relative=1)
@@ -80,14 +74,14 @@ class Foot(bone.Bone):
         # Reverse Foot Setup
         cmds.spaceLocator(n=self.inner_loc)
         cmds.parent(self.inner_loc, self.ball_loc, relative=1)
-        if self._side == 'l':
+        if self._side == Side.LEFT:
             cmds.move(-self.interval, 0, 0, self.inner_loc, relative=1)
         else: 
             cmds.move(self.interval, 0, 0, self.inner_loc, relative=1)
 
         cmds.spaceLocator(n=self.outer_loc)
         cmds.parent(self.outer_loc, self.ball_loc, relative=1)
-        if self._side == 'l':
+        if self._side == Side.LEFT:
             cmds.move(self.interval, 0, 0, self.outer_loc, relative=1)
         else: 
             cmds.move(-self.interval, 0, 0, self.outer_loc, relative=1)
@@ -163,7 +157,6 @@ class Foot(bone.Bone):
         elif self._side == "r":
             cmds.move(foot_pos[0]-3, foot_pos[1], foot_pos[2], self.switch_ctrl)
 
-        cmds.scale(0.5, 0.5, 0.5, self.switch_ctrl)
         cmds.addAttr(self.switch_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
         cmds.makeIdentity(self.switch_ctrl, apply=1, t=1, r=1, s=1)
 
@@ -197,7 +190,7 @@ class Foot(bone.Bone):
         # Foot Bank
         cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
         cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
-        if self._side == 'r':
+        if self._side == Side.RIGHT:
             cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=-20, value=-30)
             cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=20, value=30)
         else:

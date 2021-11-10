@@ -18,7 +18,6 @@ class Leg(bone.Bone):
         self.distance = distance
         self.interval = interval
         self.height = height
-        self.scale = 0.2
 
         self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='leg', length=self.distance)
         self.foot = foot.Foot(side=self._side, name=name, interval=self.interval, height=self.height)

@@ -15,9 +15,9 @@ class LimbIK(chainIK.ChainIK):
         self._rtype = ltype
 
         self.direction = [0, -1, 0]
-        if ltype == 'arm' and side == 'l':
+        if ltype == 'arm' and side == Side.LEFT:
             self.direction = [1, 0, 0]
-        elif ltype == 'arm' and side == 'r':
+        elif ltype == 'arm' and side == Side.RIGHT:
             self.direction = [-1, 0, 0]
 
         chainIK.ChainIK.__init__(self, side, name, segment=3, length=length, direction=self.direction)

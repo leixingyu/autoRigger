@@ -15,7 +15,6 @@ class Base(bone.Bone):
         bone.Bone.__init__(self, side, name)
 
         self._rtype = 'base'
-        self.scale = 0.2
 
     def set_controller_shape(self):
         # Base controller shape
@@ -28,7 +27,7 @@ class Base(bone.Bone):
 
     def create_locator(self):
         cmds.spaceLocator(n=self.locs[0])
-        cmds.scale(self.scale, self.scale, self.scale, self.locs[0])
+        cmds.scale(self._scale, self._scale, self._scale, self.locs[0])
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def create_joint(self):

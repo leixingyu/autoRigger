@@ -1,6 +1,9 @@
+from functools import wraps
+
 import maya.cmds as cmds
 
-from autoRigger import util
+from .. import util
+from ..constant import Side
 from utility.algorithm import strGenerator
 from utility.datatype import color
 from utility.rigging import transform
@@ -10,6 +13,17 @@ TMP_PREFIX = 'tmp_'
 Yellow = color.ColorRGB.yellow()
 Blue = color.ColorRGB.blue()
 Red = color.ColorRGB.red()
+
+
+def update_base_name(func):
+    """
+    Update the base name attribute in the rig component
+    """
+    @wraps(func)
+    def wrap(self):
+        self.base_name = '{}_{}_{}'.format(self._rtype, self._side.value, self._name)
+        func(self)
+    return wrap
 
 
 class Bone(object):
@@ -26,14 +40,17 @@ class Bone(object):
         """
         Initialize Base class with side and name
 
-        :param side: str. 'm', 'l' or 'r'
+        :param side: str. Side.MIDDLE, Side.LEFT or Side.RIGHT
         :param name: str. name of the bone rig
         """
         util.create_outliner_grp()
 
+        self._components = list()
+
         self._side = side
         self._name = name
         self._rtype = None
+        self._scale = 1
 
         self._shape = None
 
@@ -43,12 +60,11 @@ class Bone(object):
         self.ctrls = list()
         self.offsets = list()
 
+    @update_base_name
     def create_namespace(self):
         """
         Create naming conventions for the current rig type
         """
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
-
         self.locs.append('{}_loc'.format(self.base_name))
         self.jnts.append('{}_jnt'.format(self.base_name))
         self.ctrls.append('{}_ctrl'.format(self.base_name))
@@ -72,9 +88,9 @@ class Bone(object):
         """
         for loc in self.locs:
             try:
-                if self._side == 'l':
+                if self._side == Side.LEFT:
                     transform.colorize_rgb_normalized(loc, Blue.r, Blue.g, Blue.b)
-                elif self._side == 'r':
+                elif self._side == Side.RIGHT:
                     transform.colorize_rgb_normalized(loc, Red.r, Red.g, Red.b)
                 else:
                     transform.colorize_rgb_normalized(loc, Yellow.r, Yellow.g, Yellow.b)
@@ -101,9 +117,9 @@ class Bone(object):
         """
         for ctrl in self.ctrls:
             try:
-                if self._side == 'l':
+                if self._side == Side.LEFT:
                     transform.colorize_rgb_normalized(ctrl, Blue.r, Blue.g, Blue.b)
-                elif self._side == 'r':
+                elif self._side == Side.RIGHT:
                     transform.colorize_rgb_normalized(ctrl, Red.r, Red.g, Red.b)
                 else:
                     transform.colorize_rgb_normalized(ctrl, Yellow.r, Yellow.g, Yellow.b)

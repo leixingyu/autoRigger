@@ -2,6 +2,7 @@ import maya.cmds as cmds
 
 from . import chain, chainFK, chainIK
 from autoRigger import util
+from autoRigger.base import bone
 from utility.datatype import vector
 from utility.rigging import joint
 
@@ -21,11 +22,11 @@ class ChainFKIK(chain.Chain):
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()
 
+    @bone.update_base_name
     def create_namespace(self):
         self.ik_chain.create_namespace()
         self.fk_chain.create_namespace()
 
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base_name, index))
             self.jnts.append('{}{}_jnt'.format(self.base_name, index))
