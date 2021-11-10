@@ -12,29 +12,23 @@ from utility.setup import outliner
 
 
 class Hand(bone.Bone):
-    """ This module creates a Hand rig with multiple fingers and a wrist """
+    """
+    Hand rig mdule with multiple fingers and a wrist
+    """
 
     def __init__(self, side, name, interval=0.5, distance=2):
-
         bone.Bone.__init__(self, side, name)
-
         self._rtype = 'hand'
 
         self.interval = interval
         self.distance = distance
 
-        self.fingers = list()
-        self.constraints = list()
-
+        self.wrist = base.Base(self._side, name='wrist')
         self.thumb = finger.Finger(side, name='thumb', length=1.2)
         self.index = finger.Finger(side, name='index', length=2.0)
         self.middle = finger.Finger(side, name='middle', length=2.2)
         self.ring = finger.Finger(side, name='ring', length=2.0)
         self.pinky = finger.Finger(side, name='pinky', length=1.6)
-
-        # Single Wrist Locator
-        self.wrist = base.Base(self._side, name='wrist')
-
         self.fingers = [self.thumb, self.index, self.middle, self.ring, self.pinky]
 
     def set_controller_shape(self):
@@ -44,14 +38,14 @@ class Hand(bone.Bone):
         self.wrist.set_controller_shape()
 
     def create_namespace(self):
-        for finger in self.fingers:
-            finger.create_namespace()
+        for obj in self.fingers:
+            obj.create_namespace()
 
         self.wrist.create_namespace()
 
     def create_locator(self):
-        for finger in self.fingers:
-            finger.create_locator()
+        for obj in self.fingers:
+            obj.create_locator()
 
         self.wrist.create_locator()
         # move around the locators
@@ -68,30 +62,40 @@ class Hand(bone.Bone):
 
         outliner.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
 
-        return self.wrist.locs[0]
+    def color_locator(self):
+        for obj in self.fingers:
+            obj.color_locator()
+
+        self.wrist.color_locator()
 
     def create_joint(self):
-        fingers = [finger.create_joint() for finger in self.fingers]
-        wrist = self.wrist.create_joint()
+        for obj in self.fingers:
+            obj.create_joint()
+
+        self.wrist.create_joint()
+
+        fingers = [obj.jnts[0] for obj in self.fingers]
+        wrist = self.wrist.jnts[0]
         outliner.batch_parent(fingers, wrist)
 
     def place_controller(self):
         self.wrist.place_controller()
-
-        # placing finger controller
         for obj in self.fingers:
-            finger_grp = obj.place_controller()
-            self.constraints.append(finger_grp)
+            obj.place_controller()
 
     def add_constraint(self):
         self.wrist.add_constraint()
 
-        # add individual finger constraint
         for obj in self.fingers:
             obj.add_constraint()
+            # add individual finger constraint
+            cmds.parentConstraint(self.wrist.jnts[0], obj.offsets[0], mo=1)
 
-        for obj in self.constraints:
-            cmds.parentConstraint(self.wrist.jnts[0], obj, mo=1)
+    def delete_guide(self):
+        self.wrist.delete_guide()
+
+        for obj in self.fingers:
+            obj.delete_guide()
 
     def color_controller(self):
         self.wrist.color_controller()

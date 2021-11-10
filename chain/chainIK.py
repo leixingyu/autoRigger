@@ -1,21 +1,23 @@
 import maya.cmds as cmds
 
-import utility.setup.outliner
-from autoRigger import util
 from . import chain
+from autoRigger import util
 from utility.datatype import vector
 
 
 class ChainIK(chain.Chain):
+    """
+    Abstract IK type Chain module
+    """
 
     def __init__(self, side, name, segment, length, direction, is_stretch=1):
         chain.Chain.__init__(self, side, name, segment)
 
+        self.is_stretch = is_stretch
+
         self.clusters = list()
         self.ik_curve = None
         self.ik = None
-
-        self.is_stretch = is_stretch
 
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()
@@ -39,7 +41,7 @@ class ChainIK(chain.Chain):
         self._shape = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
 
     def build_ik(self):
-        curve_points = []
+        curve_points = list()
         for index, jnt in enumerate(self.jnts):
             pos = cmds.xform(jnt, q=1, t=1, ws=1)
             curve_points.append(pos)

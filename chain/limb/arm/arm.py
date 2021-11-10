@@ -1,31 +1,26 @@
 import maya.cmds as cmds
 
-from autoRigger.module import hand
-from autoRigger.chain.limb import limbFKIK
-from autoRigger.base import bone
 from autoRigger import util
+from autoRigger.module import hand
+from autoRigger.base import bone
+from autoRigger.chain.limb import limbFKIK
 
 
 class Arm(bone.Bone):
-    """ This module creates an Arm rig with a limb and a hand"""
+    """
+    Arm rig module with a limb and a hand
+    """
 
     def __init__(self, side, name, distance=6, interval=0.5, gap=2):
-        """  Initialize Arm class with side and base_name
-
-        :param side: str
-        :param name: str
-        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'arm'
 
         self.distance = distance
-
         self.interval = interval
         self.gap = gap
         self.scale = 0.2
 
         self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='arm', length=self.distance)
-
         self.hand = None
         if self._side == 'l':
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
@@ -48,6 +43,10 @@ class Arm(bone.Bone):
 
         cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])
 
+    def color_locator(self):
+        self.limb.color_locator()
+        self.hand.color_locator()
+
     def set_controller_shape(self):
         self.limb.set_controller_shape()
         self.hand.set_controller_shape()
@@ -63,10 +62,8 @@ class Arm(bone.Bone):
     def add_constraint(self):
         self.limb.add_constraint()
         self.hand.add_constraint()
-        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.ctrls[0], mo=1)
 
-    def lock_controller(self):
-        self.limb.lock_controller()
+        cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.ctrls[0], mo=1)
 
     def color_controller(self):
         self.limb.color_controller()

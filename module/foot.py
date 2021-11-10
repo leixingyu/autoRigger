@@ -1,20 +1,17 @@
 import maya.cmds as cmds
 
-from autoRigger.base import bone
 from autoRigger import util
+from autoRigger.base import bone
 from utility.setup import outliner
 from utility.rigging import nurbs
 
 
 class Foot(bone.Bone):
-    """ This module creates a foot rig """
+    """
+    This module creates a foot rig
+    """
     
     def __init__(self, side, name, interval=0.5, height=0.4):
-        """ Initialize Foot class with side and name
-        
-        :param side: str
-        :param name: str
-        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'foot'
 
@@ -83,14 +80,14 @@ class Foot(bone.Bone):
         # Reverse Foot Setup
         cmds.spaceLocator(n=self.inner_loc)
         cmds.parent(self.inner_loc, self.ball_loc, relative=1)
-        if self._side == 'L':
+        if self._side == 'l':
             cmds.move(-self.interval, 0, 0, self.inner_loc, relative=1)
         else: 
             cmds.move(self.interval, 0, 0, self.inner_loc, relative=1)
 
         cmds.spaceLocator(n=self.outer_loc)
         cmds.parent(self.outer_loc, self.ball_loc, relative=1)
-        if self._side == 'L':
+        if self._side == 'l':
             cmds.move(self.interval, 0, 0, self.outer_loc, relative=1)
         else: 
             cmds.move(-self.interval, 0, 0, self.outer_loc, relative=1)
@@ -161,10 +158,9 @@ class Foot(bone.Bone):
 
         # IK/FK Switch Setup
         cmds.duplicate(self._shape[2], name=self.switch_ctrl)
-        if self._side == "L":
+        if self._side == "l":
             cmds.move(foot_pos[0]+2, foot_pos[1], foot_pos[2], self.switch_ctrl)
-
-        elif self._side == "R":
+        elif self._side == "r":
             cmds.move(foot_pos[0]-3, foot_pos[1], foot_pos[2], self.switch_ctrl)
 
         cmds.scale(0.5, 0.5, 0.5, self.switch_ctrl)
@@ -201,7 +197,7 @@ class Foot(bone.Bone):
         # Foot Bank
         cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
         cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
-        if self._side == 'R':
+        if self._side == 'r':
             cmds.setDrivenKeyframe(self.inner_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=-20, value=-30)
             cmds.setDrivenKeyframe(self.outer_jnt+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=20, value=30)
         else:

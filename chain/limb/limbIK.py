@@ -1,26 +1,26 @@
 import maya.cmds as cmds
 
-from utility.setup import outliner
 from autoRigger import util
-from utility.rigging import joint
 from autoRigger.chain import chainIK
+from utility.rigging import joint
+from utility.setup import outliner
 
 
 class LimbIK(chainIK.ChainIK):
+    """
+    Abstract IK limb rig
+    """
 
     def __init__(self, side, name, length, ltype='null'):
-
-        segment = 3
-        self.ltype = ltype
-        self.direction = [0, -1, 0]
         self._rtype = ltype
 
+        self.direction = [0, -1, 0]
         if ltype == 'arm' and side == 'l':
             self.direction = [1, 0, 0]
         elif ltype == 'arm' and side == 'r':
             self.direction = [-1, 0, 0]
 
-        chainIK.ChainIK.__init__(self, side, name, segment, length, self.direction)
+        chainIK.ChainIK.__init__(self, side, name, segment=3, length=length, direction=self.direction)
 
     def place_controller(self):
         # TODO: move pole vector out
@@ -31,8 +31,6 @@ class LimbIK(chainIK.ChainIK):
             outliner.match_xform(self.offsets[index], self.jnts[index])
             cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
-
-        return self.offsets[0]
 
     def build_ik(self):
         if self.direction == 'vertical':
@@ -45,7 +43,8 @@ class LimbIK(chainIK.ChainIK):
             startJoint=self.jnts[0],
             endEffector=self.jnts[-1],
             name=self.ik,
-            solver='ikRPsolver')
+            solver='ikRPsolver'
+        )
 
     def add_constraint(self):
         self.build_ik()

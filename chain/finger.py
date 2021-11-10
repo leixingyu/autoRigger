@@ -2,6 +2,9 @@ from autoRigger.chain import chainFK
 
 
 class Finger(chainFK.ChainFK):
+    """
+    Rig module for FK finger
+    """
 
     def __init__(
             self,

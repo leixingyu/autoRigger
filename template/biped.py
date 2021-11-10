@@ -1,30 +1,20 @@
 import maya.cmds as cmds
 
+from autoRigger import util
+from autoRigger.base import base, bone
 from autoRigger.chain.spine import spine
 from autoRigger.chain.limb.arm import arm
 from autoRigger.chain.limb.leg import leg
-from autoRigger.base import base, bone
-from autoRigger import util
-from utility.setup import outliner
 
 
 class Biped(bone.Bone):
-    """ This module creates a biped template rig
-
-    The biped template consists of:
-    one head
-    two arms
-    one spine &
-    two legs
+    """
+    This module creates a biped template rig consisting of
+    one head, two arms, one spine & two legs
     """
 
     def __init__(self, side, name, spine_len=5.0):
-        """ Initialize Biped class with side and name
-
-        :param side: str
-        :param name: str
-        """
-
+        bone.Bone.__init__(self, side, name)
         self._rtype = 'biped'
 
         self.pos = [0, 8.4, 0]
@@ -52,17 +42,19 @@ class Biped(bone.Bone):
             self.tip
         ]
 
-        bone.Bone.__init__(self, side, name)
-
     def create_namespace(self):
-        for rig_componet in self.rig_components:
-            rig_componet.create_namespace()
+        for rig_component in self.rig_components:
+            rig_component.create_namespace()
 
     def create_locator(self):
         for rig_component in self.rig_components:
             rig_component.create_locator()
 
         self.move_locator()
+
+    def color_locator(self):
+        for rig_component in self.rig_components:
+            rig_component.color_locator()
 
     def move_locator(self):
         util.move(self.left_arm.limb.locs[0], pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
@@ -85,21 +77,16 @@ class Biped(bone.Bone):
         for rig_component in self.rig_components:
             rig_component.create_joint()
 
-        # Connect
         # Leg root to spine root
-        left_leg_jnt = cmds.ls(self.left_leg.limb.jnts[0])
-        right_leg_jnt = cmds.ls(self.right_leg.limb.jnts[0])
-        root_spine_jnt = cmds.ls(self.spine.jnts[0])
-        outliner.batch_parent([left_leg_jnt, right_leg_jnt], root_spine_jnt)
+        cmds.parent(self.left_leg.limb.jnts[0], self.spine.jnts[0])
+        cmds.parent(self.right_leg.limb.jnts[0], self.spine.jnts[0])
 
         # Arm root spine root
-        left_arm_jnt = cmds.ls(self.left_arm.limb.jnts[0])
-        right_arm_jnt = cmds.ls(self.right_arm.limb.jnts[0])
-        top_spine_jnt = cmds.ls(self.spine.jnts[-1])
-        outliner.batch_parent([left_arm_jnt, right_arm_jnt], top_spine_jnt)
+        cmds.parent(self.left_arm.limb.jnts[0], self.spine.jnts[-1])
+        cmds.parent(self.right_arm.limb.jnts[0], self.spine.jnts[-1])
 
         # Neck to spine tip, head to neck
-        cmds.parent(self.neck.jnts[0], top_spine_jnt)
+        cmds.parent(self.neck.jnts[0], self.spine.jnts[-1])
         cmds.parent(self.head.jnts[0], self.neck.jnts[0])
         cmds.parent(self.tip.jnts[0], self.head.jnts[0])
 
@@ -111,14 +98,13 @@ class Biped(bone.Bone):
         for rig_component in self.rig_components:
             rig_component.add_constraint()
 
-        # Connect
         # Leg driven by root spine control #
-        cmds.parent(self.left_leg.limb.master_offset, self.spine.ctrls[0])
-        cmds.parent(self.right_leg.limb.master_offset, self.spine.ctrls[0])
+        cmds.parent(self.left_leg.limb.offsets[0], self.spine.ctrls[0])
+        cmds.parent(self.right_leg.limb.offsets[0], self.spine.ctrls[0])
 
         # Arm driven by top spine control #
-        cmds.parent(self.left_arm.limb.master_offset, self.spine.ctrls[-1])
-        cmds.parent(self.right_arm.limb.master_offset, self.spine.ctrls[-1])
+        cmds.parent(self.left_arm.limb.offsets[0], self.spine.ctrls[-1])
+        cmds.parent(self.right_arm.limb.offsets[0], self.spine.ctrls[-1])
 
         # Neck to Head chain #
         cmds.parent(self.tip.offsets[0], self.head.offsets[0])
@@ -130,5 +116,5 @@ class Biped(bone.Bone):
             rig_component.color_controller()
 
     def delete_guide(self):
-        loc = cmds.ls(util.G_LOC_GRP)
-        cmds.delete(loc)
+        for rig_component in self.rig_components:
+            rig_component.delete_guide()

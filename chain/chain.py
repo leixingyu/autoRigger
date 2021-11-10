@@ -1,20 +1,17 @@
 import maya.cmds as cmds
 
-import utility.setup.outliner
 from autoRigger.base import bone
 from autoRigger import util
 from utility.rigging import joint
+from utility.setup import outliner
 
 
 class Chain(bone.Bone):
-    """ Abstract chain module """
+    """
+    Abstract chain module
+    """
 
     def __init__(self, side, name, segment=6):
-        """ Initialize Tail class with side and name
-
-        :param side: str
-        :param name: str
-        """
         bone.Bone.__init__(self, side, name)
 
         self._rtype = 'chain'
@@ -30,26 +27,22 @@ class Chain(bone.Bone):
 
             if index:
                 cmds.parent(self.locs[index], self.locs[index-1], relative=1)
-
                 distance = (self.interval * self.dir).as_list
                 util.move(self.locs[index], distance)
 
         cmds.parent(self.locs[0], util.G_LOC_GRP)
-        return self.locs[0]
 
     def place_controller(self):
         for index in range(self.segment):
             cmds.duplicate(self._shape, name=self.ctrls[index])
             cmds.group(em=1, name=self.offsets[index])
-            utility.setup.outliner.match_xform(self.offsets[index], self.jnts[index])
+            outliner.match_xform(self.offsets[index], self.jnts[index])
 
             cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
             if index:
                 cmds.parent(self.offsets[index], self.ctrls[index-1])
 
-        # Cleanup
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
-        return self.offsets[0]
 
     def create_joint(self):
         cmds.select(clear=1)
@@ -59,5 +52,3 @@ class Chain(bone.Bone):
 
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
         joint.orient_joint(self.jnts[0])
-
-        return self.jnts[0]

@@ -5,6 +5,9 @@ from utility.datatype import vector
 
 
 class ChainFK(chain.Chain):
+    """
+    Abstract FK type Chain module
+    """
 
     def __init__(self, side, name, segment, length, direction):
         chain.Chain.__init__(self, side, name, segment)
@@ -23,7 +26,12 @@ class ChainFK(chain.Chain):
                 '{}{}fk_offset'.format(self.base_name, index))
 
     def set_controller_shape(self):
-        self._shape = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
+        self._shape = cmds.circle(
+            nr=(1, 0, 0),
+            c=(0, 0, 0),
+            radius=1,
+            s=8,
+            name=self.namer.tmp)[0]
 
     def add_constraint(self):
         for index, jnt in enumerate(self.jnts):

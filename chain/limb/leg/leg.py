@@ -1,20 +1,17 @@
 import maya.cmds as cmds
 
+from autoRigger import util
 from autoRigger.module import foot
 from autoRigger.base import bone
 from autoRigger.chain.limb import limbFKIK
-from autoRigger import util
 
 
 class Leg(bone.Bone):
-    """ This module create a biped leg rig"""
+    """
+    Biped leg rig module with a limb and a foot
+    """
 
     def __init__(self, side, name, distance=8, interval=0.5, height=0.4):
-        """ Initialize Leg class with side and name
-
-        :param side: str
-        :param name: str
-        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'leg'
 
@@ -35,8 +32,11 @@ class Leg(bone.Bone):
         self.foot.create_locator()
 
         util.move(self.foot.ankle_loc, [0, -self.distance, 0])
-
         cmds.parent(self.foot.ankle_loc, self.limb.locs[-1])
+
+    def color_locator(self):
+        self.limb.color_locator()
+        self.foot.color_locator()
 
     def set_controller_shape(self):
         self.limb.set_controller_shape()
@@ -64,13 +64,13 @@ class Leg(bone.Bone):
         cmds.parent(self.foot.fk_ctrl, self.limb.fk_chain.ctrls[-1])
 
         # IK/FK switch #
-        cmds.setDrivenKeyframe(self.limb.master_ctrl+'.FK_IK', currentDriver=self.foot.switch_ctrl+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.limb.master_ctrl+'.FK_IK', currentDriver=self.foot.switch_ctrl+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.limb.ctrls[0]+'.FK_IK', currentDriver=self.foot.switch_ctrl+'.FK_IK', driverValue=1, value=1)
+        cmds.setDrivenKeyframe(self.limb.ctrls[0]+'.FK_IK', currentDriver=self.foot.switch_ctrl+'.FK_IK', driverValue=0, value=0)
 
         # Sub controller visibility and channel hide #
-        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.master_ctrl+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.master_ctrl+'.FK_IK', driverValue=0, value=0)
-        cmds.setAttr(self.limb.master_ctrl+'.FK_IK', l=1, k=0)
+        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=1, value=0)
+        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=0, value=0)
+        cmds.setAttr(self.limb.ctrls[0]+'.FK_IK', l=1, k=0)
 
     def delete_guide(self):
         self.foot.delete_guide()
@@ -79,5 +79,3 @@ class Leg(bone.Bone):
     def color_controller(self):
         self.limb.color_controller()
         self.foot.color_controller()
-
-

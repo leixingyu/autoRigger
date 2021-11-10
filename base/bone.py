@@ -1,24 +1,34 @@
 import maya.cmds as cmds
 
-from utility.algorithm import strGenerator
 from autoRigger import util
+from utility.algorithm import strGenerator
+from utility.datatype import color
+from utility.rigging import transform
 
 
 TMP_PREFIX = 'tmp_'
+Yellow = color.ColorRGB.yellow()
+Blue = color.ColorRGB.blue()
+Red = color.ColorRGB.red()
 
 
 class Bone(object):
-    """ Abstract class for joint """
+    """
+    Abstract class for joint creation
+    The two fundamental steps are:
+    1. build_guide: create guide locators for placement
+    2. build_rig: create joints and controller following the guide
+    """
 
     namer = strGenerator.StrGenerator(TMP_PREFIX, 8)
 
     def __init__(self, side, name):
-        """ Initialize Base class with side and name
+        """
+        Initialize Base class with side and name
 
         :param side: str. 'm', 'l' or 'r'
-        :param name: str
+        :param name: str. name of the bone rig
         """
-
         util.create_outliner_grp()
 
         self._side = side
@@ -34,7 +44,9 @@ class Bone(object):
         self.offsets = list()
 
     def create_namespace(self):
-        """ Create naming convention for complex module """
+        """
+        Create naming conventions for the current rig type
+        """
         self.base_name = '{}_{}_{}'.format(self._rtype, self._side, self._name)
 
         self.locs.append('{}_loc'.format(self.base_name))
@@ -43,39 +55,37 @@ class Bone(object):
         self.offsets.append('{}_offset'.format(self.base_name))
 
     def set_controller_shape(self):
-        """ Setting up controller curve shapes as templates """
-
-        pass
-
-    def set_locator_attr(self):
-        """ Setup Locator initial position and size as guide """
-
+        """
+        Set up controller curve shapes
+        """
         pass
 
     def create_locator(self):
-        """ Create the rig guides for placement purpose """
-
+        """
+        Create the rig guides for placement purpose
+        """
         pass
 
     def color_locator(self):
         """
         Color-code the guide locators based on left, right, middle side
         """
-
-        locs = cmds.ls('{}*_loc'.format(self.base_name))
-        for loc in locs:
-            if cmds.nodeType(loc) in ['transform']:
-                cmds.setAttr(loc + '.overrideEnabled', 1)
+        for loc in self.locs:
+            try:
                 if self._side == 'l':
-                    cmds.setAttr(loc + '.overrideColor', 6)
+                    transform.colorize_rgb_normalized(loc, Blue.r, Blue.g, Blue.b)
                 elif self._side == 'r':
-                    cmds.setAttr(loc + '.overrideColor', 13)
+                    transform.colorize_rgb_normalized(loc, Red.r, Red.g, Red.b)
                 else:
-                    cmds.setAttr(loc + '.overrideColor', 17)
+                    transform.colorize_rgb_normalized(loc, Yellow.r, Yellow.g, Yellow.b)
+            except RuntimeError:
+                # some locators have namespace created but doesn't exists
+                pass
 
     def create_joint(self):
-        """ Create the rig joints based on the guide's transform """
-
+        """
+        Create the rig joints based on the guide's transform
+        """
         pass
 
     def place_controller(self):
@@ -83,46 +93,50 @@ class Bone(object):
         Duplicate controller shapes and
         place them based on guide's and joint's transform
         """
-
         pass
 
     def color_controller(self):
         """
         Colorize the controller based on left, right, middle side
         """
-
-        ctrls = cmds.ls('{}*_ctrl'.format(self.base_name))
-        for ctrl in ctrls:
-            if cmds.nodeType(ctrl) in ['nurbsCurve', 'transform']:
-                cmds.setAttr(ctrl + '.overrideEnabled', 1)
+        for ctrl in self.ctrls:
+            try:
                 if self._side == 'l':
-                    cmds.setAttr(ctrl + '.overrideColor', 6)
+                    transform.colorize_rgb_normalized(ctrl, Blue.r, Blue.g, Blue.b)
                 elif self._side == 'r':
-                    cmds.setAttr(ctrl + '.overrideColor', 13)
+                    transform.colorize_rgb_normalized(ctrl, Red.r, Red.g, Red.b)
                 else:
-                    cmds.setAttr(ctrl + '.overrideColor', 17)
+                    transform.colorize_rgb_normalized(ctrl, Yellow.r, Yellow.g, Yellow.b)
+            except RuntimeError:
+                # some controllers have namespace created but doesn't exist
+                pass
 
     def add_constraint(self):
-        """ Add all necessary constraints for the controller """
-
+        """
+        Add all necessary constraints for the controller
+        """
         pass
 
     def delete_guide(self):
-        """ Delete all locator guides to de-clutter the scene """
-
-        grp = cmds.ls('*_loc')
-        cmds.delete(grp)
+        """
+        Delete all locator guides to de-clutter the scene
+        """
+        try:
+            cmds.delete(self.locs)
+        except ValueError:
+            pass
 
     @staticmethod
     def delete_shape():
-        """ Delete control template shape to de-clutter the scene """
-
-        shapes = cmds.ls('{}*'.format(TMP_PREFIX))
-        cmds.delete(shapes)
+        """
+        Delete control template shape to de-clutter the scene
+        """
+        cmds.delete(cmds.ls('{}*'.format(TMP_PREFIX)))
 
     def lock_controller(self):
-        """ Not exposing specific channels of controllers """
-
+        """
+        Not exposing specific channels of controllers
+        """
         pass
 
     def build_guide(self):
@@ -130,7 +144,6 @@ class Bone(object):
         Create the entire rig guide setup
         """
         self.create_namespace()
-        self.set_locator_attr()
         self.create_locator()
         self.color_locator()
 
@@ -138,16 +151,12 @@ class Bone(object):
         """
         Build the full rig based on the guide, without skinning
         """
-
         self.create_joint()
         self.set_controller_shape()
         self.place_controller()
-
         self.delete_guide()
         self.delete_shape()
-
         self.color_controller()
         self.add_constraint()
-
         # clean ups
         self.lock_controller()

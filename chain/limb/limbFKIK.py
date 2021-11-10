@@ -4,13 +4,14 @@ from utility.datatype import vector
 
 
 class LimbFKIK(chainFKIK.ChainFKIK):
+    """
+    Abstract FK/IK limb rig
+    """
 
     def __init__(self, side, name, length, ltype='null'):
-
-        self.ltype = ltype
-        self.direction = [0, -1, 0]
         self._rtype = ltype
 
+        self.direction = [0, -1, 0]
         if ltype == 'arm' and side == 'l':
             self.direction = [1, 0, 0]
         elif ltype == 'arm' and side == 'r':

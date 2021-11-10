@@ -163,7 +163,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         elif item == RigComponents.HAND.value:
             obj = hand.Hand(side, base_name)
         elif item == RigComponents.LIMB.value:
-            obj = limbFKIK.LimbFKIK(side, base_name)
+            obj = limbFKIK.LimbFKIK(side, base_name, length=6)
         elif item == RigComponents.ARM.value:
             obj = arm.Arm(side, base_name)
         elif item == RigComponents.FOOT.value:

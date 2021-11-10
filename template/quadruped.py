@@ -10,7 +10,8 @@ from utility.setup import outliner
 
 
 class Quadruped(bone.Bone):
-    """ This module creates a quadruped template rig
+    """
+    This module creates a quadruped template rig
 
     The quadruped template consists of:
     one head
@@ -62,7 +63,6 @@ class Quadruped(bone.Bone):
     def create_locator(self):
         for rig_component in self.rig_components:
             rig_component.create_locator()
-
         self.move_locator()
 
     def move_locator(self):
@@ -88,30 +88,22 @@ class Quadruped(bone.Bone):
             rig_component.set_controller_shape()
 
     def create_joint(self):
-        left_shoulder = self.left_arm.create_joint()
-        right_shoulder = self.right_arm.create_joint()
-        left_hip = self.left_leg.create_joint()
-        right_hip = self.right_leg.create_joint()
-        spine_root = self.spine.create_joint()
-        tail_root = self.tail.create_joint()
-
-        neck_root = self.neck.create_joint()
-        head = self.head.create_joint()
-        tip = self.tip.create_joint()
+        for rig_component in self.rig_components:
+            rig_component.create_joint()
 
         # parent leg root joints to root spline joint
-        outliner.batch_parent([left_shoulder, right_shoulder], self.spine.jnts[-1])
+        outliner.batch_parent([self.left_arm.jnts[0], self.right_arm.jnts[0]], self.spine.jnts[-1])
 
         # parent arm root joints to top spline joint
-        outliner.batch_parent([left_hip, right_hip], spine_root)
+        outliner.batch_parent([self.left_leg.jnts[0], self.right_leg.jnts[0]], self.spine.jnts[0])
 
         # parent tail to spine
-        cmds.parent(tail_root, spine_root)
+        cmds.parent(self.tail.jnts[0], self.spine.jnts[0])
 
         # parent neck, head, tip
-        cmds.parent(neck_root, self.spine.jnts[-1])
-        cmds.parent(head, neck_root)
-        cmds.parent(tip, head)
+        cmds.parent(self.neck.jnts[0], self.spine.jnts[-1])
+        cmds.parent(self.head.jnts[0], self.neck.jnts[0])
+        cmds.parent(self.tip.jnts[0], self.head.jnts[0])
 
     def place_controller(self):
         for rig_component in self.rig_components:
@@ -126,10 +118,10 @@ class Quadruped(bone.Bone):
         # parenting the front and back leg and tail under spine ctrl
         outliner.batch_parent([self.left_arm.offsets[0], self.right_arm.offsets[0]], self.spine.ctrls[-1])
         outliner.batch_parent([self.left_leg.offsets[0], self.right_leg.offsets[0]], self.spine.ctrls[0])
-        cmds.parentConstraint(self.spine.ctrls[0], self.tail.master_ctrl, mo=1)
+        cmds.parentConstraint(self.spine.ctrls[0], self.tail.ctrls[0], mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
-        cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.master_ctrl+'.FK_IK')
+        cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.ctrls[0]+'.FK_IK')
 
         # parent head up
         cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])
