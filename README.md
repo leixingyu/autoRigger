@@ -1,61 +1,48 @@
-# Announcement
+# Under Construction
 
 Looking back at this project I started three years ago, I realized there's a huge
 room for improvement as my skill grows. So, I decided to do a major overhaul. It may take couple of weeks or 
 months, maybe even years. who knows?
 
 ## Introduction
-AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well as providing pre-made template for Biped, Quadruped, and next up Bird.
 
-quadruped rigging demo: https://youtu.be/GT15B_x8R9w
+AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well
+as providing pre-made template for Biped, Quadruped, and next up Bird or Vehicle and more...
 
-biped riggin demo: https://vimeo.com/372001985
-
-modular rigging demo: https://vimeo.com/367496504
-
-facial rigging demo: https://www.youtube.com/watch?v=Vnmq4ok0KUs
+- [Quadruped Rigging Demo](https://youtu.be/GT15B_x8R9w)
+- [Biped Rigging Demo](https://vimeo.com/372001985)
+- [Modular Rigging Demo](https://vimeo.com/367496504)
+- [Facial Rigging Demo](https://www.youtube.com/watch?v=Vnmq4ok0KUs)
 
 ## Installation
 
-1. Unzip to maya script directory
+Install the auto-rigger and [maya-utility](https://github.com/leixingyu/maya-utility) under
+`C:/Users/Username/Documents/maya/[current maya version]/scripts/`
 
-    (Example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**autoRigger**)
+or unzip to your custom directory, and add to PYTHONPATH system variable 
 
-    Or, unzip to custom directory, and add to PYTHONPATH system variable 
-    
-2. Install the maya-utility module in the same directory: https://github.com/leixingyu/maya-utility
-
-    (Example: C:/Users/Username/Documents/maya/[current maya version]/scripts/**utility**)
-
-3. Execute the following command in script editor (python tab)
+Launch:
 ```python
 from autoRigger import autoRigger
 autoRigger.show()
 ```
 
-## Current Version
+![gugu](https://i.imgur.com/9E5V0Rn.png)
+
+### Release Version
 
 <details>
   <summary>Update 1.1.2 (01/05/2021)</summary>
   <p>*updated code format to better adhere with PEP8</p>
-</details>
-
-
-## Past Updates
-
-<details>
-  <summary>Update 1.1.1 (09/20/2020)</summary>
   <p>*improved naming convention</p>
   <p>*updated user-interface
 </details>
 
+### Past Updates
+
 <details>
   <summary>Update 1.1.0 (04/08/2020)</summary>
   <p>*added quadruped template</p>
-</details>
-
-<details>
-  <summary>Update 1.0.0 (11/08/2019)</summary>
   <p>*added biped template</p>
 </details>
 
@@ -73,21 +60,9 @@ autoRigger.show()
 
 <details>
   <summary>Update 0.2.2 (3/22/2019)</summary>
-  <p>*fixed IK/FK Arm bugs</p>
-  <p>*updated Foot Roll and Foot Bank</p>
-  <p>*included Flexible Spine Control</p>
-</details>
-
-<details>
-  <summary>Update 0.2.1 (3/17/2019)</summary>
-  <p>*fixed Bugs on Arm Result Joint</p>
-</details>
-
-<details>
-  <summary>Update 0.2.0 (2/25/2019)</summary>
-  <p>*now support Non-Tpose/Tpose Character Model</p>
-  <p>*included IK/FK switch for Character arm</p>
-  <p>*included Foot Bank attribute</p>
+  <p>*IK/FK Arm</p>
+  <p>*Foot Roll and Foot Bank</p>
+  <p>*Flexible Spine Control</p>
 </details>
 
 <details>

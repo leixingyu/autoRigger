@@ -28,7 +28,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>AutoRigger v1.1.2</string>
+   <string>AutoRigger</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
