@@ -73,6 +73,9 @@
            <pointsize>9</pointsize>
           </font>
          </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="styleSheet">
           <string notr="true">QTabBar::tab { height: 45px; width:85px;}</string>
          </property>
@@ -80,7 +83,7 @@
           <enum>QTabWidget::Rounded</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="iconSize">
           <size>
@@ -104,9 +107,9 @@
            <string>Quadruped</string>
           </attribute>
          </widget>
-         <widget class="QWidget" name="birdTab">
+         <widget class="QWidget" name="chainTab">
           <attribute name="title">
-           <string>Bird</string>
+           <string>Chain</string>
           </attribute>
          </widget>
          <widget class="QWidget" name="customTab">

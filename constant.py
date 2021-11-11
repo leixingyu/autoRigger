@@ -26,10 +26,15 @@ class RigComponents(Enum):
     TAIL = 'quad-tail'
     QUAD = 'quad'
 
+    CHAIN_IK = 'chain-ik'
+    CHAIN_FK = 'chain-fk'
+    CHAIN_EP = 'chain-ep'
+    CHAIN_FKIK = 'chain-fkik'
+
 
 @unique
 class RigType(IntEnum):
     BIPED = 0
     QUADRUPED = 1
-    BIRD = 2
+    CHAIN = 2
     CUSTOM = 3

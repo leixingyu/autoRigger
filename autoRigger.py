@@ -7,9 +7,8 @@ from .constant import RigComponents, RigType, Side
 from .module import foot, hand
 from .chain.spine import spine, spineQuad
 from .template import biped, quadruped
-from .chain import finger
+from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
-from .chain import tail
 from .chain.limb.arm import arm
 from .chain.limb.leg import leg, legBack, legFront
 from .base import base
@@ -93,9 +92,10 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
                           RigComponents.LEG_FRONT, RigComponents.SPINE_QUAD,
                           RigComponents.TAIL]
 
-        # Bird
-        elif tab_index == RigType.BIRD:
-            pass
+        # Chain
+        elif tab_index == RigType.CHAIN:
+            components = [RigComponents.CHAIN_FK, RigComponents.CHAIN_IK,
+                          RigComponents.CHAIN_EP, RigComponents.CHAIN_FKIK]
 
         # Custom
         elif tab_index == RigType.CUSTOM:
@@ -123,11 +123,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
 
         # Side
         side = [Side.LEFT, Side.RIGHT, Side.MIDDLE][self.ui_sideCBox.currentIndex()]
-
-        # Start Position
-        pos_x = int(self.ui_worldX.text()) if self.ui_worldX.text() else 0
-        pos_y = int(self.ui_worldY.text()) if self.ui_worldZ.text() else 0
-        pos_z = int(self.ui_worldY.text()) if self.ui_worldZ.text() else 0
 
         # Identify the item type and build it
         item = self.ui_listWidget.currentItem().text()
@@ -159,6 +154,15 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             obj = quadruped.Quadruped(side, base_name)
         elif item == RigComponents.BASE.value:
             obj = base.Base(side, base_name)
+
+        elif item == RigComponents.CHAIN_FK.value:
+            obj = chainFK.ChainFK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
+        elif item == RigComponents.CHAIN_IK.value:
+            obj = chainIK.ChainIK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
+        elif item == RigComponents.CHAIN_EP.value:
+            obj = chainEP.ChainEP(side, base_name, segment=20, curve='curve1')
+        elif item == RigComponents.CHAIN_FKIK.value:
+            obj = chainFKIK.ChainFKIK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
         else:
             logging.error("object name not found, using base component instead")
             return
