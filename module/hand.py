@@ -30,25 +30,15 @@ class Hand(bone.Bone):
         self.middle = finger.Finger(side, name='middle', length=2.2)
         self.ring = finger.Finger(side, name='ring', length=2.0)
         self.pinky = finger.Finger(side, name='pinky', length=1.6)
+
         self.fingers = [self.thumb, self.index, self.middle, self.ring, self.pinky]
 
-    def set_controller_shape(self):
-        for obj in self.fingers:
-            obj.set_controller_shape()
-
-        self.wrist.set_controller_shape()
-
-    def create_namespace(self):
-        for obj in self.fingers:
-            obj.create_namespace()
-
-        self.wrist.create_namespace()
+        self._components.append(self.wrist)
+        self._components.extend(self.fingers)
 
     def create_locator(self):
-        for obj in self.fingers:
-            obj.create_locator()
+        super(Hand, self).create_locator()
 
-        self.wrist.create_locator()
         # move around the locators
         side_factor = 1
         if self._side == Side.RIGHT:
@@ -63,43 +53,16 @@ class Hand(bone.Bone):
 
         outliner.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
 
-    def color_locator(self):
-        for obj in self.fingers:
-            obj.color_locator()
-
-        self.wrist.color_locator()
-
     def create_joint(self):
-        for obj in self.fingers:
-            obj.create_joint()
-
-        self.wrist.create_joint()
+        super(Hand, self).create_joint()
 
         fingers = [obj.jnts[0] for obj in self.fingers]
         wrist = self.wrist.jnts[0]
         outliner.batch_parent(fingers, wrist)
 
-    def place_controller(self):
-        self.wrist.place_controller()
-        for obj in self.fingers:
-            obj.place_controller()
-
     def add_constraint(self):
-        self.wrist.add_constraint()
+        super(Hand, self).add_constraint()
 
         for obj in self.fingers:
-            obj.add_constraint()
             # add individual finger constraint
             cmds.parentConstraint(self.wrist.jnts[0], obj.offsets[0], mo=1)
-
-    def delete_guide(self):
-        self.wrist.delete_guide()
-
-        for obj in self.fingers:
-            obj.delete_guide()
-
-    def color_controller(self):
-        self.wrist.color_controller()
-        
-        for obj in self.fingers:
-            obj.color_controller()

@@ -45,7 +45,7 @@ class SpineQuad(bone.Bone):
         self.ik_curve = '{}ik_curve'.format(self.base_name)
         self.ik = '{}_ik'.format(self.base_name)
 
-    def set_controller_shape(self):
+    def set_shape(self):
         sphere = cmds.createNode('implicitSphere')
         self._shapes = list(range(2))
 

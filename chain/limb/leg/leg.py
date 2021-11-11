@@ -22,36 +22,16 @@ class Leg(bone.Bone):
         self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='leg', length=self.distance)
         self.foot = foot.Foot(side=self._side, name=name, interval=self.interval, height=self.height)
 
-    def create_namespace(self):
-        self.limb.create_namespace()
-        self.foot.create_namespace()
+        self._components = [self.limb, self.foot]
 
     def create_locator(self):
-        self.limb.create_locator()
-        self.foot.create_locator()
+        super(Leg, self).create_locator()
 
         util.move(self.foot.locs[0], [0, -self.distance, 0])
         cmds.parent(self.foot.locs[0], self.limb.locs[-1])
 
-    def color_locator(self):
-        self.limb.color_locator()
-        self.foot.color_locator()
-
-    def set_controller_shape(self):
-        self.limb.set_controller_shape()
-        self.foot.set_controller_shape()
-
-    def create_joint(self):
-        self.limb.create_joint()
-        self.foot.create_joint()
-
-    def place_controller(self):
-        self.limb.place_controller()
-        self.foot.place_controller()
-
     def add_constraint(self):
-        self.limb.add_constraint()
-        self.foot.add_constraint()
+        super(Leg, self).add_constraint()
 
         # Connect foot and limb
         # IK constraint #
@@ -70,11 +50,3 @@ class Leg(bone.Bone):
         cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=1, value=0)
         cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=0, value=0)
         cmds.setAttr(self.limb.ctrls[0]+'.FK_IK', l=1, k=0)
-
-    def delete_guide(self):
-        self.foot.delete_guide()
-        self.limb.delete_guide()
-
-    def color_controller(self):
-        self.limb.color_controller()
-        self.foot.color_controller()

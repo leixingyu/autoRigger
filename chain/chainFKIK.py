@@ -34,9 +34,9 @@ class ChainFKIK(chain.Chain):
         self.offsets.append('{}master_offset'.format(self.base_name))
         self.ctrls.append('{}master_ctrl'.format(self.base_name))
 
-    def set_controller_shape(self):
-        self.ik_chain.set_controller_shape()
-        self.fk_chain.set_controller_shape()
+    def set_shape(self):
+        self.ik_chain.set_shape()
+        self.fk_chain.set_shape()
 
         # master control
         arrow_pts = [

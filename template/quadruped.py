@@ -88,9 +88,9 @@ class Quadruped(bone.Bone):
         cmds.rotate(90, 0, 0, self.head.locs[0])
         cmds.rotate(90, 0, 0, self.tip.locs[0])
 
-    def set_controller_shape(self):
+    def set_shape(self):
         for rig_component in self.rig_components:
-            rig_component.set_controller_shape()
+            rig_component.set_shape()
 
     def create_joint(self):
         for rig_component in self.rig_components:

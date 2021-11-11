@@ -36,7 +36,7 @@ class Foot(bone.Bone):
         self.ctrls.append('{}fk_ctrl'.format(self.base_name))
         self.ctrls.append('{}switch_ctrl'.format(self.base_name))
 
-    def set_controller_shape(self):
+    def set_shape(self):
         self._shape = list(range(3))
 
         self._shape[0] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
@@ -88,7 +88,7 @@ class Foot(bone.Bone):
         
         # Result Foot
         cmds.select(clear=1)
-        cmds.joint(p=cmds.xform(self.locs[0], q=1, t=1, ws=1), name=self.jnts[0])
+        cmds.joint(p=ankle_pos, name=self.jnts[0])
         cmds.joint(p=ball_pos, name=self.jnts[1])
         cmds.joint(p=toe_pos, name=self.jnts[2])
 
@@ -201,7 +201,6 @@ class Foot(bone.Bone):
 
         # switch will follow ankle movement
         cmds.parentConstraint(self.jnts[0], self.ctrls[2], mo=1)
-
         cmds.setDrivenKeyframe(self.ctrls[0]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=1)
         cmds.setDrivenKeyframe(self.ctrls[0]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=0)
         cmds.setDrivenKeyframe(self.ctrls[1]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)

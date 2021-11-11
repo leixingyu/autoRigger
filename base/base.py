@@ -16,7 +16,7 @@ class Base(bone.Bone):
 
         self._rtype = 'base'
 
-    def set_controller_shape(self):
+    def set_shape(self):
         # Base controller shape
         self._shape = cmds.circle(
             nr=(0, 1, 0),

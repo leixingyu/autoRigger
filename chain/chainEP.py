@@ -52,7 +52,7 @@ class ChainEP(chain.Chain):
 
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
-    def set_controller_shape(self):
+    def set_shape(self):
         sphere = cmds.createNode('implicitSphere')
         self._shape = cmds.rename(
             cmds.listRelatives(sphere, p=1),

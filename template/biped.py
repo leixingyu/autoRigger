@@ -31,7 +31,7 @@ class Biped(bone.Bone):
         self.head = base.Base(side=Side.MIDDLE, name='head')
         self.tip = base.Base(side=Side.MIDDLE, name='tip')
 
-        self.rig_components = [
+        self._components = [
             self.left_arm,
             self.right_arm,
             self.left_leg,
@@ -42,19 +42,10 @@ class Biped(bone.Bone):
             self.tip
         ]
 
-    def create_namespace(self):
-        for rig_component in self.rig_components:
-            rig_component.create_namespace()
-
     def create_locator(self):
-        for rig_component in self.rig_components:
-            rig_component.create_locator()
+        super(Biped, self).create_locator()
 
         self.move_locator()
-
-    def color_locator(self):
-        for rig_component in self.rig_components:
-            rig_component.color_locator()
 
     def move_locator(self):
         util.move(self.left_arm.limb.locs[0], pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
@@ -69,13 +60,8 @@ class Biped(bone.Bone):
         util.move(self.head.locs[0], pos=[self.pos[0], self.pos[1]+self.spine_len+1.5, self.pos[2]])
         util.move(self.tip.locs[0], pos=[self.pos[0], self.pos[1]+self.spine_len+2, self.pos[2]])
 
-    def set_controller_shape(self):
-        for rig_component in self.rig_components:
-            rig_component.set_controller_shape()
-
     def create_joint(self):
-        for rig_component in self.rig_components:
-            rig_component.create_joint()
+        super(Biped, self).create_joint()
 
         # Leg root to spine root
         cmds.parent(self.left_leg.limb.jnts[0], self.spine.jnts[0])
@@ -90,13 +76,8 @@ class Biped(bone.Bone):
         cmds.parent(self.head.jnts[0], self.neck.jnts[0])
         cmds.parent(self.tip.jnts[0], self.head.jnts[0])
 
-    def place_controller(self):
-        for rig_component in self.rig_components:
-            rig_component.place_controller()
-
     def add_constraint(self):
-        for rig_component in self.rig_components:
-            rig_component.add_constraint()
+        super(Biped, self).add_constraint()
 
         # Leg driven by root spine control #
         cmds.parent(self.left_leg.limb.offsets[0], self.spine.ctrls[0])
@@ -110,11 +91,3 @@ class Biped(bone.Bone):
         cmds.parent(self.tip.offsets[0], self.head.offsets[0])
         cmds.parent(self.head.offsets[0], self.neck.offsets[0])
         cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])
-
-    def color_controller(self):
-        for rig_component in self.rig_components:
-            rig_component.color_controller()
-
-    def delete_guide(self):
-        for rig_component in self.rig_components:
-            rig_component.delete_guide()

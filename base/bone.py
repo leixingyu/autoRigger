@@ -65,27 +65,39 @@ class Bone(object):
         """
         Create naming conventions for the current rig type
         """
+        if self._components:
+            for c in self._components:
+                c.create_namespace()
+
         self.locs.append('{}_loc'.format(self.base_name))
         self.jnts.append('{}_jnt'.format(self.base_name))
         self.ctrls.append('{}_ctrl'.format(self.base_name))
         self.offsets.append('{}_offset'.format(self.base_name))
 
-    def set_controller_shape(self):
+    def set_shape(self):
         """
         Set up controller curve shapes
         """
-        pass
+        if self._components:
+            for c in self._components:
+                c.set_shape()
 
     def create_locator(self):
         """
         Create the rig guides for placement purpose
         """
-        pass
+        if self._components:
+            for c in self._components:
+                c.create_locator()
 
     def color_locator(self):
         """
         Color-code the guide locators based on left, right, middle side
         """
+        if self._components:
+            for c in self._components:
+                c.color_locator()
+
         for loc in self.locs:
             try:
                 if self._side == Side.LEFT:
@@ -102,19 +114,27 @@ class Bone(object):
         """
         Create the rig joints based on the guide's transform
         """
-        pass
+        if self._components:
+            for c in self._components:
+                c.create_joint()
 
     def place_controller(self):
         """
         Duplicate controller shapes and
         place them based on guide's and joint's transform
         """
-        pass
+        if self._components:
+            for c in self._components:
+                c.place_controller()
 
     def color_controller(self):
         """
         Colorize the controller based on left, right, middle side
         """
+        if self._components:
+            for c in self._components:
+                c.color_controller()
+
         for ctrl in self.ctrls:
             try:
                 if self._side == Side.LEFT:
@@ -131,12 +151,18 @@ class Bone(object):
         """
         Add all necessary constraints for the controller
         """
-        pass
+        if self._components:
+            for c in self._components:
+                c.add_constraint()
 
     def delete_guide(self):
         """
         Delete all locator guides to de-clutter the scene
         """
+        if self._components:
+            for c in self._components:
+                c.delete_guide()
+
         try:
             cmds.delete(self.locs)
         except ValueError:
@@ -168,7 +194,7 @@ class Bone(object):
         Build the full rig based on the guide, without skinning
         """
         self.create_joint()
-        self.set_controller_shape()
+        self.set_shape()
         self.place_controller()
         self.delete_guide()
         self.delete_shape()

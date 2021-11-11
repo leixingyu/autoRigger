@@ -36,7 +36,7 @@ class ChainIK(chain.Chain):
         self.ik_curve = '{}ik_curve'.format(self.base_name)
         self.ik = '{}_ik'.format(self.base_name)
 
-    def set_controller_shape(self):
+    def set_shape(self):
         sphere = cmds.createNode('implicitSphere')
         self._shape = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
 

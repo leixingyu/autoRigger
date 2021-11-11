@@ -46,7 +46,7 @@ class LegBack(bone.Bone):
         self.toe_ik = '{}toe_ik'.format(self.base_name)
         self.helper_ik = '{}helper_ik'.format(self.base_name)
 
-    def set_controller_shape(self):
+    def set_shape(self):
         self._shape = list(range(3))
 
         sphere = cmds.createNode('implicitSphere')

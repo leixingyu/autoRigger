@@ -27,13 +27,10 @@ class Arm(bone.Bone):
         elif self._side == Side.RIGHT:
             self.hand = hand.Hand(side=self._side, name=name, interval=self.interval, distance=self.gap)
 
-    def create_namespace(self):
-        self.limb.create_namespace()
-        self.hand.create_namespace()
+        self._components = [self.hand, self.limb]
 
     def create_locator(self):
-        self.limb.create_locator()
-        self.hand.create_locator()
+        super(Arm, self).create_locator()
 
         # move hand based on side
         if self._side == Side.LEFT:
@@ -43,29 +40,9 @@ class Arm(bone.Bone):
 
         cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])
 
-    def color_locator(self):
-        self.limb.color_locator()
-        self.hand.color_locator()
-
-    def set_controller_shape(self):
-        self.limb.set_controller_shape()
-        self.hand.set_controller_shape()
-
-    def create_joint(self):
-        self.limb.create_joint()
-        self.hand.create_joint()
-
-    def place_controller(self):
-        self.limb.place_controller()
-        self.hand.place_controller()
-
     def add_constraint(self):
-        self.limb.add_constraint()
-        self.hand.add_constraint()
+        super(Arm, self).add_constraint()
 
         cmds.parentConstraint(self.limb.jnts[-1], self.hand.wrist.ctrls[0], mo=1)
 
-    def color_controller(self):
-        self.limb.color_controller()
-        self.hand.color_controller()
 

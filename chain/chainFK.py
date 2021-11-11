@@ -25,7 +25,7 @@ class ChainFK(chain.Chain):
             self.offsets.append(
                 '{}{}fk_offset'.format(self.base_name, index))
 
-    def set_controller_shape(self):
+    def set_shape(self):
         self._shape = cmds.circle(
             nr=(1, 0, 0),
             c=(0, 0, 0),
