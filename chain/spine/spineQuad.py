@@ -47,11 +47,9 @@ class SpineQuad(bone.Bone):
 
     def set_shape(self):
         sphere = cmds.createNode('implicitSphere')
-        self._shapes = list(range(2))
-
-        self._shapes[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
-
-        self._shapes[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
+        self._shape = list(range(2))
+        self._shape[0] = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
+        self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=1, s=8, name=self.namer.tmp)[0]
 
     def create_locator(self):
         for i in range(self.segment):
@@ -82,14 +80,14 @@ class SpineQuad(bone.Bone):
         top_rot = cmds.xform(self.jnts[-1], q=1, ro=1, ws=1)
 
         # master ctrl is positioned on top of root ctrl
-        cmds.duplicate(self._shapes[0], name=self.master_ctrl)
+        cmds.duplicate(self._shape[0], name=self.master_ctrl)
         cmds.group(em=1, name=self.master_offset)
         cmds.move(root_pos[0], root_pos[1]+2, root_pos[2], self.master_offset)
         cmds.parent(self.master_ctrl, self.master_offset, relative=1)
 
         # root ctrl is positioned at the root joint
         # root ctrl needs to be accessed outside for parenting
-        cmds.duplicate(self._shapes[1], name=self.ctrls[0])
+        cmds.duplicate(self._shape[1], name=self.ctrls[0])
         cmds.group(em=1, name=self.offsets[0])
         cmds.move(root_pos[0], root_pos[1], root_pos[2], self.offsets[0])
         cmds.rotate(root_rot[0], root_rot[1], root_rot[2], self.offsets[0])
@@ -97,7 +95,7 @@ class SpineQuad(bone.Bone):
 
         # top ctrl is positioned at the top joint
         # top ctrl needs to be accessed outside for parenting
-        cmds.duplicate(self._shapes[1], name=self.ctrls[-1])
+        cmds.duplicate(self._shape[1], name=self.ctrls[-1])
         cmds.group(em=1, name=self.offsets[-1])
         cmds.move(top_pos[0], top_pos[1], top_pos[2], self.offsets[-1])
         cmds.rotate(top_rot[0], top_rot[1], top_rot[2], self.offsets[-1])
@@ -116,7 +114,7 @@ class SpineQuad(bone.Bone):
             mid_pos = [(mid_upper_pos[0]+mid_lower_pos[0]) / 2, (mid_upper_pos[1]+mid_lower_pos[1]) / 2, (mid_upper_pos[2]+mid_lower_pos[2]) / 2]
             mid_rot = [(mid_upper_rot[0]+mid_lower_rot[0]) / 2, (mid_upper_rot[1]+mid_lower_rot[1]) / 2, (mid_upper_rot[2]+mid_lower_rot[2]) / 2]
 
-        cmds.duplicate(self._shapes[1], name=self.ctrls[1])
+        cmds.duplicate(self._shape[1], name=self.ctrls[1])
         cmds.group(em=1, name=self.offsets[1])
         cmds.move(mid_pos[0], mid_pos[1], mid_pos[2], self.offsets[1])
         cmds.rotate(mid_rot[0], mid_rot[1], mid_rot[2], self.offsets[1])

@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 from . import chain, chainFK, chainIK
-from .. import util
+from .. import util, shape
 from ..base import bone
 from ..utility.datatype import vector
 from ..utility.rigging import joint, transform
@@ -37,24 +37,7 @@ class ChainFKIK(chain.Chain):
     def set_shape(self):
         self.ik_chain.set_shape()
         self.fk_chain.set_shape()
-
-        # master control
-        arrow_pts = [
-            [2.0, 0.0, 2.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0], [3.0, 0.0, 2.0],
-            [5.0, 0.0, 0.0], [3.0, 0.0, -2.0], [3.0, 0.0, -1.0],
-            [2.0, 0.0, -1.0],
-            [2.0, 0.0, -2.0], [1.0, 0.0, -2.0], [1.0, 0.0, -3.0],
-            [2.0, 0.0, -3.0], [0.0, 0.0, -5.0], [-2.0, 0.0, -3.0],
-            [-1.0, 0.0, -3.0], [-1.0, 0.0, -2.0],
-            [-2.0, 0.0, -2.0], [-2.0, 0.0, -1.0], [-3.0, 0.0, -1.0],
-            [-3.0, 0.0, -2.0], [-5.0, 0.0, 0.0], [-3.0, 0.0, 2.0],
-            [-3.0, 0.0, 1.0], [-2.0, 0.0, 1.0],
-            [-2.0, 0.0, 2.0], [-1.0, 0.0, 2.0], [-1.0, 0.0, 3.0],
-            [-2.0, 0.0, 3.0], [0.0, 0.0, 5.0], [2.0, 0.0, 3.0],
-            [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]
-        ]
-        self._shape = cmds.curve(p=arrow_pts, degree=1, name=self.namer.tmp)
-        util.uniform_scale(self._shape, self._scale)
+        self._shape = shape.make_arrow(self._scale)
 
     def create_joint(self):
         self.ik_chain.create_joint()

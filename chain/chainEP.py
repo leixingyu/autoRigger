@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 from . import chain
-from .. import util
+from .. import util, shape
 from ..base import bone
 from ..utility.algorithm import algorithm
 from ..utility.rigging import transform
@@ -53,11 +53,7 @@ class ChainEP(chain.Chain):
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def set_shape(self):
-        sphere = cmds.createNode('implicitSphere')
-        self._shape = cmds.rename(
-            cmds.listRelatives(sphere, p=1),
-            self.namer.tmp
-        )
+        self._shape = shape.make_sphere(self._scale)
 
     def place_controller(self):
         for index in self.cvs:

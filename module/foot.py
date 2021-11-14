@@ -1,10 +1,9 @@
 import maya.cmds as cmds
 
-from .. import util
+from .. import util, shape
 from ..base import bone
 from ..constant import Side
 from ..utility.common import hierarchy
-from ..utility.rigging import nurbs
 
 
 class Foot(bone.Bone):
@@ -39,14 +38,10 @@ class Foot(bone.Bone):
     def set_shape(self):
         self._shape = list(range(3))
 
-        self._shape[0] = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), radius=self._scale, s=8, name=self.namer.tmp)[0]
-        self._shape[1] = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), radius=self._scale, s=6, name=self.namer.tmp)[0]
+        self._shape[0] = shape.make_circle(self._scale)
+        self._shape[1] = shape.make_circle(self._scale)
         cmds.rotate(0, 90, 0, self._shape[1], relative=1)
-
-        self._shape[2] = nurbs.make_curve_by_text(text='FK/IK', name=self.namer.tmp)
-        util.uniform_scale(self._shape[2], self._scale)
-        cmds.makeIdentity(self._shape[2], apply=1, r=1, t=1, s=1)
-        cmds.rotate(-90, 0, 0, self._shape[2], relative=1)
+        self._shape[2] = shape.make_text('FK/IK', self._scale)
 
     def create_locator(self):
         # Result Foot

@@ -14,3 +14,4 @@ class Finger(chainFK.ChainFK):
 
         chainFK.ChainFK.__init__(self, side, name, segment, length, direction)
         self._rtype = 'finger'
+        self._scale = 0.4

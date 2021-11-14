@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 
-from .. import util
+from .. import util, shape
 from ..base import bone
 from ..utility.rigging import transform
 
@@ -17,12 +17,7 @@ class Base(bone.Bone):
         self._rtype = 'base'
 
     def set_shape(self):
-        self._shape = cmds.circle(
-            nr=(0, 1, 0),
-            c=(0, 0, 0),
-            radius=self._scale,
-            s=8,
-            name=self.namer.tmp)[0]
+        self._shape = shape.make_circle(self._scale)
 
     def create_locator(self):
         cmds.spaceLocator(n=self.locs[0])

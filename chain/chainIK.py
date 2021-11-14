@@ -1,10 +1,9 @@
 import maya.cmds as cmds
 
 from . import chain
-from .. import util
+from .. import util, shape
 from ..base import bone
 from ..utility.datatype import vector
-from ..utility.rigging import nurbs
 
 
 class ChainIK(chain.Chain):
@@ -38,24 +37,7 @@ class ChainIK(chain.Chain):
         self.ik = '{}_ik'.format(self.base_name)
 
     def set_shape(self):
-        c1 = cmds.circle(
-            nr=(0, 1, 0),
-            c=(0, 0, 0),
-            radius=self._scale,
-            s=8)[0]
-        c2 = cmds.circle(
-            nr=(1, 0, 0),
-            c=(0, 0, 0),
-            radius=self._scale,
-            s=8)[0]
-
-        c3 = cmds.circle(
-            nr=(0, 0, 1),
-            c=(0, 0, 0),
-            radius=self._scale,
-            s=8)[0]
-
-        self._shape = nurbs.merge_curves(name=self.namer.tmp, curves=[c1, c2, c3])
+        self._shape = shape.make_sphere(self._scale)
 
     def build_ik(self):
         curve_points = list()
