@@ -1,9 +1,10 @@
 import maya.cmds as cmds
 
 from . import chain
-from autoRigger import util
-from autoRigger.base import bone
+from .. import util
+from ..base import bone
 from ..utility.datatype import vector
+from ..utility.rigging import nurbs
 
 
 class ChainIK(chain.Chain):
@@ -11,7 +12,7 @@ class ChainIK(chain.Chain):
     Abstract IK type Chain module
     """
 
-    def __init__(self, side, name, segment, length, direction, is_stretch=1):
+    def __init__(self, side, name, segment, length, direction, is_stretch=0):
         chain.Chain.__init__(self, side, name, segment)
 
         self.is_stretch = is_stretch
@@ -37,8 +38,24 @@ class ChainIK(chain.Chain):
         self.ik = '{}_ik'.format(self.base_name)
 
     def set_shape(self):
-        sphere = cmds.createNode('implicitSphere')
-        self._shape = cmds.rename(cmds.listRelatives(sphere, p=1), self.namer.tmp)
+        c1 = cmds.circle(
+            nr=(0, 1, 0),
+            c=(0, 0, 0),
+            radius=self._scale,
+            s=8)[0]
+        c2 = cmds.circle(
+            nr=(1, 0, 0),
+            c=(0, 0, 0),
+            radius=self._scale,
+            s=8)[0]
+
+        c3 = cmds.circle(
+            nr=(0, 0, 1),
+            c=(0, 0, 0),
+            radius=self._scale,
+            s=8)[0]
+
+        self._shape = nurbs.merge_curves(name=self.namer.tmp, curves=[c1, c2, c3])
 
     def build_ik(self):
         curve_points = list()
@@ -48,6 +65,7 @@ class ChainIK(chain.Chain):
 
         cmds.curve(p=curve_points, name=self.ik_curve)
         cmds.setAttr(self.ik_curve+'.visibility', 0)
+
         # turning off inherit transform avoid curve move/scale twice as much
         cmds.inheritTransform(self.ik_curve, off=1)
         cmds.parent(self.ik_curve, util.G_CTRL_GRP)
@@ -78,6 +96,8 @@ class ChainIK(chain.Chain):
         cmds.connectAttr(self.ctrls[-1]+'.worldMatrix[0]', self.ik+'.dWorldUpMatrixEnd', f=1)
 
         if self.is_stretch:
+            # FIXME: cycle evaluation when stretching
+
             # mid cluster weighting
             for index, offset in enumerate(self.offsets):
                 if self.ctrls[index] not in [self.ctrls[0], self.ctrls[-1]]:

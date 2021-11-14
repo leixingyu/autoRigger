@@ -4,7 +4,7 @@ from . import chain, chainFK, chainIK
 from .. import util
 from ..base import bone
 from ..utility.datatype import vector
-from ..utility.rigging import joint
+from ..utility.rigging import joint, transform
 
 
 class ChainFKIK(chain.Chain):
@@ -12,7 +12,7 @@ class ChainFKIK(chain.Chain):
     Abstract FK/IK type Chain module
     """
 
-    def __init__(self, side, name, segment, length, direction, is_stretch=1):
+    def __init__(self, side, name, segment, length, direction, is_stretch=0):
         chain.Chain.__init__(self, side, name, segment)
 
         self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction, is_stretch)
@@ -54,6 +54,7 @@ class ChainFKIK(chain.Chain):
             [1.0, 0.0, 3.0], [1.0, 0.0, 2.0], [2.0, 0.0, 2.0]
         ]
         self._shape = cmds.curve(p=arrow_pts, degree=1, name=self.namer.tmp)
+        util.uniform_scale(self._shape, self._scale)
 
     def create_joint(self):
         self.ik_chain.create_joint()
@@ -64,6 +65,7 @@ class ChainFKIK(chain.Chain):
         for index, loc in enumerate(self.locs):
             pos = cmds.xform(loc, q=1, t=1, ws=1)
             cmds.joint(p=pos, name=self.jnts[index])
+            util.uniform_scale(self.jnts[index], self._scale)
 
         # Cleanup
         cmds.setAttr(self.ik_chain.jnts[0]+'.visibility', 0)
@@ -78,14 +80,9 @@ class ChainFKIK(chain.Chain):
 
         # Master control
         cmds.duplicate(self._shape, name=self.ctrls[0])
+        cmds.rotate(0, 0, 90, self.ctrls[0])
         cmds.group(name=self.offsets[0], em=1)
-
-        pos = cmds.xform(self.jnts[0], q=1, t=1, ws=1)
-        distance = (vector.Vector(pos)-self.interval * self.dir).as_list
-        util.move(self.offsets[0], distance)
-        cmds.parent(self.ctrls[0], self.offsets[0], relative=1)
-        cmds.makeIdentity(self.ctrls[0], apply=1, t=1, r=1, s=1)
-
+        transform.clear_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
         cmds.addAttr(self.ctrls[0], longName='FK_IK',
                      attributeType='double', defaultValue=1, minValue=0,
                      maxValue=1, keyable=1)

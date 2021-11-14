@@ -3,7 +3,7 @@ import maya.cmds as cmds
 
 from .. import util
 from ..base import bone
-from ..utility.rigging import joint, transform
+from ..utility.rigging import transform
 
 
 class Base(bone.Bone):
@@ -17,25 +17,27 @@ class Base(bone.Bone):
         self._rtype = 'base'
 
     def set_shape(self):
-        # Base controller shape
         self._shape = cmds.circle(
             nr=(0, 1, 0),
             c=(0, 0, 0),
-            radius=1,
+            radius=self._scale,
             s=8,
             name=self.namer.tmp)[0]
 
     def create_locator(self):
         cmds.spaceLocator(n=self.locs[0])
-        cmds.scale(self._scale, self._scale, self._scale, self.locs[0])
+        util.uniform_scale(self.locs[0], self._scale)
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def create_joint(self):
         cmds.select(clear=1)
-        loc_pos = cmds.xform(self.locs[0], q=1, t=1, ws=1)
-        cmds.joint(p=loc_pos, name=self.jnts[0])
+
+        cmds.joint(name=self.jnts[0])
+        util.uniform_scale(self.jnts[0], self._scale)
+
+        transform.match_xform(self.jnts[0], self.locs[0])
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
-        joint.orient_joint(self.jnts[0])
+        # joint.orient_joint(self.jnts[0])
 
     def place_controller(self):
         cmds.duplicate(self._shape, name=self.ctrls[0])

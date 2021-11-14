@@ -49,6 +49,7 @@ class Hand(bone.Bone):
         util.move(self.pinky.locs[0], [0, 0, -2 * self.interval])
 
         util.move(self.wrist.locs[0], [-side_factor * self.distance, 0, 0])
+        cmds.rotate(0, 0, 90, self.wrist.locs[0])
 
         hierarchy.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
 

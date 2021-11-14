@@ -39,20 +39,33 @@ def create_outliner_grp():
 
 def move(obj, pos):
     """
+    Move object relative to its current position
 
-    :param obj: str. root
+    :param obj: str. maya object
     :param pos: list. position x, y and z
     """
-
     return cmds.move(pos[0], pos[1], pos[2], obj, relative=1)
 
 
 def move_to(obj, pos):
     """
+    Move object to an absolute position (i.e. set transform to position)
 
-    :param obj:
-    :param pos:
-    :return:
+    :param obj: str. maya object
+    :param pos: list. position x, y and z
     """
-
     return cmds.move(pos[0], pos[1], pos[2], obj, absolute=1)
+
+
+def uniform_scale(obj, scale):
+    """
+    Scale object relative to its current scale
+
+    :param obj: str. maya object
+    :param scale: int. uniform scale value
+    """
+    if cmds.nodeType(obj) == 'joint':
+        default = cmds.getAttr('{}.radius'.format(obj))
+        return cmds.setAttr('{}.radius'.format(obj), scale * default)
+
+    return cmds.scale(scale, scale, scale, obj)
