@@ -1,11 +1,10 @@
 import maya.cmds as cmds
 
+from .. import util
+from ..base import bone, base
+from ..chain import finger
 from ..constant import Side
-from autoRigger.chain import finger
-from autoRigger.base import bone, base
-from autoRigger import util
-
-from utility.setup import outliner
+from ..utility.common import hierarchy
 
 
 # TODO: make so the finger count is not hard coded
@@ -51,14 +50,14 @@ class Hand(bone.Bone):
 
         util.move(self.wrist.locs[0], [-side_factor * self.distance, 0, 0])
 
-        outliner.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
+        hierarchy.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
 
     def create_joint(self):
         super(Hand, self).create_joint()
 
         fingers = [obj.jnts[0] for obj in self.fingers]
         wrist = self.wrist.jnts[0]
-        outliner.batch_parent(fingers, wrist)
+        hierarchy.batch_parent(fingers, wrist)
 
     def add_constraint(self):
         super(Hand, self).add_constraint()

@@ -1,10 +1,10 @@
 import maya.cmds as cmds
 
 from . import chain, chainFK, chainIK
-from autoRigger import util
-from autoRigger.base import bone
-from utility.datatype import vector
-from utility.rigging import joint
+from .. import util
+from ..base import bone
+from ..utility.datatype import vector
+from ..utility.rigging import joint
 
 
 class ChainFKIK(chain.Chain):

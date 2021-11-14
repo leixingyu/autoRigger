@@ -1,7 +1,7 @@
 from ...constant import Side
-from autoRigger.chain import chain, chainFKIK
-from autoRigger.chain.limb import limbIK, limbFK
-from utility.datatype import vector
+from ...chain import chain, chainFKIK
+from ...chain.limb import limbIK, limbFK
+from ...utility.datatype import vector
 
 
 class LimbFKIK(chainFKIK.ChainFKIK):

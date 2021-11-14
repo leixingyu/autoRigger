@@ -1,13 +1,13 @@
 import maya.cmds as cmds
 
-from ..constant import Side
 from .. import util
+from ..constant import Side
 from ..chain.spine import spineQuad
 from ..chain import tail
 from ..chain.limb.leg import legFront
 from ..chain.limb.leg import legBack
 from ..base import base, bone
-from utility.setup import outliner
+from ..utility.common import hierarchy
 
 
 class Quadruped(bone.Bone):
@@ -97,10 +97,10 @@ class Quadruped(bone.Bone):
             rig_component.create_joint()
 
         # parent leg root joints to root spline joint
-        outliner.batch_parent([self.left_arm.jnts[0], self.right_arm.jnts[0]], self.spine.jnts[-1])
+        hierarchy.batch_parent([self.left_arm.jnts[0], self.right_arm.jnts[0]], self.spine.jnts[-1])
 
         # parent arm root joints to top spline joint
-        outliner.batch_parent([self.left_leg.jnts[0], self.right_leg.jnts[0]], self.spine.jnts[0])
+        hierarchy.batch_parent([self.left_leg.jnts[0], self.right_leg.jnts[0]], self.spine.jnts[0])
 
         # parent tail to spine
         cmds.parent(self.tail.jnts[0], self.spine.jnts[0])
@@ -121,8 +121,8 @@ class Quadruped(bone.Bone):
             rig_component.add_constraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        outliner.batch_parent([self.left_arm.offsets[0], self.right_arm.offsets[0]], self.spine.ctrls[-1])
-        outliner.batch_parent([self.left_leg.offsets[0], self.right_leg.offsets[0]], self.spine.ctrls[0])
+        hierarchy.batch_parent([self.left_arm.offsets[0], self.right_arm.offsets[0]], self.spine.ctrls[-1])
+        hierarchy.batch_parent([self.left_leg.offsets[0], self.right_leg.offsets[0]], self.spine.ctrls[0])
         cmds.parentConstraint(self.spine.ctrls[0], self.tail.ctrls[0], mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl

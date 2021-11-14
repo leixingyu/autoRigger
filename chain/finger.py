@@ -1,5 +1,5 @@
 from ..constant import Side
-from autoRigger.chain import chainFK
+from ..chain import chainFK
 
 
 class Finger(chainFK.ChainFK):

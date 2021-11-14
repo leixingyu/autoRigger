@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
-from autoRigger.base import bone
-from autoRigger import util
-from utility.setup import outliner
-from utility.rigging import joint
+from ... import util
+from ...base import bone
+from ...utility.common import hierarchy
+from ...utility.rigging import joint
 
 
 class SpineQuad(bone.Bone):
@@ -123,7 +123,7 @@ class SpineQuad(bone.Bone):
         cmds.parent(self.ctrls[1], self.offsets[1], relative=1)
 
         # Cleanup
-        outliner.batch_parent([self.offsets[0], self.offsets[1], self.offsets[-1]], self.master_ctrl)
+        hierarchy.batch_parent([self.offsets[0], self.offsets[1], self.offsets[-1]], self.master_ctrl)
         cmds.parent(self.master_offset, util.G_CTRL_GRP)
         return self.master_ctrl
 

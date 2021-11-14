@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
-from autoRigger.base import bone
-from autoRigger import util
-from utility.setup import outliner
-from utility.rigging import joint
+from .... import util
+from ....base import bone
+from ....utility.common import hierarchy
+from ....utility.rigging import joint
 
 
 class LegBack(bone.Bone):
@@ -142,7 +142,7 @@ class LegBack(bone.Bone):
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)
         cmds.parent(pole_ctrl_offset, foot_ctrl)
 
-        outliner.batch_parent([hip_ctrl_offset, foot_ctrl], util.G_CTRL_GRP)
+        hierarchy.batch_parent([hip_ctrl_offset, foot_ctrl], util.G_CTRL_GRP)
 
     def build_ik(self):
         cmds.ikHandle(startJoint=self.jnts[0], endEffector=self.jnts[2], name=self.leg_ik, solver='ikRPsolver')
@@ -194,7 +194,7 @@ class LegBack(bone.Bone):
         cmds.setAttr(length_node+'.visibility', 0)
         cmds.setAttr(hip_loc+'.visibility', 0)
         cmds.setAttr(ankle_loc+'.visibility', 0)
-        outliner.batch_parent([length_node, hip_loc, ankle_loc], util.G_CTRL_GRP)
+        hierarchy.batch_parent([length_node, hip_loc, ankle_loc], util.G_CTRL_GRP)
 
         cmds.parentConstraint(self.ctrls[0], hip_loc)
         cmds.parentConstraint(self.ctrls[3], ankle_loc, mo=1)
@@ -222,11 +222,11 @@ class LegBack(bone.Bone):
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], swivel_pivot_grp)
         cmds.move(toe_pos[0], toe_pos[1], toe_pos[2], toe_tip_pivot_grp)
 
-        outliner.batch_parent([self.leg_ik, self.foot_ik], flex_pivot_grp)
+        hierarchy.batch_parent([self.leg_ik, self.foot_ik], flex_pivot_grp)
         cmds.parent(flex_pivot_grp, flex_offset_grp)
         cmds.parentConstraint(self.jnt_helpers[3], flex_offset_grp, mo=1)
-        outliner.batch_parent([self.toe_ik, self.helper_ik], toe_tap_pivot_grp)
-        outliner.batch_parent([toe_tap_pivot_grp, flex_offset_grp], toe_tip_pivot_grp)
+        hierarchy.batch_parent([self.toe_ik, self.helper_ik], toe_tap_pivot_grp)
+        hierarchy.batch_parent([toe_tap_pivot_grp, flex_offset_grp], toe_tip_pivot_grp)
         cmds.parent(toe_tip_pivot_grp, swivel_pivot_grp)
         cmds.parent(swivel_pivot_grp, self.ctrls[3])
 

@@ -1,0 +1,3 @@
+[submodule "utility"]
+	path = utility
+	url = https://github.com/leixingyu/maya-utility.git

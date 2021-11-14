@@ -1,10 +1,10 @@
 import maya.cmds as cmds
 
+from .... import util
+from ....base import bone
+from ....chain.limb import limbFKIK
 from ....constant import Side
-from autoRigger import util
-from autoRigger.module import hand
-from autoRigger.base import bone
-from autoRigger.chain.limb import limbFKIK
+from ....module import hand
 
 
 class Arm(bone.Bone):

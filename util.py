@@ -11,9 +11,7 @@ G_MESH_GRP = '_Meshes'
 
 def create_locators_on_curve(curve, sample):
     locs = list()
-
     points, tangents = nurbs.get_point_on_curve(curve, sample)
-
     for index in range(len(points)):
         point = points[index]
         tangent = tangents[index]
@@ -24,17 +22,16 @@ def create_locators_on_curve(curve, sample):
 
         cmds.xform(temp_node, t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z])
         cmds.xform(loc, t=[point.x, point.y, point.z])
-
         constraint = cmds.aimConstraint(temp_node, loc)[0]
-
         cmds.delete([temp_node, constraint])
 
     return locs
 
 
 def create_outliner_grp():
-    """ Create different groups in the outliner """
-
+    """
+    Create different groups in the outliner
+    """
     for grp in [G_LOC_GRP, G_JNT_GRP, G_CTRL_GRP, G_MESH_GRP]:
         if not cmds.ls(grp):
             cmds.group(em=1, name=grp)

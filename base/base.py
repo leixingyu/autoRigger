@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
 
-from autoRigger.base import bone
-from autoRigger import util
-from utility.rigging import joint, transform
+from .. import util
+from ..base import bone
+from ..utility.rigging import joint, transform
 
 
 class Base(bone.Bone):

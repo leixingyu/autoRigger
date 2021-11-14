@@ -3,19 +3,19 @@
 import os
 import logging
 
+from Qt import QtCore, QtGui, QtWidgets
+from Qt import _loadUi
+
+from .template import biped, quadruped
 from .constant import RigComponents, RigType, Side
 from .module import foot, hand
 from .chain.spine import spine, spineQuad
-from .template import biped, quadruped
 from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
 from .chain.limb.arm import arm
 from .chain.limb.leg import leg, legBack, legFront
 from .base import base
-
-from utility._vendor.Qt import QtCore, QtGui, QtWidgets
-from utility._vendor.Qt import _loadUi
-from utility.setup import setup
+from utility.common import setup
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))

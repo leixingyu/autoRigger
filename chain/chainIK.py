@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from . import chain
 from autoRigger import util
 from autoRigger.base import bone
-from utility.datatype import vector
+from ..utility.datatype import vector
 
 
 class ChainIK(chain.Chain):

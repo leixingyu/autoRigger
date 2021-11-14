@@ -1,4 +1,4 @@
-from autoRigger.chain import chainIK
+from ...chain import chainIK
 
 
 class Spine(chainIK.ChainIK):

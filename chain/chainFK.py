@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
 from . import chain
-from autoRigger.base import bone
-from utility.datatype import vector
+from ..base import bone
+from ..utility.datatype import vector
 
 
 class ChainFK(chain.Chain):

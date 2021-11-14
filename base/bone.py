@@ -4,9 +4,9 @@ import maya.cmds as cmds
 
 from .. import util
 from ..constant import Side
-from utility.algorithm import strGenerator
-from utility.datatype import color
-from utility.rigging import transform
+from ..utility.algorithm import strGenerator
+from ..utility.datatype import color
+from ..utility.rigging import transform
 
 
 TMP_PREFIX = 'tmp_'

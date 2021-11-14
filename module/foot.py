@@ -1,10 +1,10 @@
 import maya.cmds as cmds
 
+from .. import util
+from ..base import bone
 from ..constant import Side
-from autoRigger import util
-from autoRigger.base import bone
-from utility.setup import outliner
-from utility.rigging import nurbs
+from ..utility.common import hierarchy
+from ..utility.rigging import nurbs
 
 
 class Foot(bone.Bone):
@@ -110,7 +110,7 @@ class Foot(bone.Bone):
         cmds.setAttr(self.fk_jnts[0]+'.visibility', 0)
 
         # Cleanup
-        outliner.batch_parent([self.fk_jnts[0], self.jnts[3], self.jnts[0]], util.G_JNT_GRP)
+        hierarchy.batch_parent([self.fk_jnts[0], self.jnts[3], self.jnts[0]], util.G_JNT_GRP)
 
     def place_controller(self):
         # IK Setup
@@ -142,7 +142,7 @@ class Foot(bone.Bone):
         cmds.makeIdentity(self.ctrls[2], apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        outliner.batch_parent([self.ctrls[2], self.ctrls[0], self.ctrls[1]], util.G_CTRL_GRP)
+        hierarchy.batch_parent([self.ctrls[2], self.ctrls[0], self.ctrls[1]], util.G_CTRL_GRP)
 
     def add_constraint(self):
         # FK Setup

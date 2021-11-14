@@ -2,8 +2,8 @@ import maya.cmds as cmds
 
 from autoRigger.base import bone
 from autoRigger import util
-from utility.setup import outliner
-from utility.rigging import joint
+from ....utility.common import hierarchy
+from ....utility.rigging import joint
 
 
 class LegFront(bone.Bone):
@@ -125,7 +125,7 @@ class LegFront(bone.Bone):
         cmds.parent(pole_ctrl, pole_ctrl_offset, relative=1)
         cmds.parent(pole_ctrl_offset, paw_ctrl)
 
-        outliner.batch_parent([shoulder_ctrl_offset, paw_ctrl], util.G_CTRL_GRP)
+        hierarchy.batch_parent([shoulder_ctrl_offset, paw_ctrl], util.G_CTRL_GRP)
 
     def build_ik(self):
         cmds.ikHandle(startJoint=self.jnts[0], endEffector=self.jnts[2], name=self.leg_ik, solver='ikRPsolver')
@@ -172,7 +172,7 @@ class LegFront(bone.Bone):
         cmds.setAttr(length_node+'.visibility', 0)
         cmds.setAttr(shoulder_loc+'.visibility', 0)
         cmds.setAttr(elbow_loc+'.visibility', 0)
-        outliner.batch_parent([length_node, shoulder_loc, elbow_loc], util.G_CTRL_GRP)
+        hierarchy.batch_parent([length_node, shoulder_loc, elbow_loc], util.G_CTRL_GRP)
 
         cmds.parentConstraint(self.ctrls[0], shoulder_loc)
         cmds.parentConstraint(self.ctrls[3], elbow_loc, mo=1)
@@ -200,8 +200,8 @@ class LegFront(bone.Bone):
         cmds.move(wrist_pos[0], wrist_pos[1], wrist_pos[2], wrist_pivot_grp)
 
         cmds.parent(self.toe_ik, toe_tap_pivot_grp)
-        outliner.batch_parent([self.leg_ik, self.foot_ik], flex_pivot_grp)
-        outliner.batch_parent([toe_tap_pivot_grp, flex_pivot_grp], swivel_pivot_grp)
+        hierarchy.batch_parent([self.leg_ik, self.foot_ik], flex_pivot_grp)
+        hierarchy.batch_parent([toe_tap_pivot_grp, flex_pivot_grp], swivel_pivot_grp)
         cmds.parent(swivel_pivot_grp, toe_tip_pivot_grp)
         cmds.parent(toe_tip_pivot_grp, wrist_pivot_grp)
         cmds.parent(wrist_pivot_grp, self.ctrls[3])

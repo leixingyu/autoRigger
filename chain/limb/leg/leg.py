@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
-from autoRigger import util
-from autoRigger.module import foot
-from autoRigger.base import bone
-from autoRigger.chain.limb import limbFKIK
+from .... import util
+from ....module import foot
+from ....base import bone
+from ....chain.limb import limbFKIK
 
 
 class Leg(bone.Bone):

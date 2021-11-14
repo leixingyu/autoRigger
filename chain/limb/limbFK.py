@@ -1,4 +1,5 @@
-from autoRigger.chain import chainFK
+from ...constant import Side
+from ...chain import chainFK
 
 
 class LimbFK(chainFK.ChainFK):
