@@ -114,7 +114,7 @@ class Quadruped(bone.Bone):
         for rig_component in self.rig_components:
             rig_component.place_controller()
 
-        cmds.addAttr(self.spine.master_ctrl, longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
+        cmds.addAttr(self.spine.ctrls[0], longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
 
     def add_constraint(self):
         for rig_component in self.rig_components:
@@ -126,7 +126,7 @@ class Quadruped(bone.Bone):
         cmds.parentConstraint(self.spine.ctrls[0], self.tail.ctrls[0], mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
-        cmds.connectAttr(self.spine.master_ctrl+'.FK_IK', self.tail.ctrls[0]+'.FK_IK')
+        cmds.connectAttr(self.spine.ctrls[0]+'.FK_IK', self.tail.ctrls[0]+'.FK_IK')
 
         # parent head up
         cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])
