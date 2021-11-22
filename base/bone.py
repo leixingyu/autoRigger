@@ -101,11 +101,26 @@ class Bone(object):
         for loc in self.locs:
             try:
                 if self._side == Side.LEFT:
-                    transform.colorize_rgb_normalized(loc, Blue.r, Blue.g, Blue.b)
+                    transform.colorize_rgb_normalized(
+                        loc,
+                        Blue.r_normalized,
+                        Blue.g_normalized,
+                        Blue.b_normalized
+                    )
                 elif self._side == Side.RIGHT:
-                    transform.colorize_rgb_normalized(loc, Red.r, Red.g, Red.b)
+                    transform.colorize_rgb_normalized(
+                        loc,
+                        Red.r_normalized,
+                        Red.g_normalized,
+                        Red.b_normalized
+                    )
                 else:
-                    transform.colorize_rgb_normalized(loc, Yellow.r, Yellow.g, Yellow.b)
+                    transform.colorize_rgb_normalized(
+                        loc,
+                        Yellow.r_normalized,
+                        Yellow.g_normalized,
+                        Yellow.b_normalized
+                    )
             except RuntimeError:
                 # some locators have namespace created but doesn't exists
                 pass
@@ -138,11 +153,26 @@ class Bone(object):
         for ctrl in self.ctrls:
             try:
                 if self._side == Side.LEFT:
-                    transform.colorize_rgb_normalized(ctrl, Blue.r, Blue.g, Blue.b)
+                    transform.colorize_rgb_normalized(
+                        ctrl,
+                        Blue.r_normalized,
+                        Blue.g_normalized,
+                        Blue.b_normalized
+                    )
                 elif self._side == Side.RIGHT:
-                    transform.colorize_rgb_normalized(ctrl, Red.r, Red.g, Red.b)
+                    transform.colorize_rgb_normalized(
+                        ctrl,
+                        Red.r_normalized,
+                        Red.g_normalized,
+                        Red.b_normalized
+                    )
                 else:
-                    transform.colorize_rgb_normalized(ctrl, Yellow.r, Yellow.g, Yellow.b)
+                    transform.colorize_rgb_normalized(
+                        ctrl,
+                        Yellow.r_normalized,
+                        Yellow.g_normalized,
+                        Yellow.b_normalized
+                    )
             except RuntimeError:
                 # some controllers have namespace created but doesn't exist
                 pass
