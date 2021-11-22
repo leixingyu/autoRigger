@@ -27,10 +27,10 @@ class LimbIK(chainIK.ChainIK):
         # TODO: move pole vector out
 
         for index in range(self.segment):
-            cmds.duplicate(self._shape, name=self.ctrls[index])
-            cmds.group(em=1, name=self.offsets[index])
+            cmds.duplicate(self._shape, n=self.ctrls[index])
+            cmds.group(em=1, n=self.offsets[index])
             transform.match_xform(self.offsets[index], self.jnts[index])
-            cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
+            cmds.parent(self.ctrls[index], self.offsets[index], r=1)
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
 
     def build_ik(self):
@@ -40,12 +40,7 @@ class LimbIK(chainIK.ChainIK):
             joint.set_prefer_angle(self.jnts[1], [0, 0, 1])
 
         # IK Handle #
-        cmds.ikHandle(
-            startJoint=self.jnts[0],
-            endEffector=self.jnts[-1],
-            name=self.ik,
-            solver='ikRPsolver'
-        )
+        cmds.ikHandle(sj=self.jnts[0], ee=self.jnts[-1], n=self.ik, sol='ikRPsolver')
 
     def add_constraint(self):
         self.build_ik()
@@ -57,5 +52,5 @@ class LimbIK(chainIK.ChainIK):
         cmds.pointConstraint(self.ctrls[0], self.jnts[0], mo=1)
         cmds.parent(self.offsets[1], self.ctrls[0])
 
-        cmds.setAttr(self.ik+'.visibility', 0)
+        cmds.setAttr(self.ik+'.v', 0)
         cmds.parent(self.ik, util.G_CTRL_GRP)

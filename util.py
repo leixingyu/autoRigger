@@ -10,6 +10,13 @@ G_MESH_GRP = '_Meshes'
 
 
 def create_locators_on_curve(curve, sample):
+    """
+    Create locators uniformly spread on curve
+
+    :param curve: str. single nurbsCurve node
+    :param sample: int. number of sample points
+    :return: list. list of locators created
+    """
     locs = list()
     points, tangents = nurbs.get_point_on_curve(curve, sample)
     for index in range(len(points)):
@@ -20,7 +27,10 @@ def create_locators_on_curve(curve, sample):
         locs.append(loc)
         temp_node = cmds.createNode('transform')
 
-        cmds.xform(temp_node, t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z])
+        cmds.xform(
+            temp_node,
+            t=[point.x+tangent.x, point.y+tangent.y, point.z+tangent.z]
+        )
         cmds.xform(loc, t=[point.x, point.y, point.z])
         constraint = cmds.aimConstraint(temp_node, loc)[0]
         cmds.delete([temp_node, constraint])
@@ -44,7 +54,7 @@ def move(obj, pos):
     :param obj: str. maya object
     :param pos: list. position x, y and z
     """
-    return cmds.move(pos[0], pos[1], pos[2], obj, relative=1)
+    return cmds.move(pos[0], pos[1], pos[2], obj, r=1)
 
 
 def move_to(obj, pos):

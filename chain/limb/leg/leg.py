@@ -19,8 +19,10 @@ class Leg(bone.Bone):
         self.interval = interval
         self.height = height
 
-        self.limb = limbFKIK.LimbFKIK(side=self._side, name=name, ltype='leg', length=self.distance)
-        self.foot = foot.Foot(side=self._side, name=name, interval=self.interval, height=self.height)
+        self.limb = limbFKIK.LimbFKIK(
+            self._side, name, ltype='leg', length=self.distance)
+        self.foot = foot.Foot(
+            self._side, name, interval=self.interval, height=self.height)
 
         self._components = [self.limb, self.foot]
 
@@ -35,18 +37,37 @@ class Leg(bone.Bone):
 
         # Connect foot and limb
         # IK constraint #
-        cmds.parentConstraint(self.foot.rev_jnts[0], self.limb.ik_chain.ctrls[-1], mo=1)
-        cmds.setAttr(self.limb.ik_chain.ctrls[-1]+'.visibility', 0)
+        cmds.parentConstraint(
+            self.foot.rev_jnts[0], self.limb.ik_chain.ctrls[-1], mo=1)
+        cmds.setAttr(self.limb.ik_chain.ctrls[-1]+'.v', 0)
 
         # FK constraint #
         cmds.parentConstraint(self.limb.jnts[-1], self.foot.fk_jnts[0], mo=1)
         cmds.parent(self.foot.ctrls[1], self.limb.fk_chain.ctrls[-1])
 
         # IK/FK switch #
-        cmds.setDrivenKeyframe(self.limb.ctrls[0]+'.FK_IK', currentDriver=self.foot.ctrls[2]+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.limb.ctrls[0]+'.FK_IK', currentDriver=self.foot.ctrls[2]+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(
+            self.limb.ctrls[0]+'.FK_IK',
+            cd=self.foot.ctrls[2]+'.FK_IK',
+            dv=1,
+            v=1)
+
+        cmds.setDrivenKeyframe(
+            self.limb.ctrls[0]+'.FK_IK',
+            cd=self.foot.ctrls[2]+'.FK_IK',
+            dv=0,
+            v=0)
 
         # Sub controller visibility and channel hide #
-        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.limb.ik_chain.ctrls[-1]+'.visibility', currentDriver=self.limb.ctrls[0]+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(
+            self.limb.ik_chain.ctrls[-1]+'.v',
+            cd=self.limb.ctrls[0]+'.FK_IK',
+            dv=1,
+            v=0)
+
+        cmds.setDrivenKeyframe(
+            self.limb.ik_chain.ctrls[-1]+'.v',
+            cd=self.limb.ctrls[0]+'.FK_IK',
+            dv=0,
+            v=0)
         cmds.setAttr(self.limb.ctrls[0]+'.FK_IK', l=1, k=0)

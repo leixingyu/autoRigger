@@ -7,6 +7,11 @@ from ..utility.datatype import vector
 from ..utility.rigging import joint, transform
 
 
+ATTRS = {
+    'sw': 'FK_IK'
+}
+
+
 class ChainFKIK(chain.Chain):
     """
     Abstract FK/IK type Chain module
@@ -47,12 +52,12 @@ class ChainFKIK(chain.Chain):
         cmds.select(clear=1)
         for index, loc in enumerate(self.locs):
             pos = cmds.xform(loc, q=1, t=1, ws=1)
-            cmds.joint(p=pos, name=self.jnts[index])
+            cmds.joint(p=pos, n=self.jnts[index])
             util.uniform_scale(self.jnts[index], self._scale)
 
         # Cleanup
-        cmds.setAttr(self.ik_chain.jnts[0]+'.visibility', 0)
-        cmds.setAttr(self.fk_chain.jnts[0]+'.visibility', 0)
+        cmds.setAttr(self.ik_chain.jnts[0]+'.v', 0)
+        cmds.setAttr(self.fk_chain.jnts[0]+'.v', 0)
 
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
         joint.orient_joint(self.jnts[0])
@@ -62,13 +67,12 @@ class ChainFKIK(chain.Chain):
         self.fk_chain.place_controller()
 
         # Master control
-        cmds.duplicate(self._shape, name=self.ctrls[0])
+        cmds.duplicate(self._shape, n=self.ctrls[0])
         cmds.rotate(0, 0, 90, self.ctrls[0])
-        cmds.group(name=self.offsets[0], em=1)
+        cmds.group(n=self.offsets[0], em=1)
         transform.clear_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
-        cmds.addAttr(self.ctrls[0], longName='FK_IK',
-                     attributeType='double', defaultValue=1, minValue=0,
-                     maxValue=1, keyable=1)
+        cmds.addAttr(self.ctrls[0], sn='sw', ln=ATTRS['sw'], at='double',
+                     dv=1, min=0, max=1, k=1)
 
         cmds.parent(self.ik_chain.offsets[0], self.ctrls[0])
         cmds.parent(self.ik_chain.offsets[-1], self.ctrls[0])
@@ -81,28 +85,21 @@ class ChainFKIK(chain.Chain):
 
         # IK, FK to result jnt
         for index in range(self.segment):
-            cmds.parentConstraint(
+            cons = cmds.parentConstraint(
                 self.ik_chain.jnts[index],
                 self.fk_chain.jnts[index],
-                self.jnts[index]
-            )
+                self.jnts[index])[0]
 
-        # IK FK switch
-        for index in range(self.segment):
             cmds.setDrivenKeyframe(
-                '{}_parentConstraint1.{}W0'.format(self.jnts[index],self.ik_chain.jnts[index]),
-                cd=self.ctrls[0]+'.FK_IK', dv=1, v=1)
+                '{}.w0'.format(cons), cd=self.ctrls[0]+'.sw', dv=1, v=1)
             cmds.setDrivenKeyframe(
-                '{}_parentConstraint1.{}W1'.format(self.jnts[index], self.fk_chain.jnts[index]),
-                cd=self.ctrls[0]+'.FK_IK', dv=1, v=0)
+                '{}.w1'.format(cons), cd=self.ctrls[0]+'.sw', dv=1, v=0)
             cmds.setDrivenKeyframe(
-                '{}_parentConstraint1.{}W0'.format(self.jnts[index], self.ik_chain.jnts[index]),
-                cd=self.ctrls[0]+'.FK_IK', dv=0, v=0)
+                '{}.w0'.format(cons), cd=self.ctrls[0]+'.sw', dv=0, v=0)
             cmds.setDrivenKeyframe(
-                '{}_parentConstraint1.{}W1'.format(self.jnts[index], self.fk_chain.jnts[index]),
-                cd=self.ctrls[0]+'.FK_IK', dv=0, v=1)
+                '{}.w1'.format(cons), cd=self.ctrls[0]+'.sw', dv=0, v=1)
 
-            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.visibility', cd=self.ctrls[0]+'.FK_IK', dv=1, v=1)
-            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.visibility', cd=self.ctrls[0]+'.FK_IK', dv=0, v=0)
-            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.visibility', cd=self.ctrls[0]+'.FK_IK', dv=0, v=1)
-            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.visibility', cd=self.ctrls[0]+'.FK_IK', dv=1, v=0)
+            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=1, v=1)
+            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=0, v=0)
+            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=0, v=1)
+            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=1, v=0)

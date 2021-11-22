@@ -23,12 +23,12 @@ class Hand(bone.Bone):
         self.interval = interval
         self.distance = distance
 
-        self.wrist = base.Base(self._side, name='wrist')
-        self.thumb = finger.Finger(side, name='thumb', length=1.2)
-        self.index = finger.Finger(side, name='index', length=2.0)
-        self.middle = finger.Finger(side, name='middle', length=2.2)
-        self.ring = finger.Finger(side, name='ring', length=2.0)
-        self.pinky = finger.Finger(side, name='pinky', length=1.6)
+        self.wrist = base.Base(side, 'wrist')
+        self.thumb = finger.Finger(side, 'thumb', length=1.2)
+        self.index = finger.Finger(side, 'index', length=2.0)
+        self.middle = finger.Finger(side, 'middle', length=2.2)
+        self.ring = finger.Finger(side, 'ring', length=2.0)
+        self.pinky = finger.Finger(side, 'pinky', length=1.6)
 
         self.fingers = [self.thumb, self.index, self.middle, self.ring, self.pinky]
 

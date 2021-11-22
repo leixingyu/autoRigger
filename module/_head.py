@@ -322,7 +322,7 @@ class Head(create_locator.Bone):
     def lock_controller(self):
         allCtrls = cmds.ls('Ctrl_Face_*', transforms=1)
         for ctrl in allCtrls:
-            cmds.setAttr(ctrl+'.visibility', k=0, l=1)
+            cmds.setAttr(ctrl+'.v', k=0, l=1)
             for axis in 'xyz':
                 cmds.setAttr(ctrl+'.s'+axis, k=0, l=1)
             if 'Ctrl_Face_Jaw' in ctrl:

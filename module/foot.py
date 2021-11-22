@@ -6,6 +6,13 @@ from ..constant import Side
 from ..utility.common import hierarchy
 
 
+ATTRS = {
+    'fr': 'foot_roll',
+    'fb': 'foot_bank',
+    'sw': 'FK_IK'
+}
+
+
 class Foot(bone.Bone):
     """
     This module creates a foot rig
@@ -40,7 +47,7 @@ class Foot(bone.Bone):
 
         self._shape[0] = shape.make_circle(self._scale)
         self._shape[1] = shape.make_circle(self._scale)
-        cmds.rotate(0, 90, 0, self._shape[1], relative=1)
+        cmds.rotate(0, 90, 0, self._shape[1], r=1)
         self._shape[2] = shape.make_text('FK/IK', self._scale)
 
     def create_locator(self):
@@ -48,31 +55,31 @@ class Foot(bone.Bone):
         cmds.spaceLocator(n=self.locs[0])
 
         cmds.spaceLocator(n=self.locs[1])
-        cmds.parent(self.locs[1], self.locs[0], relative=1)
-        cmds.move(0, -self.height, self.interval, self.locs[1], relative=1)
+        cmds.parent(self.locs[1], self.locs[0], r=1)
+        cmds.move(0, -self.height, self.interval, self.locs[1], r=1)
 
         cmds.spaceLocator(n=self.locs[2])
-        cmds.parent(self.locs[2], self.locs[1], relative=1)
-        cmds.move(0, 0, 2 * self.interval, self.locs[2], relative=1)
+        cmds.parent(self.locs[2], self.locs[1], r=1)
+        cmds.move(0, 0, 2 * self.interval, self.locs[2], r=1)
 
         # Reverse Foot Setup
         cmds.spaceLocator(n=self.locs[3])
-        cmds.parent(self.locs[3], self.locs[1], relative=1)
+        cmds.parent(self.locs[3], self.locs[1], r=1)
         if self._side == Side.LEFT:
-            cmds.move(-self.interval, 0, 0, self.locs[3], relative=1)
+            cmds.move(-self.interval, 0, 0, self.locs[3], r=1)
         else: 
-            cmds.move(self.interval, 0, 0, self.locs[3], relative=1)
+            cmds.move(self.interval, 0, 0, self.locs[3], r=1)
 
         cmds.spaceLocator(n=self.locs[4])
-        cmds.parent(self.locs[4], self.locs[1], relative=1)
+        cmds.parent(self.locs[4], self.locs[1], r=1)
         if self._side == Side.LEFT:
-            cmds.move(self.interval, 0, 0, self.locs[4], relative=1)
+            cmds.move(self.interval, 0, 0, self.locs[4], r=1)
         else: 
-            cmds.move(-self.interval, 0, 0, self.locs[4], relative=1)
+            cmds.move(-self.interval, 0, 0, self.locs[4], r=1)
 
         cmds.spaceLocator(n=self.locs[5])
-        cmds.parent(self.locs[5], self.locs[1], relative=1)
-        cmds.move(0, 0, -1.5 * self.interval, self.locs[5], relative=1)
+        cmds.parent(self.locs[5], self.locs[1], r=1)
+        cmds.move(0, 0, -1.5 * self.interval, self.locs[5], r=1)
 
         # Cleanup
         cmds.parent(self.locs[0], util.G_LOC_GRP)
@@ -84,26 +91,26 @@ class Foot(bone.Bone):
         
         # Result Foot
         cmds.select(clear=1)
-        cmds.joint(p=ankle_pos, name=self.jnts[0])
-        cmds.joint(p=ball_pos, name=self.jnts[1])
-        cmds.joint(p=toe_pos, name=self.jnts[2])
+        cmds.joint(p=ankle_pos, n=self.jnts[0])
+        cmds.joint(p=ball_pos, n=self.jnts[1])
+        cmds.joint(p=toe_pos, n=self.jnts[2])
 
         # Reverse Foot
         cmds.select(clear=1)
-        cmds.joint(p=cmds.xform(self.locs[3], q=1, t=1, ws=1), name=self.jnts[3])
-        cmds.joint(p=cmds.xform(self.locs[4], q=1, t=1, ws=1), name=self.jnts[4])
-        cmds.joint(p=cmds.xform(self.locs[5], q=1, t=1, ws=1), name=self.jnts[5])
-        cmds.joint(p=toe_pos, name=self.rev_jnts[2])
-        cmds.joint(p=ball_pos, name=self.rev_jnts[1])
-        cmds.joint(p=ankle_pos, name=self.rev_jnts[0])
-        cmds.setAttr(self.jnts[3]+'.visibility', 0)
+        cmds.joint(p=cmds.xform(self.locs[3], q=1, t=1, ws=1), n=self.jnts[3])
+        cmds.joint(p=cmds.xform(self.locs[4], q=1, t=1, ws=1), n=self.jnts[4])
+        cmds.joint(p=cmds.xform(self.locs[5], q=1, t=1, ws=1), n=self.jnts[5])
+        cmds.joint(p=toe_pos, n=self.rev_jnts[2])
+        cmds.joint(p=ball_pos, n=self.rev_jnts[1])
+        cmds.joint(p=ankle_pos, n=self.rev_jnts[0])
+        cmds.setAttr(self.jnts[3]+'.v', 0)
 
         # FK Foot
         cmds.select(clear=1)
-        cmds.joint(p=ankle_pos, name=self.fk_jnts[0])
-        cmds.joint(p=ball_pos, name=self.fk_jnts[1])
-        cmds.joint(p=toe_pos, name=self.fk_jnts[2])
-        cmds.setAttr(self.fk_jnts[0]+'.visibility', 0)
+        cmds.joint(p=ankle_pos, n=self.fk_jnts[0])
+        cmds.joint(p=ball_pos, n=self.fk_jnts[1])
+        cmds.joint(p=toe_pos, n=self.fk_jnts[2])
+        cmds.setAttr(self.fk_jnts[0]+'.v', 0)
 
         # Cleanup
         hierarchy.batch_parent([self.fk_jnts[0], self.jnts[3], self.jnts[0]], util.G_JNT_GRP)
@@ -111,30 +118,30 @@ class Foot(bone.Bone):
     def place_controller(self):
         # IK Setup
 
-        cmds.duplicate(self._shape[0], name=self.ctrls[0])
-        cmds.addAttr(self.ctrls[0], longName='foot_Roll', attributeType='double', defaultValue=0, minValue=-10, maxValue=40, keyable=1)
-        cmds.addAttr(self.ctrls[0], longName='foot_Bank', attributeType='double', defaultValue=0, minValue=-20, maxValue=20, keyable=1)
+        cmds.duplicate(self._shape[0], n=self.ctrls[0])
+        cmds.addAttr(self.ctrls[0], sn='fr', ln=ATTRS['fr'], at='double', dv=0, min=-10, max=40, k=1)
+        cmds.addAttr(self.ctrls[0], sn='fb', ln=ATTRS['fb'], at='double', dv=0, min=-20, max=20, k=1)
 
         foot_pos = cmds.xform(self.jnts[1], q=1, t=1, ws=1)
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2]+1, self.ctrls[0])
         cmds.makeIdentity(self.ctrls[0], apply=1, t=1, r=1, s=1)
 
         heel_loc = cmds.xform(self.jnts[5], q=1, t=1, ws=1)
-        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '{}.scalePivot'.format(self.ctrls[0]), '{}.rotatePivot'.format(self.ctrls[0]), absolute=1)
+        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '{}.sp'.format(self.ctrls[0]), '{}.rp'.format(self.ctrls[0]))
 
         # FK Setup
-        cmds.duplicate(self._shape[1], name=self.ctrls[1])
+        cmds.duplicate(self._shape[1], n=self.ctrls[1])
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], self.ctrls[1])
         cmds.makeIdentity(self.ctrls[1], apply=1, t=1, r=1, s=1)
 
         # IK/FK Switch Setup
-        cmds.duplicate(self._shape[2], name=self.ctrls[2])
+        cmds.duplicate(self._shape[2], n=self.ctrls[2])
         if self._side == Side.LEFT:
             cmds.move(foot_pos[0]+2, foot_pos[1], foot_pos[2], self.ctrls[2])
         elif self._side == Side.RIGHT:
             cmds.move(foot_pos[0]-3, foot_pos[1], foot_pos[2], self.ctrls[2])
 
-        cmds.addAttr(self.ctrls[2], longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
+        cmds.addAttr(self.ctrls[2], sn='sw', ln=ATTRS['sw'], at='double', dv=1, min=0, max=1, k=1)
         cmds.makeIdentity(self.ctrls[2], apply=1, t=1, r=1, s=1)
 
         # Cleanup
@@ -142,11 +149,11 @@ class Foot(bone.Bone):
 
     def add_constraint(self):
         # FK Setup
+        cons_p1 = cmds.pointConstraint(self.fk_jnts[0], self.jnts[0])[0]
+        cons_o1 = cmds.orientConstraint(self.fk_jnts[0], self.jnts[0], mo=1)[0]
+        cons_o2 = cmds.orientConstraint(self.fk_jnts[1], self.jnts[1])[0]
+        cons_o3 = cmds.orientConstraint(self.fk_jnts[2], self.jnts[2])[0]
         cmds.orientConstraint(self.ctrls[1], self.fk_jnts[1], mo=1)
-        cmds.pointConstraint(self.fk_jnts[0], self.jnts[0])
-        cmds.orientConstraint(self.fk_jnts[0], self.jnts[0], mo=1)
-        cmds.orientConstraint(self.fk_jnts[1], self.jnts[1])
-        cmds.orientConstraint(self.fk_jnts[2], self.jnts[2])
 
         # IK Setup
         cmds.parentConstraint(self.ctrls[0], self.jnts[3], sr='z', mo=1)
@@ -155,49 +162,49 @@ class Foot(bone.Bone):
         cmds.pointConstraint(self.rev_jnts[0], self.jnts[0], mo=1)
 
         # Foot Roll
-        cmds.setDrivenKeyframe(self.jnts[5]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.jnts[5]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=-10, value=-25)
+        cmds.setDrivenKeyframe(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
+        cmds.setDrivenKeyframe(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=-10, v=-25)
 
-        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=20, value=25)
+        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
+        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=25)
 
-        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=20, value=0)
-        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rotateX', currentDriver=self.ctrls[0]+'.foot_Roll', driverValue=40, value=25)
+        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=0)
+        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=40, v=25)
 
         # Foot Bank
-        cmds.setDrivenKeyframe(self.jnts[3]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.jnts[4]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=0, value=0)
+        cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
+        cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
         if self._side == Side.RIGHT:
-            cmds.setDrivenKeyframe(self.jnts[3]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=-20, value=-30)
-            cmds.setDrivenKeyframe(self.jnts[4]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=20, value=30)
+            cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=-30)
+            cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=30)
         else:
-            cmds.setDrivenKeyframe(self.jnts[3]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=-20, value=30)
-            cmds.setDrivenKeyframe(self.jnts[4]+'.rotateZ', currentDriver=self.ctrls[0]+'.foot_Bank', driverValue=20, value=-30)
+            cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=30)
+            cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=-30)
 
         # Result Foot Setup
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jnts[0], self.rev_jnts[1]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jnts[0], self.rev_jnts[1]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W1'.format(self.jnts[0], self.rev_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W1'.format(self.jnts[0], self.rev_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
 
-        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W0'.format(self.jnts[0], self.fk_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe('{}_pointConstraint1.{}W0'.format(self.jnts[0], self.fk_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[0], self.fk_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[0], self.fk_jnts[0]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
 
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[1], self.fk_jnts[1]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[1], self.fk_jnts[1]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=1)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jnts[1], self.rev_jnts[2]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W1'.format(self.jnts[1], self.rev_jnts[2]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=0)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.setDrivenKeyframe('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=0)
 
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[2], self.fk_jnts[2]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe('{}_orientConstraint1.{}W0'.format(self.jnts[2], self.fk_jnts[2]), currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.setDrivenKeyframe('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=0, v=1)
 
         # IK/FK Switch Setup
 
         # switch will follow ankle movement
         cmds.parentConstraint(self.jnts[0], self.ctrls[2], mo=1)
-        cmds.setDrivenKeyframe(self.ctrls[0]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=1)
-        cmds.setDrivenKeyframe(self.ctrls[0]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=0)
-        cmds.setDrivenKeyframe(self.ctrls[1]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=1, value=0)
-        cmds.setDrivenKeyframe(self.ctrls[1]+'.visibility', currentDriver=self.ctrls[2]+'.FK_IK', driverValue=0, value=1)
+        cmds.setDrivenKeyframe(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.setDrivenKeyframe(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.setDrivenKeyframe(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.setDrivenKeyframe(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=1)

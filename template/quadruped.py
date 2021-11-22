@@ -10,46 +10,41 @@ from ..base import base, bone
 from ..utility.common import hierarchy
 
 
+ATTRS = {
+    'sw': 'FK_IK'
+}
+
+
 class Quadruped(bone.Bone):
     """
-    This module creates a quadruped template rig
-
-    The quadruped template consists of:
-    one head
-    two front legs
-    one spine
-    two back legs &
-    one tail
+    Module for creating a quadruped rig template
     """
 
     def __init__(self, side, name='standard'):
-        """ Initialize Quadruped class with side and name
-
-        :param side: str
-        :param name: str
+        """
+        Initialization
         """
         bone.Bone.__init__(self, side, name)
-
         self._rtype = 'quad'
 
-        self.left_arm = legFront.LegFront(side=Side.LEFT, name='standard')
-        self.right_arm = legFront.LegFront(side=Side.RIGHT, name='standard')
+        self.l_arm = legFront.LegFront(Side.LEFT, 'standard')
+        self.r_arm = legFront.LegFront(Side.RIGHT, 'standard')
 
-        self.left_leg = legBack.LegBack(side=Side.LEFT, name='standard')
-        self.right_leg = legBack.LegBack(side=Side.RIGHT, name='standard')
+        self.l_leg = legBack.LegBack(Side.LEFT, 'standard')
+        self.r_leg = legBack.LegBack(Side.RIGHT, 'standard')
 
-        self.spine = spineQuad.SpineQuad(side=Side.MIDDLE, name='spine')
-        self.tail = tail.Tail(side=Side.MIDDLE, name='tail')
+        self.spine = spineQuad.SpineQuad(Side.MIDDLE, 'spine')
+        self.tail = tail.Tail(Side.MIDDLE, 'tail')
 
-        self.neck = base.Base(side=Side.MIDDLE, name='neck')
-        self.head = base.Base(side=Side.MIDDLE, name='head')
-        self.tip = base.Base(side=Side.MIDDLE, name='tip')
+        self.neck = base.Base(Side.MIDDLE, 'neck')
+        self.head = base.Base(Side.MIDDLE, 'head')
+        self.tip = base.Base(Side.MIDDLE, 'tip')
 
         self.rig_components = [
-            self.left_arm,
-            self.right_arm,
-            self.left_leg,
-            self.right_leg,
+            self.l_arm,
+            self.r_arm,
+            self.l_leg,
+            self.r_leg,
             self.spine,
             self.tail,
             self.neck,
@@ -73,15 +68,15 @@ class Quadruped(bone.Bone):
     def move_locator(self):
         pos = [0, 0, 0]
 
-        util.move(self.left_arm.locs[0], pos=[1 + pos[0], 5 + pos[1], 3 + pos[2]])
-        util.move(self.right_arm.locs[0], pos=[-1+pos[0], 5+pos[1], 3+pos[2]])
-        util.move(self.left_leg.locs[0], pos=[1+pos[0], 5+pos[1], -3+pos[2]])
-        util.move(self.right_leg.locs[0], pos=[-1+pos[0], 5+pos[1], -3+pos[2]])
+        util.move(self.l_arm.locs[0], pos=[1+pos[0], 5+pos[1], 3+pos[2]])
+        util.move(self.r_arm.locs[0], pos=[-1+pos[0], 5+pos[1], 3+pos[2]])
+        util.move(self.l_leg.locs[0], pos=[1+pos[0], 5+pos[1], -3+pos[2]])
+        util.move(self.r_leg.locs[0], pos=[-1+pos[0], 5+pos[1], -3+pos[2]])
 
         util.move(self.spine.locs[0], pos=[pos[0], 6+pos[1], -3+pos[2]])
         util.move(self.tail.locs[0], pos=[pos[0], 6+pos[1], -4+pos[2]])
 
-        util.move(self.neck.locs[0], pos=[pos[0], 6+pos[1]+0.5, 3+pos[2]+0.5])
+        util.move(self.neck.locs[0], pos=[pos[0], 6.5+pos[1], 3.5+pos[2]])
         util.move(self.head.locs[0], pos=[pos[0], 7.5+pos[1], 4+pos[2]])
         util.move(self.tip.locs[0], pos=[pos[0], 7.5+pos[1], 6+pos[2]])
 
@@ -97,10 +92,14 @@ class Quadruped(bone.Bone):
             rig_component.create_joint()
 
         # parent leg root joints to root spline joint
-        hierarchy.batch_parent([self.left_arm.jnts[0], self.right_arm.jnts[0]], self.spine.jnts[-1])
+        hierarchy.batch_parent(
+            [self.l_arm.jnts[0], self.r_arm.jnts[0]],
+            self.spine.jnts[-1])
 
         # parent arm root joints to top spline joint
-        hierarchy.batch_parent([self.left_leg.jnts[0], self.right_leg.jnts[0]], self.spine.jnts[0])
+        hierarchy.batch_parent(
+            [self.l_leg.jnts[0], self.r_leg.jnts[0]],
+            self.spine.jnts[0])
 
         # parent tail to spine
         cmds.parent(self.tail.jnts[0], self.spine.jnts[0])
@@ -114,19 +113,24 @@ class Quadruped(bone.Bone):
         for rig_component in self.rig_components:
             rig_component.place_controller()
 
-        cmds.addAttr(self.spine.ctrls[0], longName='FK_IK', attributeType='double', defaultValue=1, minValue=0, maxValue=1, keyable=1)
+        cmds.addAttr(self.spine.ctrls[0], sn='sw', ln=ATTRS['sw'], at='double',
+                     dv=1, min=0, max=1, k=1)
 
     def add_constraint(self):
         for rig_component in self.rig_components:
             rig_component.add_constraint()
 
         # parenting the front and back leg and tail under spine ctrl
-        hierarchy.batch_parent([self.left_arm.offsets[0], self.right_arm.offsets[0]], self.spine.ctrls[-1])
-        hierarchy.batch_parent([self.left_leg.offsets[0], self.right_leg.offsets[0]], self.spine.ctrls[0])
+        hierarchy.batch_parent(
+            [self.l_arm.offsets[0], self.r_arm.offsets[0]],
+            self.spine.ctrls[-1])
+        hierarchy.batch_parent(
+            [self.l_leg.offsets[0], self.r_leg.offsets[0]],
+            self.spine.ctrls[0])
         cmds.parentConstraint(self.spine.ctrls[0], self.tail.ctrls[0], mo=1)
 
         # hide tail ctrl and connect ik/fk switch to spine master ctrl
-        cmds.connectAttr(self.spine.ctrls[0]+'.FK_IK', self.tail.ctrls[0]+'.FK_IK')
+        cmds.connectAttr(self.spine.ctrls[0]+'.sw', self.tail.ctrls[0]+'.sw')
 
         # parent head up
         cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])

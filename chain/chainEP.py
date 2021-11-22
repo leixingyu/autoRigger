@@ -14,22 +14,20 @@ class ChainEP(chain.Chain):
 
     def __init__(self, side, name, segment, curve, cv=None):
         chain.Chain.__init__(self, side, name, segment)
-        self.clusters = list()
-        self.guide_curve = None
 
         if not cv:
             cv = self.segment
-
         if cv < 2:
             raise ValueError('in-sufficient control points')
 
+        self.clusters = list()
+        self.guide_curve = None
+        self.curve = curve
         self.cvs = list()
         percentages = algorithm.get_percentages(cv)
         for p in percentages:
             integer = int(round(p*(self.segment-1)))
             self.cvs.append(integer)
-
-        self.curve = curve
 
     @bone.update_base_name
     def assign_secondary_naming(self):
@@ -48,21 +46,21 @@ class ChainEP(chain.Chain):
         for index, loc in enumerate(locs):
             cmds.rename(loc, self.locs[index])
             if index:
-                cmds.parent(self.locs[index], self.locs[index-1], absolute=1)
-
+                cmds.parent(self.locs[index], self.locs[index-1])
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def set_shape(self):
         self._shape = shape.make_sphere(self._scale)
 
     def place_controller(self):
+        # TODO: use clear_transform
         for index in self.cvs:
-            cmds.duplicate(self._shape, name=self.ctrls[index])
-            cmds.group(em=1, name=self.offsets[index])
+            cmds.duplicate(self._shape, n=self.ctrls[index])
+            cmds.group(em=1, n=self.offsets[index])
 
             transform.match_xform(self.offsets[index], self.jnts[index])
 
-            cmds.parent(self.ctrls[index], self.offsets[index], relative=1)
+            cmds.parent(self.ctrls[index], self.offsets[index], r=1)
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
 
     def add_constraint(self):
@@ -72,8 +70,13 @@ class ChainEP(chain.Chain):
             tail = self.cvs[i+1]
             for j in range(head, tail+1):
                 gap = 1.00/(tail - head)
+
                 # why not using parent constraint? because it will break things
-                cmds.pointConstraint(self.ctrls[head], self.jnts[j], w=1-((j-head) * gap), mo=1)
-                cmds.pointConstraint(self.ctrls[tail], self.jnts[j], w=(j-head) * gap, mo=1)
-                cmds.orientConstraint(self.ctrls[head], self.jnts[j], w=1-((j-head) * gap), mo=1)
-                cmds.orientConstraint(self.ctrls[tail], self.jnts[j], w=(j-head) * gap, mo=1)
+                cmds.pointConstraint(self.ctrls[head], self.jnts[j],
+                                     w=1 - ((j-head) * gap), mo=1)
+                cmds.pointConstraint(self.ctrls[tail], self.jnts[j],
+                                     w=(j-head) * gap, mo=1)
+                cmds.orientConstraint(self.ctrls[head], self.jnts[j],
+                                      w=1 - ((j-head) * gap), mo=1)
+                cmds.orientConstraint(self.ctrls[tail], self.jnts[j],
+                                      w=(j-head) * gap, mo=1)

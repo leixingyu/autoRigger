@@ -14,28 +14,28 @@ class Biped(bone.Bone):
     one head, two arms, one spine & two legs
     """
 
-    def __init__(self, side, name, spine_len=5.0):
+    def __init__(self, side, name):
         bone.Bone.__init__(self, side, name)
         self._rtype = 'biped'
 
         self.pos = [0, 8.4, 0]
-        self.spine_len = spine_len
+        self.s_len = 5
 
-        self.left_arm = arm.Arm(side=Side.LEFT, name='arm')
-        self.right_arm = arm.Arm(side=Side.RIGHT, name='arm')
+        self.l_arm = arm.Arm(Side.LEFT, 'arm')
+        self.r_arm = arm.Arm(Side.RIGHT, 'arm')
 
-        self.left_leg = leg.Leg(side=Side.LEFT, name='leg')
-        self.right_leg = leg.Leg(side=Side.RIGHT, name='leg')
-        self.spine = spine.Spine(side=Side.MIDDLE, name='spine', length=self.spine_len)
-        self.neck = base.Base(side=Side.MIDDLE, name='neck')
-        self.head = base.Base(side=Side.MIDDLE, name='head')
-        self.tip = base.Base(side=Side.MIDDLE, name='tip')
+        self.l_leg = leg.Leg(Side.LEFT, 'leg')
+        self.r_leg = leg.Leg(Side.RIGHT, 'leg')
+        self.spine = spine.Spine(Side.MIDDLE, 'spine', length=self.s_len)
+        self.neck = base.Base(Side.MIDDLE, 'neck')
+        self.head = base.Base(Side.MIDDLE, 'head')
+        self.tip = base.Base(Side.MIDDLE, 'tip')
 
         self._components = [
-            self.left_arm,
-            self.right_arm,
-            self.left_leg,
-            self.right_leg,
+            self.l_arm,
+            self.r_arm,
+            self.l_leg,
+            self.r_leg,
             self.spine,
             self.neck,
             self.head,
@@ -48,28 +48,35 @@ class Biped(bone.Bone):
         self.move_locator()
 
     def move_locator(self):
-        util.move(self.left_arm.limb.locs[0], pos=[self.pos[0]+2, self.pos[1]+self.spine_len, self.pos[2]])
-        util.move(self.right_arm.limb.locs[0], pos=[self.pos[0]-2, self.pos[1]+self.spine_len, self.pos[2]])
+        util.move(self.l_arm.limb.locs[0],
+                  pos=[self.pos[0]+2, self.pos[1]+self.s_len, self.pos[2]])
+        util.move(self.r_arm.limb.locs[0],
+                  pos=[self.pos[0]-2, self.pos[1]+self.s_len, self.pos[2]])
 
-        util.move(self.left_leg.limb.locs[0], pos=[self.pos[0]+1, self.pos[1], self.pos[2]])
-        util.move(self.right_leg.limb.locs[0], pos=[self.pos[0]-1, self.pos[1], self.pos[2]])
+        util.move(self.l_leg.limb.locs[0],
+                  pos=[self.pos[0]+1, self.pos[1], self.pos[2]])
+        util.move(self.r_leg.limb.locs[0],
+                  pos=[self.pos[0]-1, self.pos[1], self.pos[2]])
 
         util.move(self.spine.locs[0], pos=self.pos)
 
-        util.move(self.neck.locs[0], pos=[self.pos[0], self.pos[1]+self.spine_len+1, self.pos[2]])
-        util.move(self.head.locs[0], pos=[self.pos[0], self.pos[1]+self.spine_len+1.5, self.pos[2]])
-        util.move(self.tip.locs[0], pos=[self.pos[0], self.pos[1]+self.spine_len+2, self.pos[2]])
+        util.move(self.neck.locs[0],
+                  pos=[self.pos[0], self.pos[1]+self.s_len+1, self.pos[2]])
+        util.move(self.head.locs[0],
+                  pos=[self.pos[0], self.pos[1]+self.s_len+1.5, self.pos[2]])
+        util.move(self.tip.locs[0],
+                  pos=[self.pos[0], self.pos[1]+self.s_len+2, self.pos[2]])
 
     def create_joint(self):
         super(Biped, self).create_joint()
 
         # Leg root to spine root
-        cmds.parent(self.left_leg.limb.jnts[0], self.spine.jnts[0])
-        cmds.parent(self.right_leg.limb.jnts[0], self.spine.jnts[0])
+        cmds.parent(self.l_leg.limb.jnts[0], self.spine.jnts[0])
+        cmds.parent(self.r_leg.limb.jnts[0], self.spine.jnts[0])
 
         # Arm root spine root
-        cmds.parent(self.left_arm.limb.jnts[0], self.spine.jnts[-1])
-        cmds.parent(self.right_arm.limb.jnts[0], self.spine.jnts[-1])
+        cmds.parent(self.l_arm.limb.jnts[0], self.spine.jnts[-1])
+        cmds.parent(self.r_arm.limb.jnts[0], self.spine.jnts[-1])
 
         # Neck to spine tip, head to neck
         cmds.parent(self.neck.jnts[0], self.spine.jnts[-1])
@@ -80,12 +87,12 @@ class Biped(bone.Bone):
         super(Biped, self).add_constraint()
 
         # Leg driven by root spine control #
-        cmds.parent(self.left_leg.limb.offsets[0], self.spine.ctrls[0])
-        cmds.parent(self.right_leg.limb.offsets[0], self.spine.ctrls[0])
+        cmds.parent(self.l_leg.limb.offsets[0], self.spine.ctrls[0])
+        cmds.parent(self.r_leg.limb.offsets[0], self.spine.ctrls[0])
 
         # Arm driven by top spine control #
-        cmds.parent(self.left_arm.limb.offsets[0], self.spine.ctrls[-1])
-        cmds.parent(self.right_arm.limb.offsets[0], self.spine.ctrls[-1])
+        cmds.parent(self.l_arm.limb.offsets[0], self.spine.ctrls[-1])
+        cmds.parent(self.r_arm.limb.offsets[0], self.spine.ctrls[-1])
 
         # Neck to Head chain #
         cmds.parent(self.tip.offsets[0], self.head.offsets[0])

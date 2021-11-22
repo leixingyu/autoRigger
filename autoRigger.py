@@ -1,19 +1,20 @@
 """ AutoRigger provides procedural approach for maya rigging """
 
-import os
 import logging
+import os
 
+import maya.cmds as cmds
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 
 from .template import biped, quadruped
 from .constant import RigComponents, RigType, Side
 from .module import foot, hand
-from .chain.spine import spine, spineQuad
 from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
 from .chain.limb.arm import arm
 from .chain.limb.leg import leg, legBack, legFront
+from .chain.spine import spine, spineQuad
 from .base import base
 from utility.common import setup
 
@@ -23,14 +24,14 @@ UI_PATH = os.path.join('ui', 'autoRigger.ui')
 
 
 class AutoRiggerWindow(QtWidgets.QMainWindow):
-    """ This module is the class for the main dialog """
+    """
+    This module is the class for the main dialog
+    """
 
     def __init__(self, parent=setup.get_maya_main_window()):
-        """ Initialize AutoRigger class with parent window
-
-        :param parent: window instance
         """
-
+        Initialize AutoRigger class
+        """
         super(AutoRiggerWindow, self).__init__(parent)
         _loadUi(os.path.join(CURRENT_PATH, UI_PATH), self)
 
@@ -62,8 +63,9 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_clearBtn.clicked.connect(lambda: self.empty_scene())
 
     def connect_items(self):
-        """ Connect Rig component items with icon and text """
-        
+        """
+        Connect Rig component items with icon and text
+        """
         for component in RigComponents:
             icon = QtGui.QIcon()
             icon.addFile(os.path.join(CURRENT_PATH, 'ui', 'icon', component.value+'.png'))
@@ -74,8 +76,9 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             self.items.append(item)
 
     def refresh_items(self):
-        """ Clear and Re-generate Rig component items in the list widget """
-        
+        """
+        Clear and Re-generate Rig component items in the list widget
+        """
         self.clear_items(self.ui_listWidget)
         components = list()
         tab_index = self.ui_tabWidget.currentIndex()
@@ -107,8 +110,9 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             self.ui_listWidget.addItem(item)
 
     def initialize_field(self):
-        """ Change the field format after clicking item """
-        
+        """
+        Change the field format after clicking item
+        """
         self.reset_field()
         item_name = self.ui_listWidget.currentItem().text()
         print(item_name)
@@ -116,8 +120,9 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         # TODO: change field based on item clicked
 
     def create_guide(self):
-        """ Fetch all field info and build the rig guide """
-        
+        """
+        Fetch all field info and build the rig guide
+        """
         # Base name
         base_name = self.ui_nameEdit.text() if self.ui_nameEdit.text() else 'null'
 
@@ -174,25 +179,27 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.reset_field()
 
     def create_rig(self):
-        """ Build the Rig based on the to_build list and guide """
-        
+        """
+        Build the Rig based on the to_build list and guide
+        """
         for item in self.to_build:
             item.build_rig()
         self.to_build = list()
 
     def clear_items(self, widget):
-        """ This clears all items in the list widget without deleting them 
+        """
+        This clears all items in the list widget without deleting them
         
         :param widget: QListWidget
         """
-
         while widget.takeItem(0):
             widget.takeItem(0)
         self.reset_field()
 
     def reset_field(self):
-        """ Reset all field to default value """
-        
+        """
+        Reset all field to default value
+        """
         self.ui_nameEdit.setText('')
         self.ui_sideCBox.setCurrentIndex(0)
         self.ui_worldX.setText('')
@@ -201,7 +208,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
 
     def empty_scene(self):
         self.to_build = list()
-        from maya import cmds
         loc_grp = '_Locators'
         ctrl_grp = '_Controllers'
         jnt_grp = '_Joints'

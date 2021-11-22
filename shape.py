@@ -12,8 +12,12 @@ def make_circle(scale=1, name=None):
     if not name:
         name = NAMER.tmp
 
-    circle = cmds.circle(nr=(0, 1, 0), c=(0, 0, 0), s=8, radius=scale, name=name)[0]
-    return circle
+    return cmds.circle(
+        nr=(0, 1, 0),
+        c=(0, 0, 0),
+        s=8,
+        radius=scale,
+        name=name)[0]
 
 
 def make_arrow(scale=1, name=None):
@@ -61,6 +65,5 @@ def make_text(text, scale=1, name=None):
     util.uniform_scale(curve, scale)
     cmds.makeIdentity(curve, apply=1, r=1, t=1, s=1)
     # make it align on the ground plane
-    cmds.rotate(-90, 0, 0, curve, relative=1)
-
+    cmds.rotate(-90, 0, 0, curve, r=1)
     return curve

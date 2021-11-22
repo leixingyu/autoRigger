@@ -45,8 +45,8 @@ class ChainIK(chain.Chain):
             pos = cmds.xform(jnt, q=1, t=1, ws=1)
             curve_points.append(pos)
 
-        cmds.curve(p=curve_points, name=self.ik_curve)
-        cmds.setAttr(self.ik_curve+'.visibility', 0)
+        cmds.curve(p=curve_points, n=self.ik_curve)
+        cmds.setAttr(self.ik_curve+'.v', 0)
 
         # turning off inherit transform avoid curve move/scale twice as much
         cmds.inheritTransform(self.ik_curve, off=1)
@@ -54,15 +54,15 @@ class ChainIK(chain.Chain):
 
         cvs = cmds.ls(self.ik_curve+'.cv[0:]', fl=1)
         for index, cv in enumerate(cvs):
-            cluster = cmds.cluster(cv, name=self.clusters[index])[-1]
-            cmds.setAttr(cluster+'.visibility', 0)
+            cluster = cmds.cluster(cv, n=self.clusters[index])[-1]
+            cmds.setAttr(cluster+'.v', 0)
 
-        cmds.ikHandle(startJoint=self.jnts[0],
-                      endEffector=self.jnts[self.segment-1],
-                      name=self.ik, curve=self.ik_curve, createCurve=False,
-                      parentCurve=1, roc=1, solver='ikSplineSolver')
+        cmds.ikHandle(sj=self.jnts[0],
+                      ee=self.jnts[self.segment-1],
+                      n=self.ik, c=self.ik_curve, ccv=False,
+                      pcv=1, roc=1, sol='ikSplineSolver')
 
-        cmds.setAttr(self.ik+'.visibility', 0)
+        cmds.setAttr(self.ik+'.v', 0)
         cmds.parent(self.ik, util.G_CTRL_GRP)
 
     def add_constraint(self):
@@ -91,11 +91,11 @@ class ChainIK(chain.Chain):
             arc_len = cmds.arclen(self.ik_curve, constructionHistory=1)
             cmds.rename(arc_len, self.ik_curve+'Info')
             cmds.parent(self.ik_curve, util.G_CTRL_GRP)
-            cmds.setAttr(self.ik_curve+'.visibility', 0)
+            cmds.setAttr(self.ik_curve+'.v', 0)
 
             # create curve length node and multiply node
             init_len = cmds.getAttr(self.ik_curve+'Info.arcLength')
-            stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, name=self.ctrls[0]+'Stretch')
+            stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, n=self.ctrls[0]+'Stretch')
             cmds.setAttr(stretch_node+'.operation', 2)
             cmds.setAttr(stretch_node+'.input2X', init_len)
             cmds.connectAttr(self.ik_curve+'Info.arcLength', stretch_node+'.input1X')
