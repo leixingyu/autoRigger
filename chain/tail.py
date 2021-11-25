@@ -11,4 +11,10 @@ class Tail(chainFKIK.ChainFKIK):
         if not direction:
             direction = [0, -1, 0]
 
-        chainFKIK.ChainFKIK.__init__(self, side, name, segment, length, direction)
+        chainFKIK.ChainFKIK.__init__(
+            self,
+            side,
+            name,
+            segment=segment,
+            length=length,
+            direction=direction)

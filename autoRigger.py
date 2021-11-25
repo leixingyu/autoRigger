@@ -64,47 +64,59 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
 
     def connect_items(self):
         """
-        Connect Rig component items with icon and text
+        Connect Rig comp items with icon and text
         """
-        for component in RigComponents:
+        for comp in RigComponents:
             icon = QtGui.QIcon()
-            icon.addFile(os.path.join(CURRENT_PATH, 'ui', 'icon', component.value+'.png'))
+            icon.addFile(os.path.join(CURRENT_PATH, 'ui', 'icon', comp.value+'.png'))
 
             item = QtWidgets.QListWidgetItem()
-            item.setText(component.value)
+            item.setText(comp.value)
             item.setIcon(icon)
             self.items.append(item)
 
     def refresh_items(self):
         """
-        Clear and Re-generate Rig component items in the list widget
+        Clear and Re-generate Rig comp items in the list widget
         """
         self.clear_items(self.ui_listWidget)
-        components = list()
+        comps = list()
         tab_index = self.ui_tabWidget.currentIndex()
 
         # Biped
         if tab_index == RigType.BIPED:
-            components = [RigComponents.BIPED, RigComponents.HEAD,
-                          RigComponents.ARM, RigComponents.SPINE,
-                          RigComponents.LEG]
+            comps = [
+                RigComponents.BIPED,
+                RigComponents.HEAD,
+                RigComponents.ARM,
+                RigComponents.SPINE,
+                RigComponents.LEG
+            ]
 
         # Quadruped
         elif tab_index == RigType.QUADRUPED:
-            components = [RigComponents.QUAD, RigComponents.LEG_BACK,
-                          RigComponents.LEG_FRONT, RigComponents.SPINE_QUAD,
-                          RigComponents.TAIL]
+            comps = [
+                RigComponents.QUAD,
+                RigComponents.LEG_BACK,
+                RigComponents.LEG_FRONT,
+                RigComponents.SPINE_QUAD,
+                RigComponents.TAIL
+            ]
 
         # Chain
         elif tab_index == RigType.CHAIN:
-            components = [RigComponents.CHAIN_FK, RigComponents.CHAIN_IK,
-                          RigComponents.CHAIN_EP, RigComponents.CHAIN_FKIK]
+            comps = [
+                RigComponents.CHAIN_FK,
+                RigComponents.CHAIN_IK,
+                RigComponents.CHAIN_EP,
+                RigComponents.CHAIN_FKIK
+            ]
 
         # Custom
         elif tab_index == RigType.CUSTOM:
-            components = RigComponents
+            comps = RigComponents
 
-        tab_items = [tab_item.value for tab_item in components]
+        tab_items = [tab_item.value for tab_item in comps]
         items = [item for item in self.items if item.text() in tab_items]
         for item in items:
             self.ui_listWidget.addItem(item)
@@ -161,15 +173,18 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             obj = base.Base(side, base_name)
 
         elif item == RigComponents.CHAIN_FK.value:
-            obj = chainFK.ChainFK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
+            obj = chainFK.ChainFK(side, base_name,
+                                  segment=5, length=10, direction=[1, 0, 0])
         elif item == RigComponents.CHAIN_IK.value:
-            obj = chainIK.ChainIK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
+            obj = chainIK.ChainIK(side, base_name,
+                                  segment=5, length=10, direction=[1, 0, 0])
         elif item == RigComponents.CHAIN_EP.value:
             obj = chainEP.ChainEP(side, base_name, segment=20, curve='curve1')
         elif item == RigComponents.CHAIN_FKIK.value:
-            obj = chainFKIK.ChainFKIK(side, base_name, segment=5, length=10, direction=[1, 0, 0])
+            obj = chainFKIK.ChainFKIK(side, base_name,
+                                      segment=5, length=10, direction=[1, 0, 0])
         else:
-            logging.error("object name not found, using base component instead")
+            logging.error("object name not found, using base comp instead")
             return
 
         # obj.set_locator_attr([pos_x, pos_y, pos_z])

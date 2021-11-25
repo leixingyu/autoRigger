@@ -4,7 +4,7 @@ import maya.cmds as cmds
 
 from .. import util
 from ..constant import Side
-from ..utility.algorithm import strGenerator
+from ..utility.useful import strGenerator
 from ..utility.datatype import color
 from ..utility.rigging import transform
 
@@ -17,11 +17,12 @@ Red = color.ColorRGB.red()
 
 def update_base_name(func):
     """
-    Update the base name attribute in the rig component
+    Update the base name attribute in the rig comp
     """
     @wraps(func)
     def wrap(self):
-        self.base_name = '{}_{}_{}'.format(self._rtype, self._side.value, self._name)
+        self.base_name = '{}_{}_{}'.format(
+            self._rtype, self._side.value, self._name)
         func(self)
     return wrap
 
@@ -45,7 +46,7 @@ class Bone(object):
         """
         util.create_outliner_grp()
 
-        self._components = list()
+        self._comps = list()
 
         self._side = side
         self._name = name
@@ -65,8 +66,8 @@ class Bone(object):
         """
         Create naming conventions for the current rig type
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.create_namespace()
 
         self.locs.append('{}_loc'.format(self.base_name))
@@ -78,24 +79,24 @@ class Bone(object):
         """
         Set up controller curve shapes
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.set_shape()
 
     def create_locator(self):
         """
         Create the rig guides for placement purpose
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.create_locator()
 
     def color_locator(self):
         """
         Color-code the guide locators based on left, right, middle side
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.color_locator()
 
         for loc in self.locs:
@@ -129,8 +130,8 @@ class Bone(object):
         """
         Create the rig joints based on the guide's transform
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.create_joint()
 
     def place_controller(self):
@@ -138,16 +139,16 @@ class Bone(object):
         Duplicate controller shapes and
         place them based on guide's and joint's transform
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.place_controller()
 
     def color_controller(self):
         """
         Colorize the controller based on left, right, middle side
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.color_controller()
 
         for ctrl in self.ctrls:
@@ -181,16 +182,16 @@ class Bone(object):
         """
         Add all necessary constraints for the controller
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.add_constraint()
 
     def delete_guide(self):
         """
         Delete all locator guides to de-clutter the scene
         """
-        if self._components:
-            for c in self._components:
+        if self._comps:
+            for c in self._comps:
                 c.delete_guide()
 
         try:

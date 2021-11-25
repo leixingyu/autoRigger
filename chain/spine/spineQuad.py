@@ -7,6 +7,13 @@ class SpineQuad(chainIK.ChainIK):
     """
 
     def __init__(self, side, name, length=6.0, segment=6):
-        chainIK.ChainIK.__init__(self, side, name, segment, length, direction=[0, 0, 1], is_stretch=0)
+        chainIK.ChainIK.__init__(
+            self,
+            side,
+            name,
+            segment,
+            length,
+            direction=[0, 0, 1],
+            is_stretch=0)
 
         self._rtype = 'qspine'

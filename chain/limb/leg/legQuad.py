@@ -28,9 +28,9 @@ class LegQuad(bone.Bone):
         self.distance = distance
         self.height = height
 
-        self.limb_components = ['hip', 'knee', 'ankle', 'paw', 'toe']
+        self.limb_comps = ['hip', 'knee', 'ankle', 'paw', 'toe']
         if is_front:
-            self.limb_components = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
+            self.limb_comps = ['shoulder', 'elbow', 'wrist', 'paw', 'toe']
 
         # name
         self.helpers = list()
@@ -41,12 +41,12 @@ class LegQuad(bone.Bone):
 
     @bone.update_base_name
     def create_namespace(self):
-        for component in self.limb_components:
-            self.locs.append('{}{}_loc'.format(self.base_name, component))
-            self.jnts.append('{}{}_jnt'.format(self.base_name, component))
-            self.helpers.append('{}{}helper_jnt'.format(self.base_name, component))
-            self.ctrls.append('{}{}_ctrl'.format(self.base_name, component))
-            self.offsets.append('{}{}_offset'.format(self.base_name, component))
+        for comp in self.limb_comps:
+            self.locs.append('{}{}_loc'.format(self.base_name, comp))
+            self.jnts.append('{}{}_jnt'.format(self.base_name, comp))
+            self.helpers.append('{}{}helper_jnt'.format(self.base_name, comp))
+            self.ctrls.append('{}{}_ctrl'.format(self.base_name, comp))
+            self.offsets.append('{}{}_offset'.format(self.base_name, comp))
 
         self.leg_ik = '{}leg_ik'.format(self.base_name)
         self.foot_ik = '{}foot_ik'.format(self.base_name)
@@ -139,7 +139,11 @@ class LegQuad(bone.Bone):
         pole_index = 1 if self.is_front else 2
         cmds.duplicate(self._shape[1], n=self.ctrls[pole_index])
         cmds.group(em=1, n=self.offsets[pole_index])
-        transform.clear_xform(self.ctrls[pole_index], self.offsets[pole_index], self.jnts[pole_index])
+        transform.clear_xform(
+            self.ctrls[pole_index],
+            self.offsets[pole_index],
+            self.jnts[pole_index]
+        )
         hierarchy.batch_parent(
             [self.offsets[0],
              self.offsets[3],
@@ -148,15 +152,22 @@ class LegQuad(bone.Bone):
         )
 
     def build_ik(self):
-        cmds.ikHandle(sj=self.jnts[0], ee=self.jnts[2], n=self.leg_ik, sol='ikRPsolver')
-        cmds.ikHandle(sj=self.jnts[2], ee=self.jnts[3], n=self.foot_ik, sol='ikSCsolver')
-        cmds.ikHandle(sj=self.jnts[3], ee=self.jnts[4], n=self.toe_ik, sol='ikSCsolver')
+        cmds.ikHandle(
+            sj=self.jnts[0], ee=self.jnts[2], n=self.leg_ik, sol='ikRPsolver')
+        cmds.ikHandle(
+            sj=self.jnts[2], ee=self.jnts[3], n=self.foot_ik, sol='ikSCsolver')
+        cmds.ikHandle(
+            sj=self.jnts[3], ee=self.jnts[4], n=self.toe_ik, sol='ikSCsolver')
         cmds.setAttr(self.leg_ik+'.v', 0)
         cmds.setAttr(self.foot_ik+'.v', 0)
         cmds.setAttr(self.toe_ik+'.v', 0)
 
         if not self.is_front:
-            cmds.ikHandle(sj=self.helpers[0], ee=self.helpers[3], n=self.helper_ik, sol='ikRPsolver')
+            cmds.ikHandle(
+                sj=self.helpers[0],
+                ee=self.helpers[3],
+                n=self.helper_ik,
+                sol='ikRPsolver')
             cmds.setAttr(self.helper_ik+'.v', 0)
 
     def add_measurement(self):
@@ -175,12 +186,15 @@ class LegQuad(bone.Bone):
 
         # create measurement
         if not self.is_front:
-            measure_shape = cmds.distanceDimension(sp=hip_vec.as_list, ep=foot_vec.as_list)
+            measure_shape = cmds.distanceDimension(
+                sp=hip_vec.as_list, ep=foot_vec.as_list)
         else:
-            measure_shape = cmds.distanceDimension(sp=hip_vec.as_list, ep=ankle_vec.as_list)
+            measure_shape = cmds.distanceDimension(
+                sp=hip_vec.as_list, ep=ankle_vec.as_list)
 
         locs = cmds.listConnections(measure_shape)
-        measure_node = cmds.listRelatives(measure_shape, parent=1, type='transform')
+        measure_node = cmds.listRelatives(
+            measure_shape, parent=1, type='transform')
         length_node = '{}length_node'.format(self.base_name)
         hip_loc = '{}hip_node'.format(self.base_name)
         ankle_loc = '{}ankle_node'.format(self.base_name)
@@ -188,29 +202,37 @@ class LegQuad(bone.Bone):
         cmds.rename(locs[0], hip_loc)
         cmds.rename(locs[1], ankle_loc)
 
-        stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, n='{}stretch_node'.format(self.base_name))
+        stretch_node = cmds.shadingNode(
+            'multiplyDivide',
+            asUtility=1,
+            n='{}stretch_node'.format(self.base_name))
         cmds.setAttr(stretch_node+'.operation', 2)
-        cmds.setAttr(stretch_node+'.input2X', straighten_len)
-        cmds.connectAttr(length_node+'.distance', stretch_node+'.input1X')
+        cmds.setAttr(stretch_node+'.i2x', straighten_len)
+        cmds.connectAttr(length_node+'.distance', stretch_node+'.i1x')
 
-        condition_node = cmds.shadingNode('condition', asUtility=1, n='{}condition_node'.format(self.base_name))
-        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.firstTerm')
-        cmds.setAttr(condition_node+'.secondTerm', 1)
+        condition_node = cmds.shadingNode(
+            'condition',
+            asUtility=1,
+            n='{}condition_node'.format(self.base_name))
+        cmds.connectAttr(stretch_node+'.ox', condition_node+'.ft')
+        cmds.setAttr(condition_node+'.st', 1)
         cmds.setAttr(condition_node+'.operation', 2)  # greater than
-        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.colorIfTrueR')
-        cmds.setAttr(condition_node+'.colorIfFalseR', 1)
+        cmds.connectAttr(stretch_node+'.outputX', condition_node+'.ctr')
+        cmds.setAttr(condition_node+'.cfr', 1)
 
         if not self.is_front:
-            for jnt in [self.jnts[0], self.jnts[1], self.jnts[2], self.helpers[0], self.helpers[1], self.helpers[2]]:
-                cmds.connectAttr(condition_node+'.outColorR', jnt+'.sx')
+            for jnt in [self.jnts[0], self.jnts[1], self.jnts[2],
+                        self.helpers[0], self.helpers[1], self.helpers[2]]:
+                cmds.connectAttr(condition_node+'.ocr', jnt+'.sx')
         else:
-            cmds.connectAttr(condition_node+'.outColorR', self.jnts[0]+'.sx')
-            cmds.connectAttr(condition_node+'.outColorR', self.jnts[1]+'.sx')
+            cmds.connectAttr(condition_node+'.ocr', self.jnts[0]+'.sx')
+            cmds.connectAttr(condition_node+'.ocr', self.jnts[1]+'.sx')
 
         cmds.setAttr(length_node+'.v', 0)
         cmds.setAttr(hip_loc+'.v', 0)
         cmds.setAttr(ankle_loc+'.v', 0)
-        hierarchy.batch_parent([length_node, hip_loc, ankle_loc], util.G_CTRL_GRP)
+        hierarchy.batch_parent(
+            [length_node, hip_loc, ankle_loc], util.G_CTRL_GRP)
 
         cmds.parentConstraint(self.ctrls[0], hip_loc)
         cmds.parentConstraint(self.ctrls[3], ankle_loc, mo=1)
@@ -224,23 +246,23 @@ class LegQuad(bone.Bone):
             cmds.parentConstraint(self.ctrls[0], self.helpers[0])
 
         # Front foot pivot group
-        toe_tap_pivot = cmds.group(em=1, n='{}toetap_pivot'.format(self.base_name))
-        flex_pivot = cmds.group(em=1, n='{}flex_pivot'.format(self.base_name))
-        swivel_pivot = cmds.group(em=1, n='{}swivel_pivot'.format(self.base_name))
-        toe_tip_pivot = cmds.group(em=1, n='{}toetip_pivot'.format(self.base_name))
+        tap_pivot = cmds.group(em=1, n='{}tap_piv'.format(self.base_name))
+        flex_pivot = cmds.group(em=1, n='{}flex_piv'.format(self.base_name))
+        swivel_pivot = cmds.group(em=1, n='{}swivel_piv'.format(self.base_name))
+        tip_pivot = cmds.group(em=1, n='{}tip_piv'.format(self.base_name))
 
         wrist_pos = cmds.xform(self.jnts[2], q=1, ws=1, t=1)
         foot_pos = cmds.xform(self.jnts[3], q=1, ws=1, t=1)
         toe_pos = cmds.xform(self.jnts[4], q=1, ws=1, t=1)
 
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], flex_pivot)
-        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], toe_tap_pivot)
+        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], tap_pivot)
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], swivel_pivot)
-        cmds.move(toe_pos[0], toe_pos[1], toe_pos[2], toe_tip_pivot)
+        cmds.move(toe_pos[0], toe_pos[1], toe_pos[2], tip_pivot)
 
         cmds.parent(self.leg_ik, flex_pivot)
         cmds.parent(self.foot_ik, flex_pivot)
-        cmds.parent(self.toe_ik, toe_tap_pivot)
+        cmds.parent(self.toe_ik, tap_pivot)
 
         if not self.is_front:
             flex_offset = cmds.group(em=1, n='{}flex_offset'.format(self.base_name))
@@ -248,22 +270,22 @@ class LegQuad(bone.Bone):
 
             cmds.parent(flex_pivot, flex_offset)
             cmds.parentConstraint(self.helpers[3], flex_offset, mo=1)
-            cmds.parent(self.helper_ik, toe_tap_pivot)
-            cmds.parent(toe_tap_pivot, toe_tip_pivot)
-            cmds.parent(flex_offset, toe_tip_pivot)
-            cmds.parent(toe_tip_pivot, swivel_pivot)
+            cmds.parent(self.helper_ik, tap_pivot)
+            cmds.parent(tap_pivot, tip_pivot)
+            cmds.parent(flex_offset, tip_pivot)
+            cmds.parent(tip_pivot, swivel_pivot)
             cmds.parent(swivel_pivot, self.ctrls[3])
 
             # pole vector setup
             cmds.poleVectorConstraint(self.ctrls[2], self.leg_ik)
             cmds.poleVectorConstraint(self.ctrls[2], self.helper_ik)
         else:
-            wrist_pivot = cmds.group(em=1, n='{}wrist_pivot'.format(self.base_name))
+            wrist_pivot = cmds.group(em=1, n='{}wrist_piv'.format(self.base_name))
             cmds.move(wrist_pos[0], wrist_pos[1], wrist_pos[2], wrist_pivot)
 
-            hierarchy.batch_parent([toe_tap_pivot, flex_pivot], swivel_pivot)
-            cmds.parent(swivel_pivot, toe_tip_pivot)
-            cmds.parent(toe_tip_pivot, wrist_pivot)
+            hierarchy.batch_parent([tap_pivot, flex_pivot], swivel_pivot)
+            cmds.parent(swivel_pivot, tip_pivot)
+            cmds.parent(tip_pivot, wrist_pivot)
             cmds.parent(wrist_pivot, self.ctrls[3])
 
             cmds.connectAttr(self.ctrls[3]+'.wr', wrist_pivot+'.rx')
@@ -273,8 +295,8 @@ class LegQuad(bone.Bone):
 
         cmds.connectAttr(self.ctrls[3]+'.flx', flex_pivot+'.rx')
         cmds.connectAttr(self.ctrls[3]+'.swv', swivel_pivot+'.ry')
-        cmds.connectAttr(self.ctrls[3]+'.tap', toe_tap_pivot+'.rx')
-        cmds.connectAttr(self.ctrls[3]+'.tip', toe_tip_pivot+'.rx')
+        cmds.connectAttr(self.ctrls[3]+'.tap', tap_pivot+'.rx')
+        cmds.connectAttr(self.ctrls[3]+'.tip', tip_pivot+'.rx')
 
         # Scalable rig setup
         self.add_measurement()

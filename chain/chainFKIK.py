@@ -71,8 +71,11 @@ class ChainFKIK(chain.Chain):
         cmds.rotate(0, 0, 90, self.ctrls[0])
         cmds.group(n=self.offsets[0], em=1)
         transform.clear_xform(self.ctrls[0], self.offsets[0], self.jnts[0])
-        cmds.addAttr(self.ctrls[0], sn='sw', ln=ATTRS['sw'], at='double',
-                     dv=1, min=0, max=1, k=1)
+        cmds.addAttr(
+            self.ctrls[0],
+            sn='sw', ln=ATTRS['sw'], at='double',
+            dv=1, min=0, max=1,
+            k=1)
 
         cmds.parent(self.ik_chain.offsets[0], self.ctrls[0])
         cmds.parent(self.ik_chain.offsets[-1], self.ctrls[0])
@@ -99,7 +102,11 @@ class ChainFKIK(chain.Chain):
             cmds.setDrivenKeyframe(
                 '{}.w1'.format(cons), cd=self.ctrls[0]+'.sw', dv=0, v=1)
 
-            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=1, v=1)
-            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=0, v=0)
-            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=0, v=1)
-            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v', cd=self.ctrls[0]+'.sw', dv=1, v=0)
+            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v',
+                                   cd=self.ctrls[0]+'.sw', dv=1, v=1)
+            cmds.setDrivenKeyframe(self.ik_chain.ctrls[index]+'.v',
+                                   cd=self.ctrls[0]+'.sw', dv=0, v=0)
+            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v',
+                                   cd=self.ctrls[0]+'.sw', dv=0, v=1)
+            cmds.setDrivenKeyframe(self.fk_chain.ctrls[index]+'.v',
+                                   cd=self.ctrls[0]+'.sw', dv=1, v=0)

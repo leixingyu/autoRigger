@@ -30,10 +30,16 @@ class Hand(bone.Bone):
         self.ring = finger.Finger(side, 'ring', length=2.0)
         self.pinky = finger.Finger(side, 'pinky', length=1.6)
 
-        self.fingers = [self.thumb, self.index, self.middle, self.ring, self.pinky]
+        self.fingers = [
+            self.thumb,
+            self.index,
+            self.middle,
+            self.ring,
+            self.pinky
+        ]
 
-        self._components.append(self.wrist)
-        self._components.extend(self.fingers)
+        self._comps.append(self.wrist)
+        self._comps.extend(self.fingers)
 
     def create_locator(self):
         super(Hand, self).create_locator()
@@ -51,7 +57,8 @@ class Hand(bone.Bone):
         util.move(self.wrist.locs[0], [-side_factor * self.distance, 0, 0])
         cmds.rotate(0, 0, 90, self.wrist.locs[0])
 
-        hierarchy.batch_parent([finger.locs[0] for finger in self.fingers], self.wrist.locs[0])
+        hierarchy.batch_parent(
+            [f.locs[0] for f in self.fingers], self.wrist.locs[0])
 
     def create_joint(self):
         super(Hand, self).create_joint()

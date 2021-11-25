@@ -13,6 +13,9 @@ ATTRS = {
 }
 
 
+cmds.sdk = cmds.setDrivenKeyframe
+
+
 class Foot(bone.Bone):
     """
     This module creates a foot rig
@@ -113,25 +116,36 @@ class Foot(bone.Bone):
         cmds.setAttr(self.fk_jnts[0]+'.v', 0)
 
         # Cleanup
-        hierarchy.batch_parent([self.fk_jnts[0], self.jnts[3], self.jnts[0]], util.G_JNT_GRP)
+        hierarchy.batch_parent(
+            [self.fk_jnts[0], self.jnts[3], self.jnts[0]],
+            util.G_JNT_GRP)
 
     def place_controller(self):
         # IK Setup
 
         cmds.duplicate(self._shape[0], n=self.ctrls[0])
-        cmds.addAttr(self.ctrls[0], sn='fr', ln=ATTRS['fr'], at='double', dv=0, min=-10, max=40, k=1)
-        cmds.addAttr(self.ctrls[0], sn='fb', ln=ATTRS['fb'], at='double', dv=0, min=-20, max=20, k=1)
+        cmds.addAttr(
+            self.ctrls[0],
+            sn='fr', ln=ATTRS['fr'], at='double',
+            dv=0, min=-10, max=40,
+            k=1)
+        cmds.addAttr(
+            self.ctrls[0],
+            sn='fb', ln=ATTRS['fb'], at='double',
+            dv=0, min=-20, max=20,
+            k=1)
 
         foot_pos = cmds.xform(self.jnts[1], q=1, t=1, ws=1)
         cmds.move(foot_pos[0], foot_pos[1], foot_pos[2]+1, self.ctrls[0])
         cmds.makeIdentity(self.ctrls[0], apply=1, t=1, r=1, s=1)
 
         heel_loc = cmds.xform(self.jnts[5], q=1, t=1, ws=1)
-        cmds.move(heel_loc[0], heel_loc[1], heel_loc[2], '{}.sp'.format(self.ctrls[0]), '{}.rp'.format(self.ctrls[0]))
+        util.move_to('{}.sp'.format(self.ctrls[0]), heel_loc)
+        util.move_to('{}.rp'.format(self.ctrls[0]), heel_loc)
 
         # FK Setup
         cmds.duplicate(self._shape[1], n=self.ctrls[1])
-        cmds.move(foot_pos[0], foot_pos[1], foot_pos[2], self.ctrls[1])
+        util.move_to(self.ctrls[1], foot_pos)
         cmds.makeIdentity(self.ctrls[1], apply=1, t=1, r=1, s=1)
 
         # IK/FK Switch Setup
@@ -141,11 +155,20 @@ class Foot(bone.Bone):
         elif self._side == Side.RIGHT:
             cmds.move(foot_pos[0]-3, foot_pos[1], foot_pos[2], self.ctrls[2])
 
-        cmds.addAttr(self.ctrls[2], sn='sw', ln=ATTRS['sw'], at='double', dv=1, min=0, max=1, k=1)
+        cmds.addAttr(
+            self.ctrls[2],
+            sn='sw',
+            ln=ATTRS['sw'],
+            at='double',
+            dv=1,
+            min=0,
+            max=1,
+            k=1)
         cmds.makeIdentity(self.ctrls[2], apply=1, t=1, r=1, s=1)
 
         # Cleanup
-        hierarchy.batch_parent([self.ctrls[2], self.ctrls[0], self.ctrls[1]], util.G_CTRL_GRP)
+        hierarchy.batch_parent(
+            [self.ctrls[2], self.ctrls[0], self.ctrls[1]], util.G_CTRL_GRP)
 
     def add_constraint(self):
         # FK Setup
@@ -162,49 +185,49 @@ class Foot(bone.Bone):
         cmds.pointConstraint(self.rev_jnts[0], self.jnts[0], mo=1)
 
         # Foot Roll
-        cmds.setDrivenKeyframe(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
-        cmds.setDrivenKeyframe(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=-10, v=-25)
+        cmds.sdk(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
+        cmds.sdk(self.jnts[5]+'.rx', cd=self.ctrls[0]+'.fr', dv=-10, v=-25)
 
-        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
-        cmds.setDrivenKeyframe(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=25)
+        cmds.sdk(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=0, v=0)
+        cmds.sdk(self.rev_jnts[1]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=25)
 
-        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=0)
-        cmds.setDrivenKeyframe(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=40, v=25)
+        cmds.sdk(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=20, v=0)
+        cmds.sdk(self.rev_jnts[2]+'.rx', cd=self.ctrls[0]+'.fr', dv=40, v=25)
 
         # Foot Bank
-        cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
-        cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
+        cmds.sdk(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
+        cmds.sdk(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=0, v=0)
         if self._side == Side.RIGHT:
-            cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=-30)
-            cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=30)
+            cmds.sdk(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=-30)
+            cmds.sdk(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=30)
         else:
-            cmds.setDrivenKeyframe(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=30)
-            cmds.setDrivenKeyframe(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=-30)
+            cmds.sdk(self.jnts[3]+'.rz', cd=self.ctrls[0]+'.fb', dv=-20, v=30)
+            cmds.sdk(self.jnts[4]+'.rz', cd=self.ctrls[0]+'.fb', dv=20, v=-30)
 
         # Result Foot Setup
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.sdk('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.sdk('{}.w1'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.sdk('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.sdk('{}.w1'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=0)
 
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.sdk('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.sdk('{}.w0'.format(cons_p1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.sdk('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.sdk('{}.w0'.format(cons_o1), cd=self.ctrls[2]+'.sw', dv=0, v=1)
 
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=0)
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=1)
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=1)
-        cmds.setDrivenKeyframe('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.sdk('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.sdk('{}.w0'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.sdk('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.sdk('{}.w1'.format(cons_o2), cd=self.ctrls[2]+'.sw', dv=0, v=0)
 
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=1, v=0)
-        cmds.setDrivenKeyframe('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.sdk('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.sdk('{}.w0'.format(cons_o3), cd=self.ctrls[2]+'.sw', dv=0, v=1)
 
         # IK/FK Switch Setup
 
         # switch will follow ankle movement
         cmds.parentConstraint(self.jnts[0], self.ctrls[2], mo=1)
-        cmds.setDrivenKeyframe(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=1)
-        cmds.setDrivenKeyframe(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=0)
-        cmds.setDrivenKeyframe(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=0)
-        cmds.setDrivenKeyframe(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=1)
+        cmds.sdk(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=1)
+        cmds.sdk(self.ctrls[0]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=0)
+        cmds.sdk(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=1, v=0)
+        cmds.sdk(self.ctrls[1]+'.v', cd=self.ctrls[2]+'.sw', dv=0, v=1)

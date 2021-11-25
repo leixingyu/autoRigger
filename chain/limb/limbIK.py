@@ -21,7 +21,13 @@ class LimbIK(chainIK.ChainIK):
         elif ltype == 'arm' and side == Side.RIGHT:
             self.direction = [-1, 0, 0]
 
-        chainIK.ChainIK.__init__(self, side, name, segment=3, length=length, direction=self.direction)
+        chainIK.ChainIK.__init__(
+            self,
+            side,
+            name,
+            segment=3,
+            length=length,
+            direction=self.direction)
 
     def place_controller(self):
         # TODO: move pole vector out
@@ -40,7 +46,10 @@ class LimbIK(chainIK.ChainIK):
             joint.set_prefer_angle(self.jnts[1], [0, 0, 1])
 
         # IK Handle #
-        cmds.ikHandle(sj=self.jnts[0], ee=self.jnts[-1], n=self.ik, sol='ikRPsolver')
+        cmds.ikHandle(
+            sj=self.jnts[0],
+            ee=self.jnts[-1],
+            n=self.ik, sol='ikRPsolver')
 
     def add_constraint(self):
         self.build_ik()

@@ -40,7 +40,7 @@ class Quadruped(bone.Bone):
         self.head = base.Base(Side.MIDDLE, 'head')
         self.tip = base.Base(Side.MIDDLE, 'tip')
 
-        self.rig_components = [
+        self.rig_comps = [
             self.l_arm,
             self.r_arm,
             self.l_leg,
@@ -53,17 +53,17 @@ class Quadruped(bone.Bone):
         ]
 
     def create_namespace(self):
-        for rig_component in self.rig_components:
-            rig_component.create_namespace()
+        for rig_comp in self.rig_comps:
+            rig_comp.create_namespace()
 
     def create_locator(self):
-        for rig_component in self.rig_components:
-            rig_component.create_locator()
+        for rig_comp in self.rig_comps:
+            rig_comp.create_locator()
         self.move_locator()
 
     def color_locator(self):
-        for rig_component in self.rig_components:
-            rig_component.color_locator()
+        for rig_comp in self.rig_comps:
+            rig_comp.color_locator()
 
     def move_locator(self):
         pos = [0, 0, 0]
@@ -84,12 +84,12 @@ class Quadruped(bone.Bone):
         cmds.rotate(90, 0, 0, self.tip.locs[0])
 
     def set_shape(self):
-        for rig_component in self.rig_components:
-            rig_component.set_shape()
+        for rig_comp in self.rig_comps:
+            rig_comp.set_shape()
 
     def create_joint(self):
-        for rig_component in self.rig_components:
-            rig_component.create_joint()
+        for rig_comp in self.rig_comps:
+            rig_comp.create_joint()
 
         # parent leg root joints to root spline joint
         hierarchy.batch_parent(
@@ -110,15 +110,18 @@ class Quadruped(bone.Bone):
         cmds.parent(self.tip.jnts[0], self.head.jnts[0])
 
     def place_controller(self):
-        for rig_component in self.rig_components:
-            rig_component.place_controller()
+        for rig_comp in self.rig_comps:
+            rig_comp.place_controller()
 
-        cmds.addAttr(self.spine.ctrls[0], sn='sw', ln=ATTRS['sw'], at='double',
-                     dv=1, min=0, max=1, k=1)
+        cmds.addAttr(
+            self.spine.ctrls[0],
+            sn='sw', ln=ATTRS['sw'], at='double',
+            dv=1, min=0, max=1,
+            k=1)
 
     def add_constraint(self):
-        for rig_component in self.rig_components:
-            rig_component.add_constraint()
+        for rig_comp in self.rig_comps:
+            rig_comp.add_constraint()
 
         # parenting the front and back leg and tail under spine ctrl
         hierarchy.batch_parent(
@@ -138,8 +141,8 @@ class Quadruped(bone.Bone):
         cmds.parent(self.tip.offsets[0], self.head.ctrls[0])
 
     def color_controller(self):
-        for rig_component in self.rig_components:
-            rig_component.color_controller()
+        for rig_comp in self.rig_comps:
+            rig_comp.color_controller()
 
     def delete_guide(self):
         loc = cmds.ls(util.G_LOC_GRP)

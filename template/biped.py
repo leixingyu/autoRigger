@@ -31,7 +31,7 @@ class Biped(bone.Bone):
         self.head = base.Base(Side.MIDDLE, 'head')
         self.tip = base.Base(Side.MIDDLE, 'tip')
 
-        self._components = [
+        self._comps = [
             self.l_arm,
             self.r_arm,
             self.l_leg,

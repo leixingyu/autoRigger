@@ -31,7 +31,7 @@ class Arm(bone.Bone):
             self.hand = hand.Hand(
                 self._side, name, interval=self.interval, distance=self.gap)
 
-        self._components = [self.hand, self.limb]
+        self._comps = [self.hand, self.limb]
 
     def create_locator(self):
         super(Arm, self).create_locator()

@@ -24,7 +24,7 @@ class Leg(bone.Bone):
         self.foot = foot.Foot(
             self._side, name, interval=self.interval, height=self.height)
 
-        self._components = [self.limb, self.foot]
+        self._comps = [self.limb, self.foot]
 
     def create_locator(self):
         super(Leg, self).create_locator()

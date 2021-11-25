@@ -74,8 +74,12 @@ class ChainIK(chain.Chain):
         # enable advance twist control
         cmds.setAttr(self.ik+'.dTwistControlEnable', 1)
         cmds.setAttr(self.ik+'.dWorldUpType', 4)
-        cmds.connectAttr(self.ctrls[0]+'.worldMatrix[0]', self.ik+'.dWorldUpMatrix', f=1)
-        cmds.connectAttr(self.ctrls[-1]+'.worldMatrix[0]', self.ik+'.dWorldUpMatrixEnd', f=1)
+        cmds.connectAttr(
+            self.ctrls[0]+'.worldMatrix[0]',
+            self.ik+'.dWorldUpMatrix', f=1)
+        cmds.connectAttr(
+            self.ctrls[-1]+'.worldMatrix[0]',
+            self.ik+'.dWorldUpMatrixEnd', f=1)
 
         if self.is_stretch:
             # FIXME: cycle evaluation when stretching
@@ -89,16 +93,20 @@ class ChainIK(chain.Chain):
 
             # scaling of the spine
             arc_len = cmds.arclen(self.ik_curve, constructionHistory=1)
-            cmds.rename(arc_len, self.ik_curve+'Info')
+            ik_info = self.ik_curve + '_info'
+            cmds.rename(arc_len, ik_info)
             cmds.parent(self.ik_curve, util.G_CTRL_GRP)
             cmds.setAttr(self.ik_curve+'.v', 0)
 
             # create curve length node and multiply node
-            init_len = cmds.getAttr(self.ik_curve+'Info.arcLength')
-            stretch_node = cmds.shadingNode('multiplyDivide', asUtility=1, n=self.ctrls[0]+'Stretch')
+            init_len = cmds.getAttr('{}.arcLength'.format(ik_info))
+            stretch_node = cmds.shadingNode(
+                'multiplyDivide',
+                asUtility=1,
+                n=self.ctrls[0]+'Stretch')
             cmds.setAttr(stretch_node+'.operation', 2)
-            cmds.setAttr(stretch_node+'.input2X', init_len)
-            cmds.connectAttr(self.ik_curve+'Info.arcLength', stretch_node+'.input1X')
+            cmds.setAttr(stretch_node+'.i2x', init_len)
+            cmds.connectAttr('{}.arcLength'.format(ik_info), stretch_node+'.i1x')
 
             for i in range(self.segment):
-                cmds.connectAttr(stretch_node+'.outputX', self.jnts[i]+'.scaleX')
+                cmds.connectAttr(stretch_node+'.ox', self.jnts[i]+'.sx')

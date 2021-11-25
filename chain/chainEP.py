@@ -3,7 +3,7 @@ import maya.cmds as cmds
 from . import chain
 from .. import util, shape
 from ..base import bone
-from ..utility.algorithm import algorithm
+from ..utility.useful import algorithm
 from ..utility.rigging import transform
 
 
