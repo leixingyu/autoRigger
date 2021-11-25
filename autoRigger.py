@@ -1,4 +1,6 @@
-""" AutoRigger provides procedural approach for maya rigging """
+"""
+AutoRigger provides procedural approach for maya rigging
+"""
 
 import logging
 import os
@@ -7,16 +9,16 @@ import maya.cmds as cmds
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 
-from .template import biped, quadruped
-from .constant import RigComponents, RigType, Side
-from .module import foot, hand
+from utility.common import setup
+from .base import base
 from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
 from .chain.limb.arm import arm
 from .chain.limb.leg import leg, legBack, legFront
 from .chain.spine import spine, spineQuad
-from .base import base
-from utility.common import setup
+from .constant import RigComponents, RigType, Side
+from .module import foot, hand
+from .template import biped, quadruped
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))

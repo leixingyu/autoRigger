@@ -1,6 +1,6 @@
-from ...constant import Side
 from ...chain import chain, chainFKIK
 from ...chain.limb import limbIK, limbFK
+from ...constant import Side
 from ...utility.datatype import vector
 
 

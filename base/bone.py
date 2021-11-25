@@ -21,7 +21,7 @@ def update_base_name(func):
     """
     @wraps(func)
     def wrap(self):
-        self.base_name = '{}_{}_{}'.format(
+        self.base = '{}_{}_{}'.format(
             self._rtype, self._side.value, self._name)
         func(self)
     return wrap
@@ -55,7 +55,7 @@ class Bone(object):
 
         self._shape = None
 
-        self.base_name = None
+        self.base = None
         self.locs = list()
         self.jnts = list()
         self.ctrls = list()
@@ -70,10 +70,10 @@ class Bone(object):
             for c in self._comps:
                 c.create_namespace()
 
-        self.locs.append('{}_loc'.format(self.base_name))
-        self.jnts.append('{}_jnt'.format(self.base_name))
-        self.ctrls.append('{}_ctrl'.format(self.base_name))
-        self.offsets.append('{}_offset'.format(self.base_name))
+        self.locs.append('{}_loc'.format(self.base))
+        self.jnts.append('{}_jnt'.format(self.base))
+        self.ctrls.append('{}_ctrl'.format(self.base))
+        self.offsets.append('{}_offset'.format(self.base))
 
     def set_shape(self):
         """

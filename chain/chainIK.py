@@ -26,15 +26,15 @@ class ChainIK(chain.Chain):
     @bone.update_base_name
     def create_namespace(self):
         for index in range(self.segment):
-            self.locs.append('{}{}_loc'.format(self.base_name, index))
-            self.jnts.append('{}{}ik_jnt'.format(self.base_name, index))
-            self.ctrls.append('{}{}ik_ctrl'.format(self.base_name, index))
+            self.locs.append('{}{}_loc'.format(self.base, index))
+            self.jnts.append('{}{}ik_jnt'.format(self.base, index))
+            self.ctrls.append('{}{}ik_ctrl'.format(self.base, index))
             self.offsets.append(
-                '{}{}ik_offset'.format(self.base_name, index))
-            self.clusters.append('{}{}_cluster'.format(self.base_name, index))
+                '{}{}ik_offset'.format(self.base, index))
+            self.clusters.append('{}{}_cluster'.format(self.base, index))
 
-        self.ik_curve = '{}ik_curve'.format(self.base_name)
-        self.ik = '{}_ik'.format(self.base_name)
+        self.ik_curve = '{}ik_curve'.format(self.base)
+        self.ik = '{}_ik'.format(self.base)
 
     def set_shape(self):
         self._shape = shape.make_sphere(self._scale)

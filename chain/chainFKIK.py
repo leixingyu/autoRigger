@@ -33,11 +33,11 @@ class ChainFKIK(chain.Chain):
         self.fk_chain.create_namespace()
 
         for index in range(self.segment):
-            self.locs.append('{}{}_loc'.format(self.base_name, index))
-            self.jnts.append('{}{}_jnt'.format(self.base_name, index))
+            self.locs.append('{}{}_loc'.format(self.base, index))
+            self.jnts.append('{}{}_jnt'.format(self.base, index))
 
-        self.offsets.append('{}master_offset'.format(self.base_name))
-        self.ctrls.append('{}master_ctrl'.format(self.base_name))
+        self.offsets.append('{}master_offset'.format(self.base))
+        self.ctrls.append('{}master_ctrl'.format(self.base))
 
     def set_shape(self):
         self.ik_chain.set_shape()

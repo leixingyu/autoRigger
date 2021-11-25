@@ -36,14 +36,14 @@ class Foot(bone.Bone):
         # sub-sequentially: ankle, ball, toe, inner, outer, heel
         segments = ['ankle', 'ball', 'toe', 'inner', 'outer', 'heel']
         for segment in segments:
-            self.locs.append('{}{}_loc'.format(self.base_name, segment))
-            self.jnts.append('{}{}_jnt'.format(self.base_name, segment))
-            self.rev_jnts.append('{}{}rev_jnt'.format(self.base_name, segment))
-            self.fk_jnts.append('{}{}fk_jnt'.format(self.base_name, segment))
+            self.locs.append('{}{}_loc'.format(self.base, segment))
+            self.jnts.append('{}{}_jnt'.format(self.base, segment))
+            self.rev_jnts.append('{}{}rev_jnt'.format(self.base, segment))
+            self.fk_jnts.append('{}{}fk_jnt'.format(self.base, segment))
 
-        self.ctrls.append('{}_ctrl'.format(self.base_name))
-        self.ctrls.append('{}fk_ctrl'.format(self.base_name))
-        self.ctrls.append('{}switch_ctrl'.format(self.base_name))
+        self.ctrls.append('{}_ctrl'.format(self.base))
+        self.ctrls.append('{}fk_ctrl'.format(self.base))
+        self.ctrls.append('{}switch_ctrl'.format(self.base))
 
     def set_shape(self):
         self._shape = list(range(3))

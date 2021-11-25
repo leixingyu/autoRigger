@@ -1,9 +1,9 @@
 import maya.cmds as cmds
 
 from .... import util
-from ....module import foot
 from ....base import bone
 from ....chain.limb import limbFKIK
+from ....module import foot
 
 
 class Leg(bone.Bone):

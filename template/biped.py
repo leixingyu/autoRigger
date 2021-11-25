@@ -1,11 +1,11 @@
 import maya.cmds as cmds
 
-from ..constant import Side
 from .. import util
 from ..base import base, bone
-from ..chain.spine import spine
 from ..chain.limb.arm import arm
 from ..chain.limb.leg import leg
+from ..chain.spine import spine
+from ..constant import Side
 
 
 class Biped(bone.Bone):

@@ -3,8 +3,8 @@ import maya.cmds as cmds
 from . import chain
 from .. import util, shape
 from ..base import bone
-from ..utility.useful import algorithm
 from ..utility.rigging import transform
+from ..utility.useful import algorithm
 
 
 class ChainEP(chain.Chain):
@@ -32,14 +32,14 @@ class ChainEP(chain.Chain):
     @bone.update_base_name
     def assign_secondary_naming(self):
         for index in range(self.segment):
-            self.locs.append('{}{}_loc'.format(self.base_name, index))
-            self.jnts.append('{}{}_jnt'.format(self.base_name, index))
-            self.ctrls.append('{}{}_ctrl'.format(self.base_name, index))
+            self.locs.append('{}{}_loc'.format(self.base, index))
+            self.jnts.append('{}{}_jnt'.format(self.base, index))
+            self.ctrls.append('{}{}_ctrl'.format(self.base, index))
             self.offsets.append(
-                '{}{}_offset'.format(self.base_name, index))
-            self.clusters.append('{}{}_cluster'.format(self.base_name, index))
+                '{}{}_offset'.format(self.base, index))
+            self.clusters.append('{}{}_cluster'.format(self.base, index))
 
-        self.guide_curve = '{}_curve'.format(self.base_name)
+        self.guide_curve = '{}_curve'.format(self.base)
 
     def create_locator(self):
         locs = util.create_locators_on_curve(self.curve, self.segment)

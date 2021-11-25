@@ -1,5 +1,5 @@
-from ..constant import Side
 from ..chain import chainFK
+from ..constant import Side
 
 
 class Finger(chainFK.ChainFK):

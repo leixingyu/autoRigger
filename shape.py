@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
 import util
-from utility.useful import strGenerator
 from utility import nurbs
+from utility.useful import strGenerator
 
 
 NAMER = strGenerator.StrGenerator(prefix='tmp_')

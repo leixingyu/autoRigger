@@ -1,12 +1,12 @@
 import maya.cmds as cmds
 
 from .. import util
-from ..constant import Side
-from ..chain.spine import spineQuad
+from ..base import base, bone
 from ..chain import tail
 from ..chain.limb.leg import legFront
 from ..chain.limb.leg import legBack
-from ..base import base, bone
+from ..chain.spine import spineQuad
+from ..constant import Side
 from ..utility.common import hierarchy
 
 

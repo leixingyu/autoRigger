@@ -19,11 +19,11 @@ class ChainFK(chain.Chain):
     @bone.update_base_name
     def create_namespace(self):
         for index in range(self.segment):
-            self.locs.append('{}{}_loc'.format(self.base_name, index))
-            self.jnts.append('{}{}fk_jnt'.format(self.base_name, index))
-            self.ctrls.append('{}{}fk_ctrl'.format(self.base_name, index))
+            self.locs.append('{}{}_loc'.format(self.base, index))
+            self.jnts.append('{}{}fk_jnt'.format(self.base, index))
+            self.ctrls.append('{}{}fk_ctrl'.format(self.base, index))
             self.offsets.append(
-                '{}{}fk_offset'.format(self.base_name, index))
+                '{}{}fk_offset'.format(self.base, index))
 
     def add_constraint(self):
         for index, jnt in enumerate(self.jnts):
