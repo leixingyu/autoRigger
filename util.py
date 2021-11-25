@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-from utility.rigging import nurbs
+from utility.nurbs import util
 
 
 G_LOC_GRP = '_Locators'
@@ -18,7 +18,7 @@ def create_locators_on_curve(curve, sample):
     :return: list. list of locators created
     """
     locs = list()
-    points, tangents = nurbs.get_point_on_curve(curve, sample)
+    points, tangents = util.get_point_on_curve(curve, sample)
     for index in range(len(points)):
         point = points[index]
         tangent = tangents[index]

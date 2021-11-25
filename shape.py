@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 
 import util
-from utility.algorithm import strGenerator
-from utility.rigging import nurbs
+from utility.useful import strGenerator
+from utility import nurbs
 
 
 NAMER = strGenerator.StrGenerator(prefix='tmp_')
@@ -53,7 +53,7 @@ def make_sphere(scale=1, name=None):
     c2 = cmds.circle(nr=(1, 0, 0), c=(0, 0, 0), s=8, radius=scale)[0]
     c3 = cmds.circle(nr=(0, 0, 1), c=(0, 0, 0), s=8, radius=scale)[0]
 
-    sphere = nurbs.merge_curves(name=name, curves=[c1, c2, c3])
+    sphere = nurbs.util.merge_curves(name=name, curves=[c1, c2, c3])
     return sphere
 
 
@@ -61,7 +61,7 @@ def make_text(text, scale=1, name=None):
     if not name:
         name = NAMER.tmp
 
-    curve = nurbs.make_curve_by_text(text=text, name=name)
+    curve = nurbs.util.make_curve_by_text(text=text, name=name)
     util.uniform_scale(curve, scale)
     cmds.makeIdentity(curve, apply=1, r=1, t=1, s=1)
     # make it align on the ground plane

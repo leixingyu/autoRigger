@@ -70,7 +70,7 @@ class ChainFKIK(chain.Chain):
         cmds.duplicate(self._shape, n=self.ctrls[0])
         cmds.rotate(0, 0, 90, self.ctrls[0])
         cmds.group(n=self.offsets[0], em=1)
-        transform.clear_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
+        transform.clear_xform(self.ctrls[0], self.offsets[0], self.jnts[0])
         cmds.addAttr(self.ctrls[0], sn='sw', ln=ATTRS['sw'], at='double',
                      dv=1, min=0, max=1, k=1)
 

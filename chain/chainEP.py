@@ -53,7 +53,7 @@ class ChainEP(chain.Chain):
         self._shape = shape.make_sphere(self._scale)
 
     def place_controller(self):
-        # TODO: use clear_transform
+        # TODO: use clear_xform
         for index in self.cvs:
             cmds.duplicate(self._shape, n=self.ctrls[index])
             cmds.group(em=1, n=self.offsets[index])

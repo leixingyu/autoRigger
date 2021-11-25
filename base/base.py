@@ -37,7 +37,7 @@ class Base(bone.Bone):
         cmds.duplicate(self._shape, n=self.ctrls[0])
         cmds.group(em=1, n=self.offsets[0])
 
-        transform.clear_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
+        transform.clear_xform(self.ctrls[0], self.offsets[0], self.jnts[0])
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
 
     def add_constraint(self):

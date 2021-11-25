@@ -120,12 +120,12 @@ class LegQuad(bone.Bone):
     def place_controller(self):
         cmds.duplicate(self._shape[0], n=self.ctrls[0])
         cmds.group(em=1, n=self.offsets[0])
-        transform.clear_transform(self.ctrls[0], self.offsets[0], self.jnts[0])
+        transform.clear_xform(self.ctrls[0], self.offsets[0], self.jnts[0])
 
         # foot control
         cmds.duplicate(self._shape[2], n=self.ctrls[3])
         cmds.group(em=1, n=self.offsets[3])
-        transform.clear_transform(self.ctrls[3], self.offsets[3], self.locs[3])
+        transform.clear_xform(self.ctrls[3], self.offsets[3], self.locs[3])
 
         # custom attribute for later pivot group access
         cmds.addAttr(self.ctrls[3], sn='flx', ln=ATTRS['flx'], at='double', k=1)
@@ -139,7 +139,7 @@ class LegQuad(bone.Bone):
         pole_index = 1 if self.is_front else 2
         cmds.duplicate(self._shape[1], n=self.ctrls[pole_index])
         cmds.group(em=1, n=self.offsets[pole_index])
-        transform.clear_transform(self.ctrls[pole_index], self.offsets[pole_index], self.jnts[pole_index])
+        transform.clear_xform(self.ctrls[pole_index], self.offsets[pole_index], self.jnts[pole_index])
         hierarchy.batch_parent(
             [self.offsets[0],
              self.offsets[3],

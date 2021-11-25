@@ -35,7 +35,7 @@ class Chain(base.Base):
             cmds.duplicate(self._shape, n=self.ctrls[index])
             cmds.rotate(0, 0, 90, self.ctrls[index])
             cmds.group(em=1, n=self.offsets[index])
-            transform.clear_transform(
+            transform.clear_xform(
                 self.ctrls[index],
                 self.offsets[index],
                 self.jnts[index]
