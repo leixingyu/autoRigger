@@ -10,13 +10,5 @@ class Spine(chainIK.ChainIK):
         """
         Override: specify the direction to be world Y-up
         """
-        chainIK.ChainIK.__init__(
-            self,
-            side,
-            name,
-            segment,
-            length,
-            direction=[0, 1, 0],
-            is_stretch=0)
-
+        super(Spine, self).__init__(side, name, segment, length, [0, 1, 0], 0)
         self._rtype = 'spine'

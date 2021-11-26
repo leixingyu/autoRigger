@@ -25,7 +25,7 @@ class Hand(bone.Bone):
         :param interval: float. length between finger roots
         :param distance: float. length between wrist and finger roots
         """
-        bone.Bone.__init__(self, side, name)
+        super(Hand, self).__init__(side, name)
         self._rtype = 'hand'
 
         self.interval = interval
@@ -54,8 +54,6 @@ class Hand(bone.Bone):
         Override: create wrist and fingers guide locators
         """
         super(Hand, self).create_locator()
-
-        # move around the locators
         side_factor = 1
         if self._side == Side.RIGHT:
             side_factor = -1
@@ -76,7 +74,6 @@ class Hand(bone.Bone):
         Override: create wrist and fingers joints and parent them together
         """
         super(Hand, self).create_joint()
-
         fingers = [obj.jnts[0] for obj in self.fingers]
         wrist = self.wrist.jnts[0]
         hierarchy.batch_parent(fingers, wrist)

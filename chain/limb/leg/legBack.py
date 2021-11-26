@@ -10,5 +10,5 @@ class LegBack(legQuad.LegQuad):
         """
         Override: specify rig type
         """
-        legQuad.LegQuad.__init__(self, side, name, distance, height, 0)
+        super(LegBack, self).__init__(side, name, distance, height, 0)
         self._rtype = 'back'

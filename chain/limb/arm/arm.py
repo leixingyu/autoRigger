@@ -22,7 +22,7 @@ class Arm(bone.Bone):
         :param interval: float. interval for Hand module
         :param gap: float. gap for Hand module
         """
-        bone.Bone.__init__(self, side, name)
+        super(Arm, self).__init__(side, name)
         self._rtype = 'arm'
 
         self.distance = distance

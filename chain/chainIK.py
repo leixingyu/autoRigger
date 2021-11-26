@@ -20,7 +20,7 @@ class ChainIK(chain.Chain):
         :param direction: vector.Vector. world direction from root to top node
         :param is_stretch: bool. allow stretching for the rig
         """
-        chain.Chain.__init__(self, side, name, segment)
+        super(ChainIK, self).__init__(side, name, segment)
 
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()

@@ -14,6 +14,6 @@ class Finger(chainFK.ChainFK):
         if side == Side.LEFT:
             direction = [1, 0, 0]
 
-        chainFK.ChainFK.__init__(self, side, name, segment, length, direction)
+        super(Finger, self).__init__(side, name, segment, length, direction)
         self._rtype = 'finger'
         self._scale = 0.4

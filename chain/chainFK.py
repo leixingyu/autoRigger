@@ -17,7 +17,7 @@ class ChainFK(chain.Chain):
         :param length: float. total length of rig chain
         :param direction: vector.Vector. world direction from root to top node
         """
-        chain.Chain.__init__(self, side, name, segment)
+        super(ChainFK, self).__init__(side, name, segment)
 
         self.interval = length / (self.segment-1)
         self.dir = vector.Vector(direction).normalize()

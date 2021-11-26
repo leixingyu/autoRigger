@@ -28,7 +28,7 @@ class Foot(bone.Bone):
         :param interval: float. horizontal distance between segments of foot
         :param height: float. vertical height of ankle to the ground
         """
-        bone.Bone.__init__(self, side, name)
+        super(Foot, self).__init__(side, name)
         self._rtype = 'foot'
 
         self.interval = interval

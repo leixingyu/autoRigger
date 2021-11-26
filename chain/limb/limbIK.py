@@ -26,13 +26,7 @@ class LimbIK(chainIK.ChainIK):
         elif ltype == 'arm' and side == Side.RIGHT:
             self.direction = [-1, 0, 0]
 
-        chainIK.ChainIK.__init__(
-            self,
-            side,
-            name,
-            segment=3,
-            length=length,
-            direction=self.direction)
+        super(LimbIK, self).__init__(side, name, 3, length, self.direction)
 
     def place_controller(self):
         """
@@ -56,7 +50,6 @@ class LimbIK(chainIK.ChainIK):
         else:
             joint.set_prefer_angle(self.jnts[1], [0, 0, 1])
 
-        # IK Handle #
         cmds.ikHandle(
             sj=self.jnts[0],
             ee=self.jnts[-1],

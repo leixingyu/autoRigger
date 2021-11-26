@@ -21,7 +21,7 @@ class Leg(bone.Bone):
         :param interval: float. interval for Foot module
         :param height: float. gap for Foot module
         """
-        bone.Bone.__init__(self, side, name)
+        super(Leg, self).__init__(side, name)
         self._rtype = 'leg'
 
         self.distance = distance

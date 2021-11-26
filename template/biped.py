@@ -20,7 +20,7 @@ class Biped(bone.Bone):
         """
         Override: initialize with multiple rig components
         """
-        bone.Bone.__init__(self, side, name)
+        super(Biped, self).__init__(side, name)
         self._rtype = 'biped'
 
         self.pos = [0, 8.4, 0]
@@ -83,15 +83,15 @@ class Biped(bone.Bone):
         """
         super(Biped, self).create_joint()
 
-        # Leg root to spine root
+        # leg root to spine root
         cmds.parent(self.l_leg.limb.jnts[0], self.spine.jnts[0])
         cmds.parent(self.r_leg.limb.jnts[0], self.spine.jnts[0])
 
-        # Arm root spine root
+        # arm root to spine top
         cmds.parent(self.l_arm.limb.jnts[0], self.spine.jnts[-1])
         cmds.parent(self.r_arm.limb.jnts[0], self.spine.jnts[-1])
 
-        # Neck to spine tip, head to neck
+        # neck to spine top, head to neck
         cmds.parent(self.neck.jnts[0], self.spine.jnts[-1])
         cmds.parent(self.head.jnts[0], self.neck.jnts[0])
         cmds.parent(self.tip.jnts[0], self.head.jnts[0])
@@ -102,15 +102,15 @@ class Biped(bone.Bone):
         """
         super(Biped, self).add_constraint()
 
-        # Leg driven by root spine control #
+        # leg driven by root spine control #
         cmds.parent(self.l_leg.limb.offsets[0], self.spine.ctrls[0])
         cmds.parent(self.r_leg.limb.offsets[0], self.spine.ctrls[0])
 
-        # Arm driven by top spine control #
+        # arm driven by top spine control #
         cmds.parent(self.l_arm.limb.offsets[0], self.spine.ctrls[-1])
         cmds.parent(self.r_arm.limb.offsets[0], self.spine.ctrls[-1])
 
-        # Neck to Head chain #
+        # neck to head chain #
         cmds.parent(self.tip.offsets[0], self.head.offsets[0])
         cmds.parent(self.head.offsets[0], self.neck.offsets[0])
         cmds.parent(self.neck.offsets[0], self.spine.ctrls[-1])

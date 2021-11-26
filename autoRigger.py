@@ -33,24 +33,23 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=setup.get_maya_main_window()):
         """
-        Initialize AutoRigger class
+        Initialization
         """
         super(AutoRiggerWindow, self).__init__(parent)
         _loadUi(os.path.join(CURRENT_PATH, UI_PATH), self)
 
         self.setWindowFlags(QtCore.Qt.Window)
 
-        # Reset list icon and item
         self.items = list()
         self.to_build = list()
 
-        # Reset tab position and populate list
+        # reset tab position and populate list
         self.connect_signals()
         self.connect_items()
         self.ui_tabWidget.setCurrentIndex(0)
         self.refresh_items()
 
-        # position could be numeric value
+        # position are numeric values
         int_only = QtGui.QIntValidator()
         self.ui_worldX.setValidator(int_only)
         self.ui_worldY.setValidator(int_only)
@@ -87,7 +86,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         comps = list()
         tab_index = self.ui_tabWidget.currentIndex()
 
-        # Biped
+        # biped
         if tab_index == RigType.BIPED:
             comps = [
                 RigComponents.BIPED,
@@ -97,7 +96,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
                 RigComponents.LEG
             ]
 
-        # Quadruped
+        # quadruped
         elif tab_index == RigType.QUADRUPED:
             comps = [
                 RigComponents.QUAD,
@@ -107,7 +106,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
                 RigComponents.TAIL
             ]
 
-        # Chain
+        # chain
         elif tab_index == RigType.CHAIN:
             comps = [
                 RigComponents.CHAIN_FK,
@@ -116,7 +115,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
                 RigComponents.CHAIN_FKIK
             ]
 
-        # Custom
+        # custom
         elif tab_index == RigType.CUSTOM:
             comps = RigComponents
 
@@ -139,13 +138,13 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """
         Fetch all field info and build the rig guide
         """
-        # Base name
+        # base name
         base_name = self.ui_nameEdit.text() if self.ui_nameEdit.text() else 'null'
 
-        # Side
+        # side
         side = [Side.LEFT, Side.RIGHT, Side.MIDDLE][self.ui_sideCBox.currentIndex()]
 
-        # Identify the item type and build it
+        # identify the item type and build it
         item = self.ui_listWidget.currentItem().text()
         if item == RigComponents.FINGER.value:
             obj = finger.Finger(side, base_name)

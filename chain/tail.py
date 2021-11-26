@@ -10,5 +10,5 @@ class Tail(chainFKIK.ChainFKIK):
         """
         Extend: specify rig type
         """
-        chainFKIK.ChainFKIK.__init__(self, side, name, segment, length, direction)
+        super(Tail, self).__init__(side, name, segment, length, direction)
         # self._rtype = 'tail'

@@ -31,7 +31,7 @@ class ChainFKIK(chain.Chain):
         :param direction: vector.Vector. world direction from root to top node
         :param is_stretch: bool. allow stretching for the rig
         """
-        chain.Chain.__init__(self, side, name, segment)
+        super(ChainFKIK, self).__init__(side, name, segment)
 
         self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction, is_stretch)
         self.fk_chain = chainFK.ChainFK(side, name, segment, length, direction)
@@ -77,7 +77,7 @@ class ChainFKIK(chain.Chain):
             cmds.joint(p=pos, n=self.jnts[index])
             util.uniform_scale(self.jnts[index], self._scale)
 
-        # cleanup
+        # clean up
         cmds.setAttr(self.ik_chain.jnts[0]+'.v', 0)
         cmds.setAttr(self.fk_chain.jnts[0]+'.v', 0)
 

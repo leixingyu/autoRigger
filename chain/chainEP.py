@@ -23,7 +23,7 @@ class ChainEP(chain.Chain):
         :param curve: str. curve transform name used for guide
         :param cv: int. number of control vertices
         """
-        chain.Chain.__init__(self, side, name, segment)
+        super(ChainEP, self).__init__(side, name, segment)
 
         if not cv:
             cv = self.segment

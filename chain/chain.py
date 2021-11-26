@@ -11,14 +11,13 @@ class Chain(base.Base):
     such as finger, spine, tail and more
     """
 
-    # TODO: probably don't need a default value as it's meant for subclassing
-    def __init__(self, side, name, segment=6):
+    def __init__(self, side, name, segment):
         """
         Extend: specify rig type and add more instance var for convenience
 
         :param segment: int. number of joints on the chain
         """
-        base.Base.__init__(self, side, name)
+        super(Chain, self).__init__(side, name)
         self._rtype = 'chain'
 
         self.segment = segment

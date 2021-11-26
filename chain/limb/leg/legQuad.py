@@ -21,8 +21,7 @@ class LegQuad(bone.Bone):
     Abstract class for creating rig system for quadruped leg
     """
 
-    # TODO: get rid of un-necessary default value
-    def __init__(self, side, name, distance=1.5, height=0.2, is_front=0):
+    def __init__(self, side, name, distance, height, is_front=0):
         """
         Extend: specify distance and height attribute, and whether
         or not the leg is in the front
@@ -31,7 +30,7 @@ class LegQuad(bone.Bone):
         :param height: float. height from foot to ankle
         :param is_front: bool. whether the leg is the front leg
         """
-        bone.Bone.__init__(self, side, name)
+        super(LegQuad, self).__init__(side, name)
         self.is_front = is_front
 
         self.distance = distance
@@ -109,7 +108,7 @@ class LegQuad(bone.Bone):
         chain for hind/back leg
         """
 
-        # Result joint chain
+        # result joint chain
         cmds.select(clear=1)
         for index in range(len(self.locs)):
             loc = cmds.ls(self.locs[index], transforms=1)
@@ -122,7 +121,7 @@ class LegQuad(bone.Bone):
         if self.is_front:
             return self.jnts[0]
 
-        # Helper joint chain
+        # helper joint chain
         cmds.select(clear=1)
         for index in range(len(self.locs[:-1])):
             loc = cmds.ls(self.locs[index], transforms=1)
@@ -160,7 +159,7 @@ class LegQuad(bone.Bone):
             cmds.addAttr(self.ctrls[3],
                          sn='wr', ln=ATTRS['wr'], at='double', k=1)
 
-        # Ankle control - poleVector
+        # ankle control - pole vector
         pole_index = 1 if self.is_front else 2
         cmds.duplicate(self._shape[1], n=self.ctrls[pole_index])
         cmds.group(em=1, n=self.offsets[pole_index])
@@ -275,12 +274,12 @@ class LegQuad(bone.Bone):
         """
         self.build_ik()
 
-        # Shoulder pivot
+        # shoulder pivot
         cmds.parentConstraint(self.ctrls[0], self.jnts[0])
         if not self.is_front:
             cmds.parentConstraint(self.ctrls[0], self.helpers[0])
 
-        # Front foot pivot group
+        # pivot group
         tap_pivot = cmds.group(em=1, n='{}tap_piv'.format(self.base))
         flex_pivot = cmds.group(em=1, n='{}flex_piv'.format(self.base))
         swivel_pivot = cmds.group(em=1, n='{}swivel_piv'.format(self.base))
@@ -333,5 +332,5 @@ class LegQuad(bone.Bone):
         cmds.connectAttr(self.ctrls[3]+'.tap', tap_pivot+'.rx')
         cmds.connectAttr(self.ctrls[3]+'.tip', tip_pivot+'.rx')
 
-        # Scalable rig setup
+        # scalable rig setup
         self.add_measurement()

@@ -27,7 +27,7 @@ class Quadruped(bone.Bone):
         """
         Override: initialize with multiple rig components
         """
-        bone.Bone.__init__(self, side, name)
+        super(Quadruped, self).__init__(side, name)
         self._rtype = 'quad'
 
         self.l_arm = legFront.LegFront(Side.LEFT, 'standard')

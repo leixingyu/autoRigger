@@ -21,10 +21,4 @@ class LimbFK(chainFK.ChainFK):
         elif ltype == 'arm' and side == Side.RIGHT:
             self.direction = [-1, 0, 0]
 
-        chainFK.ChainFK.__init__(
-            self,
-            side,
-            name,
-            segment=3,
-            length=length,
-            direction=self.direction)
+        super(LimbFK, self).__init__(side, name, 3, length, self.direction)

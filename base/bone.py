@@ -48,6 +48,7 @@ class Bone(object):
         :param side: Side enum. the side where the rig lays on
         :param name: str. name of the rig
         """
+        super(Bone, self).__init__()
         util.create_outliner_grp()
 
         self._side = side
@@ -235,5 +236,4 @@ class Bone(object):
         self.delete_shape()
         self.color_controller()
         self.add_constraint()
-        # clean ups
         self.lock_controller()

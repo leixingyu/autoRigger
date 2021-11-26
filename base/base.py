@@ -15,7 +15,7 @@ class Base(bone.Bone):
         """
         Extend: specify rig type
         """
-        bone.Bone.__init__(self, side, name)
+        super(Base, self).__init__(side, name)
         self._rtype = 'base'
 
     def set_shape(self):

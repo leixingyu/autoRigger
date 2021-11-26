@@ -10,13 +10,6 @@ class SpineQuad(chainIK.ChainIK):
         """
         Override: specify the direction to be world Z-forward
         """
-        chainIK.ChainIK.__init__(
-            self,
-            side,
-            name,
-            segment,
-            length,
-            direction=[0, 0, 1],
-            is_stretch=0)
+        super(SpineQuad, self).__init__(side, name, segment, length, [0, 0, 1], 0)
 
         self._rtype = 'qspine'

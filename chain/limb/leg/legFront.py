@@ -10,5 +10,5 @@ class LegFront(legQuad.LegQuad):
         """
         Override: specify rig type
         """
-        legQuad.LegQuad.__init__(self, side, name, distance, height, 1)
+        super(LegFront, self).__init__(side, name, distance, height, 1)
         self._rtype = 'front'
