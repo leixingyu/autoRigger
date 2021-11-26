@@ -29,32 +29,37 @@ def update_base_name(func):
 
 class Bone(object):
     """
-    Abstract class for joint creation
+    Abstract class for creating rig control system, without the skinning
+
     The two fundamental steps are:
     1. build_guide: create guide locators for placement
     2. build_rig: create joints and controller following the guide
+
+    # Attribute:
+    namer. a string generator for temporary naming
     """
 
     namer = strGenerator.StrGenerator(TMP_PREFIX, 8)
 
     def __init__(self, side, name):
         """
-        Initialize Base class with side and name
+        Initialization
 
-        :param side: str. Side.MIDDLE, Side.LEFT or Side.RIGHT
-        :param name: str. name of the bone rig
+        :param side: Side enum. the side where the rig lays on
+        :param name: str. name of the rig
         """
         util.create_outliner_grp()
-
-        self._comps = list()
 
         self._side = side
         self._name = name
         self._rtype = None
         self._scale = 1
 
+        # components and controller shape
+        self._comps = list()
         self._shape = None
 
+        # naming related instance vars
         self.base = None
         self.locs = list()
         self.jnts = list()
@@ -77,7 +82,7 @@ class Bone(object):
 
     def set_shape(self):
         """
-        Set up controller curve shapes
+        Set up controller shape with nurbs curve
         """
         if self._comps:
             for c in self._comps:
@@ -85,7 +90,7 @@ class Bone(object):
 
     def create_locator(self):
         """
-        Create the rig guides for placement purpose
+        Create the rig guides using locators for placement purpose
         """
         if self._comps:
             for c in self._comps:
@@ -93,7 +98,7 @@ class Bone(object):
 
     def color_locator(self):
         """
-        Color-code the guide locators based on left, right, middle side
+        Color-code the guide locators based on rig side
         """
         if self._comps:
             for c in self._comps:
@@ -128,7 +133,7 @@ class Bone(object):
 
     def create_joint(self):
         """
-        Create the rig joints based on the guide's transform
+        Create the rig joints based on the guide locators' transform
         """
         if self._comps:
             for c in self._comps:
@@ -136,8 +141,7 @@ class Bone(object):
 
     def place_controller(self):
         """
-        Duplicate controller shapes and
-        place them based on guide's and joint's transform
+        Place controller (nurbs curve) based on guide's and joint's transform
         """
         if self._comps:
             for c in self._comps:
@@ -145,7 +149,7 @@ class Bone(object):
 
     def color_controller(self):
         """
-        Colorize the controller based on left, right, middle side
+        Color-code the controller based on rig side
         """
         if self._comps:
             for c in self._comps:
@@ -180,7 +184,7 @@ class Bone(object):
 
     def add_constraint(self):
         """
-        Add all necessary constraints for the controller
+        Add all constraints for the controllers and joints in the rig system
         """
         if self._comps:
             for c in self._comps:
@@ -202,13 +206,13 @@ class Bone(object):
     @staticmethod
     def delete_shape():
         """
-        Delete control template shape to de-clutter the scene
+        Delete controller temp shape to de-clutter the scene
         """
         cmds.delete(cmds.ls('{}*'.format(TMP_PREFIX)))
 
     def lock_controller(self):
         """
-        Not exposing specific channels of controllers
+        Lock and hide specific channels of the controllers
         """
         pass
 
@@ -222,7 +226,7 @@ class Bone(object):
 
     def build_rig(self):
         """
-        Build the full rig based on the guide, without skinning
+        Build the full rig system based on the guide
         """
         self.create_joint()
         self.set_shape()

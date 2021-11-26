@@ -7,10 +7,17 @@ from ..utility.rigging import joint, transform
 
 class Chain(base.Base):
     """
-    Abstract chain module
+    Abstract class for creating chain-like rig system
+    such as finger, spine, tail and more
     """
 
+    # TODO: probably don't need a default value as it's meant for subclassing
     def __init__(self, side, name, segment=6):
+        """
+        Extend: specify rig type and add more instance var for convenience
+
+        :param segment: int. number of joints on the chain
+        """
         base.Base.__init__(self, side, name)
         self._rtype = 'chain'
 
@@ -20,6 +27,10 @@ class Chain(base.Base):
         self.curve = None
 
     def create_locator(self):
+        """
+        Override: create a single chain-like locator
+        parented in hierarchical order
+        """
         for index in range(self.segment):
             cmds.spaceLocator(n=self.locs[index])
             if not index:
@@ -31,6 +42,9 @@ class Chain(base.Base):
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def place_controller(self):
+        """
+        Override: create and place controllers parented in hierarchical order
+        """
         for index in range(self.segment):
             cmds.duplicate(self._shape, n=self.ctrls[index])
             cmds.rotate(0, 0, 90, self.ctrls[index])
@@ -46,6 +60,9 @@ class Chain(base.Base):
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
 
     def create_joint(self):
+        """
+        Override: create a single joint chain
+        """
         cmds.select(clear=1)
         for index in range(self.segment):
             cmds.joint(n=self.jnts[index])

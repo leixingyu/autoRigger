@@ -3,10 +3,13 @@ from ...chain import chainIK
 
 class Spine(chainIK.ChainIK):
     """
-    This module creates a biped spine rig
+    Create a IK control rig system for biped spine
     """
 
     def __init__(self, side, name, length=6.0, segment=6):
+        """
+        Override: specify the direction to be world Y-up
+        """
         chainIK.ChainIK.__init__(
             self,
             side,

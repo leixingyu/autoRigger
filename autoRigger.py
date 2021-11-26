@@ -9,7 +9,7 @@ import maya.cmds as cmds
 from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 
-from utility.common import setup
+from . import util
 from .base import base
 from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
@@ -19,6 +19,7 @@ from .chain.spine import spine, spineQuad
 from .constant import RigComponents, RigType, Side
 from .module import foot, hand
 from .template import biped, quadruped
+from .utility.common import setup
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +28,7 @@ UI_PATH = os.path.join('ui', 'autoRigger.ui')
 
 class AutoRiggerWindow(QtWidgets.QMainWindow):
     """
-    This module is the class for the main dialog
+    Main dialog window class
     """
 
     def __init__(self, parent=setup.get_maya_main_window()):
@@ -43,9 +44,8 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.items = list()
         self.to_build = list()
 
-        self.connect_signals()
-
         # Reset tab position and populate list
+        self.connect_signals()
         self.connect_items()
         self.ui_tabWidget.setCurrentIndex(0)
         self.refresh_items()
@@ -57,7 +57,9 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldZ.setValidator(int_only)
 
     def connect_signals(self):
-        # Connect signals and slots
+        """
+        Connect signals and slots
+        """
         self.ui_tabWidget.currentChanged.connect(lambda: self.refresh_items())
         self.ui_listWidget.itemClicked.connect(lambda: self.initialize_field())
         self.ui_guideBtn.clicked.connect(lambda: self.create_guide())
@@ -224,13 +226,16 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.ui_worldZ.setText('')
 
     def empty_scene(self):
+        """
+        Delete all master groups
+        """
         self.to_build = list()
-        loc_grp = '_Locators'
-        ctrl_grp = '_Controllers'
-        jnt_grp = '_Joints'
-        mesh_grp = '_Meshes'
-
-        for grp in [loc_grp, ctrl_grp, jnt_grp, mesh_grp]:
+        for grp in [
+            util.G_LOC_GRP,
+            util.G_JNT_GRP,
+            util.G_CTRL_GRP,
+            util.G_MESH_GRP
+        ]:
             try:
                 cmds.delete(grp)
             except:

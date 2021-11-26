@@ -18,10 +18,19 @@ ATTRS = {
 
 class LegQuad(bone.Bone):
     """
-    Module for quadruped leg module
+    Abstract class for creating rig system for quadruped leg
     """
 
+    # TODO: get rid of un-necessary default value
     def __init__(self, side, name, distance=1.5, height=0.2, is_front=0):
+        """
+        Extend: specify distance and height attribute, and whether
+        or not the leg is in the front
+
+        :param distance: float. length between ankle and hip
+        :param height: float. height from foot to ankle
+        :param is_front: bool. whether the leg is the front leg
+        """
         bone.Bone.__init__(self, side, name)
         self.is_front = is_front
 
@@ -41,6 +50,9 @@ class LegQuad(bone.Bone):
 
     @bone.update_base_name
     def create_namespace(self):
+        """
+        Override: create naming for quadruped foot
+        """
         for comp in self.limb_comps:
             self.locs.append('{}{}_loc'.format(self.base, comp))
             self.jnts.append('{}{}_jnt'.format(self.base, comp))
@@ -54,6 +66,9 @@ class LegQuad(bone.Bone):
         self.helper_ik = '{}helper_ik'.format(self.base)
 
     def set_shape(self):
+        """
+        Override: setup controller shapes for quadruped legs
+        """
         self._shape = list(range(3))
 
         self._shape[0] = shape.make_sphere()
@@ -61,31 +76,27 @@ class LegQuad(bone.Bone):
         self._shape[2] = shape.make_circle()
         
     def create_locator(self):
-        cmds.spaceLocator(n=self.locs[0])
+        """
+        Override: create locator guides for quadruped leg placement
+        """
+        for loc in self.locs:
+            cmds.spaceLocator(n=loc)
 
-        cmds.spaceLocator(n=self.locs[1])
         cmds.parent(self.locs[1], self.locs[0], r=1)
-        
-        if not self.is_front:
-            cmds.move(0, -self.distance, 0, self.locs[1], r=1)
-        else:
-            cmds.move(0, -self.distance, -0.5 * self.distance, self.locs[1], r=1)
+        cmds.move(0, -self.distance, 0, self.locs[1], r=1)
+        if self.is_front:
+            cmds.move(0, 0, -0.5 * self.distance, self.locs[1], r=1)
 
-        cmds.spaceLocator(n=self.locs[2])
         cmds.parent(self.locs[2], self.locs[1], r=1)
+        cmds.move(0, -self.distance, 0, self.locs[2], r=1)
         if not self.is_front:
-            cmds.move(0, -self.distance, -0.5 * self.distance, self.locs[2], r=1)
-        else:
-            cmds.move(0, -self.distance, 0, self.locs[2], r=1)
+            cmds.move(0, 0, -0.5 * self.distance, self.locs[2], r=1)
 
-        cmds.spaceLocator(n=self.locs[3])
         cmds.parent(self.locs[3], self.locs[2], r=1)
-        if not self.is_front:
-            cmds.move(0, -self.distance+self.height, 0, self.locs[3], r=1)
-        else:
-            cmds.move(0, -self.distance+self.height, 0.5 * self.distance, self.locs[3], r=1)
+        cmds.move(0, -self.distance+self.height, 0, self.locs[3], r=1)
+        if self.is_front:
+            cmds.move(0, 0, 0.5 * self.distance, self.locs[3], r=1)
 
-        cmds.spaceLocator(n=self.locs[4])
         cmds.parent(self.locs[4], self.locs[3], r=1)
         cmds.move(0, 0, 0.5 * self.distance, self.locs[4], r=1)
 
@@ -93,6 +104,11 @@ class LegQuad(bone.Bone):
         return self.locs[0]
 
     def create_joint(self):
+        """
+        Override: create result joint chain for quadruped, and helper joint
+        chain for hind/back leg
+        """
+
         # Result joint chain
         cmds.select(clear=1)
         for index in range(len(self.locs)):
@@ -103,21 +119,25 @@ class LegQuad(bone.Bone):
         joint.orient_joint(self.jnts[0])
         cmds.parent(self.jnts[0], util.G_JNT_GRP)
 
-        if not self.is_front:
-            # Helper joint chain
-            cmds.select(clear=1)
-            for index in range(len(self.locs[:-1])):
-                loc = cmds.ls(self.locs[index], transforms=1)
-                loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
-                cmds.joint(p=loc_pos, n=self.helpers[index])
-    
-            joint.orient_joint(self.helpers[0])
-            cmds.parent(self.helpers[0], util.G_JNT_GRP)
-            cmds.setAttr(self.helpers[0]+'.v', 0)
+        if self.is_front:
+            return self.jnts[0]
 
+        # Helper joint chain
+        cmds.select(clear=1)
+        for index in range(len(self.locs[:-1])):
+            loc = cmds.ls(self.locs[index], transforms=1)
+            loc_pos = cmds.xform(loc, q=1, t=1, ws=1)
+            cmds.joint(p=loc_pos, n=self.helpers[index])
+
+        joint.orient_joint(self.helpers[0])
+        cmds.parent(self.helpers[0], util.G_JNT_GRP)
+        cmds.setAttr(self.helpers[0]+'.v', 0)
         return self.jnts[0]
 
     def place_controller(self):
+        """
+        Override: create and place controller for quadruped leg
+        """
         cmds.duplicate(self._shape[0], n=self.ctrls[0])
         cmds.group(em=1, n=self.offsets[0])
         transform.clear_xform(self.ctrls[0], self.offsets[0], self.jnts[0])
@@ -128,12 +148,17 @@ class LegQuad(bone.Bone):
         transform.clear_xform(self.ctrls[3], self.offsets[3], self.locs[3])
 
         # custom attribute for later pivot group access
-        cmds.addAttr(self.ctrls[3], sn='flx', ln=ATTRS['flx'], at='double', k=1)
-        cmds.addAttr(self.ctrls[3], sn='swv', ln=ATTRS['swv'], at='double', k=1)
-        cmds.addAttr(self.ctrls[3], sn='tap', ln=ATTRS['tap'], at='double', k=1)
-        cmds.addAttr(self.ctrls[3], sn='tip', ln=ATTRS['tip'], at='double', k=1)
+        cmds.addAttr(self.ctrls[3],
+                     sn='flx', ln=ATTRS['flx'], at='double', k=1)
+        cmds.addAttr(self.ctrls[3],
+                     sn='swv', ln=ATTRS['swv'], at='double', k=1)
+        cmds.addAttr(self.ctrls[3],
+                     sn='tap', ln=ATTRS['tap'], at='double', k=1)
+        cmds.addAttr(self.ctrls[3],
+                     sn='tip', ln=ATTRS['tip'], at='double', k=1)
         if self.is_front:
-            cmds.addAttr(self.ctrls[3], sn='wr', ln=ATTRS['wr'], at='double', k=1)
+            cmds.addAttr(self.ctrls[3],
+                         sn='wr', ln=ATTRS['wr'], at='double', k=1)
 
         # Ankle control - poleVector
         pole_index = 1 if self.is_front else 2
@@ -152,6 +177,9 @@ class LegQuad(bone.Bone):
         )
 
     def build_ik(self):
+        """
+        Override: create multi-IK system for foot movement
+        """
         cmds.ikHandle(
             sj=self.jnts[0], ee=self.jnts[2], n=self.leg_ik, sol='ikRPsolver')
         cmds.ikHandle(
@@ -171,6 +199,9 @@ class LegQuad(bone.Bone):
             cmds.setAttr(self.helper_ik+'.v', 0)
 
     def add_measurement(self):
+        """
+        Create node network for measuring leg length for stretching
+        """
         hip_vec = vector.Vector(cmds.xform(self.jnts[0], q=1, ws=1, t=1))
         knee_vec = vector.Vector(cmds.xform(self.jnts[1], q=1, ws=1, t=1))
         ankle_vec = vector.Vector(cmds.xform(self.jnts[2], q=1, ws=1, t=1))
@@ -238,6 +269,10 @@ class LegQuad(bone.Bone):
         cmds.parentConstraint(self.ctrls[3], ankle_loc, mo=1)
 
     def add_constraint(self):
+        """
+        Override: build IK system, connect controllers and joints
+        add stretching using measurement node network
+        """
         self.build_ik()
 
         # Shoulder pivot

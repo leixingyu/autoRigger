@@ -9,10 +9,19 @@ from ....module import hand
 
 class Arm(bone.Bone):
     """
-    Arm rig module with a limb and a hand
+    Create a FK/IK control rig system for arm
+
+    Uses the combination of LimbFKIK and Hand modules
     """
 
     def __init__(self, side, name, distance=6, interval=0.5, gap=2):
+        """
+        Extend: specify distance, interval and gap for connection
+
+        :param distance: float. length of the limb
+        :param interval: float. interval for Hand module
+        :param gap: float. gap for Hand module
+        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'arm'
 
@@ -34,8 +43,11 @@ class Arm(bone.Bone):
         self._comps = [self.hand, self.limb]
 
     def create_locator(self):
+        """
+        Extend: move hand and parent it with top of the limb
+        """
         super(Arm, self).create_locator()
-        # move hand based on side
+
         if self._side == Side.LEFT:
             util.move(
                 self.hand.wrist.locs[0],
@@ -48,6 +60,9 @@ class Arm(bone.Bone):
         cmds.parent(self.hand.wrist.locs[0], self.limb.locs[-1])
 
     def add_constraint(self):
+        """
+        Extend: connect the hand and limb control
+        """
         super(Arm, self).add_constraint()
         cmds.parentConstraint(
             self.limb.jnts[-1], self.hand.wrist.ctrls[0], mo=1)

@@ -8,10 +8,19 @@ from ....module import foot
 
 class Leg(bone.Bone):
     """
-    Biped leg rig module with a limb and a foot
+    Create a FK/IK control rig system for leg
+
+    Uses the combination of LimbFKIK and Foot modules
     """
 
     def __init__(self, side, name, distance=8, interval=0.5, height=0.4):
+        """
+        Extend: specify distance, interval and height for connection
+
+        :param distance: float. length of the limb
+        :param interval: float. interval for Foot module
+        :param height: float. gap for Foot module
+        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'leg'
 
@@ -27,15 +36,20 @@ class Leg(bone.Bone):
         self._comps = [self.limb, self.foot]
 
     def create_locator(self):
+        """
+        Extend: move foot and parent it with top of the limb
+        """
         super(Leg, self).create_locator()
 
         util.move(self.foot.locs[0], [0, -self.distance, 0])
         cmds.parent(self.foot.locs[0], self.limb.locs[-1])
 
     def add_constraint(self):
+        """
+        Extend: connect the foot and limb control, constraints and IK switch
+        """
         super(Leg, self).add_constraint()
 
-        # Connect foot and limb
         # IK constraint #
         cmds.parentConstraint(
             self.foot.rev_jnts[0], self.limb.ik_chain.ctrls[-1], mo=1)
@@ -58,7 +72,7 @@ class Leg(bone.Bone):
             dv=0,
             v=0)
 
-        # Sub controller visibility and channel hide #
+        # controller visibility and channel lock #
         cmds.setDrivenKeyframe(
             self.limb.ik_chain.ctrls[-1]+'.v',
             cd=self.limb.ctrls[0]+'.FK_IK',

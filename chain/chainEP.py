@@ -9,10 +9,20 @@ from ..utility.useful import algorithm
 
 class ChainEP(chain.Chain):
     """
-    Abstract EP (Edit Point) type Chain module
+    Create an EP (Edit Point) control rig system for a chain-like joints
+
+    The EP serves as controllers like in a EP-curve with fall-off influence
     """
 
-    def __init__(self, side, name, segment, curve, cv=None):
+    def __init__(self, side, name, segment, curve, cv=0):
+        """
+        Extend: specify the guide curve and the number of control vertices
+        which affects the fall-off influences;
+        the number of cv should be less than the segment
+
+        :param curve: str. curve transform name used for guide
+        :param cv: int. number of control vertices
+        """
         chain.Chain.__init__(self, side, name, segment)
 
         if not cv:
@@ -24,13 +34,17 @@ class ChainEP(chain.Chain):
         self.guide_curve = None
         self.curve = curve
         self.cvs = list()
-        percentages = algorithm.get_percentages(cv)
-        for p in percentages:
+
+        percents = algorithm.get_percentages(cv)
+        for p in percents:
             integer = int(round(p*(self.segment-1)))
             self.cvs.append(integer)
 
     @bone.update_base_name
     def assign_secondary_naming(self):
+        """
+        Override: create segment based naming and guide curve name
+        """
         for index in range(self.segment):
             self.locs.append('{}{}_loc'.format(self.base, index))
             self.jnts.append('{}{}_jnt'.format(self.base, index))
@@ -42,6 +56,9 @@ class ChainEP(chain.Chain):
         self.guide_curve = '{}_curve'.format(self.base)
 
     def create_locator(self):
+        """
+        Override: create guide locators evenly distributed on guide curve
+        """
         locs = util.create_locators_on_curve(self.curve, self.segment)
         for index, loc in enumerate(locs):
             cmds.rename(loc, self.locs[index])
@@ -50,9 +67,15 @@ class ChainEP(chain.Chain):
         cmds.parent(self.locs[0], util.G_LOC_GRP)
 
     def set_shape(self):
+        """
+        Override: setup sphere as controller shape
+        """
         self._shape = shape.make_sphere(self._scale)
 
     def place_controller(self):
+        """
+        Override: create and place controller based on control vertices
+        """
         # TODO: use clear_xform
         for index in self.cvs:
             cmds.duplicate(self._shape, n=self.ctrls[index])
@@ -64,14 +87,17 @@ class ChainEP(chain.Chain):
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
 
     def add_constraint(self):
-        # smooth fall off constraint along the chain
+        """
+        Override: add smooth fall-off constraint between joints and controller
+        """
+        # smooth fall-off constraint along the chain
         for i in range(len(self.cvs)-1):
             head = self.cvs[i]
             tail = self.cvs[i+1]
             for j in range(head, tail+1):
                 gap = 1.00/(tail - head)
 
-                # why not using parent constraint? because it will break things
+                # parent constraint will break things
                 cmds.pointConstraint(self.ctrls[head], self.jnts[j],
                                      w=1 - ((j-head) * gap), mo=1)
                 cmds.pointConstraint(self.ctrls[tail], self.jnts[j],

@@ -10,11 +10,16 @@ from ..constant import Side
 
 class Biped(bone.Bone):
     """
-    This module creates a biped template rig consisting of
-    one head, two arms, one spine & two legs
+    Create a control rig system for biped character
+
+    Consists of two Arms, two Legs, one Spine, three Base for neck,
+    head and head tip
     """
 
     def __init__(self, side, name):
+        """
+        Override: initialize with multiple rig components
+        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'biped'
 
@@ -43,11 +48,16 @@ class Biped(bone.Bone):
         ]
 
     def create_locator(self):
+        """
+        Extend: create and then move all locators
+        """
         super(Biped, self).create_locator()
-
         self.move_locator()
 
     def move_locator(self):
+        """
+        Move all the roots of locators accordingly
+        """
         util.move(self.l_arm.limb.locs[0],
                   pos=[self.pos[0]+2, self.pos[1]+self.s_len, self.pos[2]])
         util.move(self.r_arm.limb.locs[0],
@@ -68,6 +78,9 @@ class Biped(bone.Bone):
                   pos=[self.pos[0], self.pos[1]+self.s_len+2, self.pos[2]])
 
     def create_joint(self):
+        """
+        Create all the joints from all the rig components
+        """
         super(Biped, self).create_joint()
 
         # Leg root to spine root
@@ -84,6 +97,9 @@ class Biped(bone.Bone):
         cmds.parent(self.tip.jnts[0], self.head.jnts[0])
 
     def add_constraint(self):
+        """
+        Add constraints to connect all the rig components
+        """
         super(Biped, self).add_constraint()
 
         # Leg driven by root spine control #

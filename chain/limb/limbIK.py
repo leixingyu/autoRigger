@@ -9,10 +9,15 @@ from ...utility.rigging import transform
 
 class LimbIK(chainIK.ChainIK):
     """
-    Abstract IK limb rig
+    Create a IK control rig system for limb
     """
 
-    def __init__(self, side, name, length, ltype='null'):
+    def __init__(self, side, name, length, ltype=None):
+        """
+        Extend: specify limb type and side determines direction
+
+        :param ltype: str. type of the limb: 'arm' or 'leg'
+        """
         self._rtype = ltype
 
         self.direction = [0, -1, 0]
@@ -30,6 +35,9 @@ class LimbIK(chainIK.ChainIK):
             direction=self.direction)
 
     def place_controller(self):
+        """
+        Override: create and place root, IK pole and top controllers
+        """
         # TODO: move pole vector out
 
         for index in range(self.segment):
@@ -40,6 +48,9 @@ class LimbIK(chainIK.ChainIK):
             cmds.parent(self.offsets[index], util.G_CTRL_GRP)
 
     def build_ik(self):
+        """
+        Override: build the IK controller for limb using RP solver
+        """
         if self.direction == 'vertical':
             joint.set_prefer_angle(self.jnts[1], [0, 0, -1])
         else:
@@ -52,6 +63,9 @@ class LimbIK(chainIK.ChainIK):
             n=self.ik, sol='ikRPsolver')
 
     def add_constraint(self):
+        """
+        Override: no stretching support
+        """
         self.build_ik()
 
         cmds.pointConstraint(self.ctrls[-1], self.ik, mo=1)

@@ -13,10 +13,18 @@ from ..utility.common import hierarchy
 
 class Hand(bone.Bone):
     """
-    Hand rig module with multiple fingers and a wrist
+    Create a rig system for Hand
+
+    Uses the combination of Base and multiple Finger modules
     """
 
     def __init__(self, side, name, interval=0.5, distance=2):
+        """
+        Extend: specify interval and distance for hand creation
+
+        :param interval: float. length between finger roots
+        :param distance: float. length between wrist and finger roots
+        """
         bone.Bone.__init__(self, side, name)
         self._rtype = 'hand'
 
@@ -42,6 +50,9 @@ class Hand(bone.Bone):
         self._comps.extend(self.fingers)
 
     def create_locator(self):
+        """
+        Override: create wrist and fingers guide locators
+        """
         super(Hand, self).create_locator()
 
         # move around the locators
@@ -61,6 +72,9 @@ class Hand(bone.Bone):
             [f.locs[0] for f in self.fingers], self.wrist.locs[0])
 
     def create_joint(self):
+        """
+        Override: create wrist and fingers joints and parent them together
+        """
         super(Hand, self).create_joint()
 
         fingers = [obj.jnts[0] for obj in self.fingers]
@@ -68,8 +82,9 @@ class Hand(bone.Bone):
         hierarchy.batch_parent(fingers, wrist)
 
     def add_constraint(self):
+        """
+        Override: connect wrist and fingers through constraints
+        """
         super(Hand, self).add_constraint()
-
         for obj in self.fingers:
-            # add individual finger constraint
             cmds.parentConstraint(self.wrist.jnts[0], obj.offsets[0], mo=1)

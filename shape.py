@@ -9,6 +9,9 @@ NAMER = strGenerator.StrGenerator(prefix='tmp_')
 
 
 def make_circle(scale=1, name=None):
+    """
+    Make a circle nurbs curve
+    """
     if not name:
         name = NAMER.tmp
 
@@ -21,6 +24,9 @@ def make_circle(scale=1, name=None):
 
 
 def make_arrow(scale=1, name=None):
+    """
+    Make a four-directional arrow nurbs curve
+    """
     if not name:
         name = NAMER.tmp
 
@@ -46,6 +52,9 @@ def make_arrow(scale=1, name=None):
 
 
 def make_sphere(scale=1, name=None):
+    """
+    Make a sphere nurbs curve
+    """
     if not name:
         name = NAMER.tmp
 
@@ -58,6 +67,12 @@ def make_sphere(scale=1, name=None):
 
 
 def make_text(text, scale=1, name=None):
+    """
+    Make a nurbs curve with text
+
+    :param text: str. text for display
+    :return: str. transform node of the shape curve
+    """
     if not name:
         name = NAMER.tmp
 

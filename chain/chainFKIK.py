@@ -14,10 +14,23 @@ ATTRS = {
 
 class ChainFKIK(chain.Chain):
     """
-    Abstract FK/IK type Chain module
+    Create a FK/IK control rig system for a chain-like joints
+
+    This control rig consist of three overlapping joint chains:
+    FK chain, IK chain and result joint chain
+    in which, the result joint chain is driven by both FK and IK chain
     """
 
     def __init__(self, side, name, segment, length, direction, is_stretch=0):
+        """
+        Extend: create FK/IK and result three-chain system
+        specify length and direction of the chain
+        and whether it allows for stretching
+
+        :param length: float. total length of rig chain
+        :param direction: vector.Vector. world direction from root to top node
+        :param is_stretch: bool. allow stretching for the rig
+        """
         chain.Chain.__init__(self, side, name, segment)
 
         self.ik_chain = chainIK.ChainIK(side, name, segment, length, direction, is_stretch)
@@ -29,6 +42,9 @@ class ChainFKIK(chain.Chain):
 
     @bone.update_base_name
     def create_namespace(self):
+        """
+        Override: create naming for all three chains
+        """
         self.ik_chain.create_namespace()
         self.fk_chain.create_namespace()
 
@@ -40,22 +56,28 @@ class ChainFKIK(chain.Chain):
         self.ctrls.append('{}master_ctrl'.format(self.base))
 
     def set_shape(self):
+        """
+        Override: setup controller shapes for all three chains
+        """
         self.ik_chain.set_shape()
         self.fk_chain.set_shape()
         self._shape = shape.make_arrow(self._scale)
 
     def create_joint(self):
+        """
+        Override: create FK, IK and result joint chain
+        """
         self.ik_chain.create_joint()
         self.fk_chain.create_joint()
 
-        # Result jnt
+        # result jnt
         cmds.select(clear=1)
         for index, loc in enumerate(self.locs):
             pos = cmds.xform(loc, q=1, t=1, ws=1)
             cmds.joint(p=pos, n=self.jnts[index])
             util.uniform_scale(self.jnts[index], self._scale)
 
-        # Cleanup
+        # cleanup
         cmds.setAttr(self.ik_chain.jnts[0]+'.v', 0)
         cmds.setAttr(self.fk_chain.jnts[0]+'.v', 0)
 
@@ -63,10 +85,13 @@ class ChainFKIK(chain.Chain):
         joint.orient_joint(self.jnts[0])
 
     def place_controller(self):
+        """
+        Override: create and place FK, IK and result chain controller
+        """
         self.ik_chain.place_controller()
         self.fk_chain.place_controller()
 
-        # Master control
+        # result joint master control
         cmds.duplicate(self._shape, n=self.ctrls[0])
         cmds.rotate(0, 0, 90, self.ctrls[0])
         cmds.group(n=self.offsets[0], em=1)
@@ -83,6 +108,10 @@ class ChainFKIK(chain.Chain):
         cmds.parent(self.offsets[0], util.G_CTRL_GRP)
 
     def add_constraint(self):
+        """
+        Override: add constraint relationship between the result joint
+        and the other two (FK/IK) chain
+        """
         self.ik_chain.add_constraint()
         self.fk_chain.add_constraint()
 

@@ -4,10 +4,15 @@ from ...constant import Side
 
 class LimbFK(chainFK.ChainFK):
     """
-    Abstract FK limb rig
+    Create a FK control rig system for limb
     """
 
-    def __init__(self, side, name, length, ltype='null'):
+    def __init__(self, side, name, length, ltype=None):
+        """
+        Extend: specify limb type and side determines direction
+
+        :param ltype: str. type of the limb: 'arm' or 'leg'
+        """
         self._rtype = ltype
 
         self.direction = [0, -1, 0]
