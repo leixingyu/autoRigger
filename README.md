@@ -4,6 +4,21 @@ Looking back at this project I started three years ago, I realized there's a hug
 room for improvement as my skill grows. So, I decided to do a major overhaul. It may take couple of weeks or 
 months, maybe even years. who knows?
 
+#### Current Status
+
+- [x] code refactor (including rig abstraction)
+- [x] directory organization
+- [x] variable naming change
+- [x] formatting (imports, line length, docstring etc)
+- [ ] data widget mapping
+- [ ] testing
+
+#### Future Status
+
+- [ ] implement facial rigging
+- [ ] future refactor quadruped leg modules
+- [ ] to-dos
+
 ## Introduction
 
 AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well

@@ -23,7 +23,9 @@ from .utility.common import setup
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-UI_PATH = os.path.join('ui', 'autoRigger.ui')
+MAIN_UI = os.path.join('ui', 'autoRigger.ui')
+CHAIN_UI = os.path.join('ui', 'chain.ui')
+CHAIN_EP_UI = os.path.join('ui', 'chainEP.ui')
 
 
 class AutoRiggerWindow(QtWidgets.QMainWindow):
@@ -36,7 +38,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         Initialization
         """
         super(AutoRiggerWindow, self).__init__(parent)
-        _loadUi(os.path.join(CURRENT_PATH, UI_PATH), self)
+        _loadUi(os.path.join(CURRENT_PATH, MAIN_UI), self)
 
         self.setWindowFlags(QtCore.Qt.Window)
 
@@ -48,12 +50,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         self.connect_items()
         self.ui_tabWidget.setCurrentIndex(0)
         self.refresh_items()
-
-        # position are numeric values
-        int_only = QtGui.QIntValidator()
-        self.ui_worldX.setValidator(int_only)
-        self.ui_worldY.setValidator(int_only)
-        self.ui_worldZ.setValidator(int_only)
 
     def connect_signals(self):
         """
@@ -220,9 +216,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """
         self.ui_nameEdit.setText('')
         self.ui_sideCBox.setCurrentIndex(0)
-        self.ui_worldX.setText('')
-        self.ui_worldY.setText('')
-        self.ui_worldZ.setText('')
 
     def empty_scene(self):
         """
