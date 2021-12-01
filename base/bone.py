@@ -22,7 +22,7 @@ def update_base_name(func):
     @wraps(func)
     def wrap(self):
         self.base = '{}_{}_{}'.format(
-            self._rtype, self._side.value, self._name)
+            self._rtype, self._side, self._name)
         func(self)
     return wrap
 
