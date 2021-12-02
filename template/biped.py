@@ -8,6 +8,15 @@ from ..chain.spine import spine
 from ..constant import Side
 
 
+class BipedItem(base.BaseItem):
+    def __init__(self, name='biped'):
+        super(BipedItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Biped(side, base_name)
+        self._obj.build_guide()
+
+
 class Biped(bone.Bone):
     """
     Create a control rig system for biped character

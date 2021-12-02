@@ -1,4 +1,14 @@
 from . import legQuad
+from ....base import base
+
+
+class LegBackItem(base.BaseItem):
+    def __init__(self, name='quad-hind'):
+        super(LegBackItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = LegBack(side, base_name)
+        self._obj.build_guide()
 
 
 class LegBack(legQuad.LegQuad):

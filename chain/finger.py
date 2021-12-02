@@ -1,5 +1,15 @@
 from ..chain import chainFK
 from ..constant import Side
+from ..base import base
+
+
+class FingerItem(base.BaseItem):
+    def __init__(self, name='biped-finger'):
+        super(FingerItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Finger(side, base_name)
+        self._obj.build_guide()
 
 
 class Finger(chainFK.ChainFK):

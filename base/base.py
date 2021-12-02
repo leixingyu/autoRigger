@@ -1,9 +1,40 @@
+import os
+
 import maya.cmds as cmds
+from Qt import QtWidgets, QtGui, _loadUi
 
-
+from ..constant import Side, UI_DIR
 from .. import util, shape
 from ..base import bone
 from ..utility.rigging import transform
+
+
+class BaseItem(bone.RigItem):
+    def __init__(self, name='base'):
+        super(BaseItem, self).__init__(name)
+        self.base_ui = 'base.ui'
+        self.init_base()
+
+    def build_guide(self, side, base_name):
+        self._obj = Base(side, base_name)
+        self._obj.build_guide()
+
+    def build_rig(self):
+        self._obj.build_rig()
+
+    def init_base(self):
+        """Override"""
+        self.base_widget = QtWidgets.QWidget()
+        _loadUi(os.path.join(UI_DIR, self.base_ui), self.base_widget)
+
+        for side in Side:
+            self.base_widget.ui_side_cbox.addItem(side.value)
+
+    def parse_base(self):
+        """Override"""
+        name = self.base_widget.ui_name_edit.text()
+        side = self.base_widget.ui_side_cbox.currentText()
+        return [Side(side), name]
 
 
 class Base(bone.Bone):

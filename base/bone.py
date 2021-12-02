@@ -1,9 +1,11 @@
+import os
 from functools import wraps
 
 import maya.cmds as cmds
+from Qt import QtWidgets, QtGui
 
 from .. import util
-from ..constant import Side
+from ..constant import Side, ICON_DIR
 from ..utility.useful import strGenerator
 from ..utility.datatype import color
 from ..utility.rigging import transform
@@ -22,9 +24,54 @@ def update_base_name(func):
     @wraps(func)
     def wrap(self):
         self.base = '{}_{}_{}'.format(
-            self._rtype, self._side, self._name)
+            self._rtype, self._side.value, self._name)
         func(self)
     return wrap
+
+
+class RigItem(QtWidgets.QListWidgetItem):
+    """
+    A subclass of QListWidgetItem that contains the widgets correlates with
+    the rig item and widget property
+    """
+
+    def __init__(self, name):
+        super(RigItem, self).__init__()
+
+        self.icon = '{}.png'.format(name)
+        self.base_ui = None
+        self.extra_ui = None
+
+        self.setText(name)
+        icon = QtGui.QIcon()
+        path = os.path.join(ICON_DIR, self.icon)
+        icon.addFile(path)
+        self.setIcon(icon)
+
+        # property widget
+        self.base_widget = None
+        self.extra_widget = None
+
+        # rig component object
+        self._obj = None
+
+    def init_base(self):
+        pass
+
+    def init_extra(self):
+        pass
+
+    def parse_extra(self):
+        pass
+
+    def parse_base(self):
+        pass
+
+    def build_guide(self, *args, **kwargs):
+        pass
+
+    def build_rig(self):
+        pass
 
 
 class Bone(object):

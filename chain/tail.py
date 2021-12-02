@@ -1,4 +1,14 @@
 from ..chain import chainFKIK
+from ..base import base
+
+
+class TailItem(base.BaseItem):
+    def __init__(self, name='quad-tail'):
+        super(TailItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Tail(side, base_name)
+        self._obj.build_guide()
 
 
 class Tail(chainFKIK.ChainFKIK):

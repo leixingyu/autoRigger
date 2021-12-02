@@ -1,10 +1,19 @@
 import maya.cmds as cmds
 
 from .... import util
-from ....base import bone
+from ....base import base, bone
 from ....chain.limb import limbFKIK
 from ....constant import Side
 from ....module import hand
+
+
+class ArmItem(base.BaseItem):
+    def __init__(self, name='biped-arm'):
+        super(ArmItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Arm(side, base_name)
+        self._obj.build_guide()
 
 
 class Arm(bone.Bone):

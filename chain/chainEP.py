@@ -1,10 +1,38 @@
+import os
+
 import maya.cmds as cmds
+from Qt import QtWidgets, _loadUi
 
 from . import chain
 from .. import util, shape
-from ..base import bone
+from ..base import bone, base
+from ..constant import UI_DIR
 from ..utility.rigging import transform
 from ..utility.useful import algorithm
+
+
+class ChainEPItem(base.BaseItem):
+    def __init__(self, name='chain-ep'):
+        super(ChainEPItem, self).__init__(name)
+        self.extra_ui = 'chainEP.ui'
+        self.init_extra()
+
+    def build_guide(self, *args, **kwargs):
+        """Override"""
+        self._obj = ChainEP(*args, **kwargs)
+        self._obj.build_guide()
+
+    def init_extra(self):
+        """Override"""
+        self.extra_widget = QtWidgets.QWidget()
+        _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
+
+    def parse_extra(self):
+        seg = self.widget.ui_seg_sbox.value()
+        cvs = self.widget.ui_cvs_sbox.value()
+        guide_curve = self.widget.ui_gcurve_edit.text()
+
+        return [seg, guide_curve, cvs]
 
 
 class ChainEP(chain.Chain):

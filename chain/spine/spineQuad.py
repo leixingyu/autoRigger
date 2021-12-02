@@ -1,4 +1,14 @@
 from ...chain import chainIK
+from ...base import base
+
+
+class SpineQuadItem(base.BaseItem):
+    def __init__(self, name='quad-spine'):
+        super(SpineQuadItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = SpineQuad(side, base_name)
+        self._obj.build_guide()
 
 
 class SpineQuad(chainIK.ChainIK):

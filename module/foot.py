@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 from .. import util, shape
-from ..base import bone
+from ..base import bone, base
 from ..constant import Side
 from ..utility.common import hierarchy
 
@@ -14,6 +14,15 @@ ATTRS = {
 
 
 cmds.sdk = cmds.setDrivenKeyframe
+
+
+class FootItem(base.BaseItem):
+    def __init__(self, name='biped-foot'):
+        super(FootItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Foot(side, base_name)
+        self._obj.build_guide()
 
 
 class Foot(bone.Bone):

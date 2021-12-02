@@ -11,6 +11,15 @@ from ..utility.common import hierarchy
 # FIXME: lets get rid of the side factor and use direction instead
 
 
+class HandItem(base.BaseItem):
+    def __init__(self, name='biped-hand'):
+        super(HandItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Hand(side, base_name)
+        self._obj.build_guide()
+
+
 class Hand(bone.Bone):
     """
     Create a rig system for Hand

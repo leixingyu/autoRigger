@@ -15,6 +15,15 @@ ATTRS = {
 }
 
 
+class QuadrupedItem(base.BaseItem):
+    def __init__(self, name='quad'):
+        super(QuadrupedItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = Quadruped(side, base_name)
+        self._obj.build_guide()
+
+
 class Quadruped(bone.Bone):
     """
     Create a control rig system for quadruped character

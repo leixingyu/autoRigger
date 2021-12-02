@@ -1,8 +1,36 @@
+import os
+
 import maya.cmds as cmds
+from Qt import QtWidgets, QtGui, _loadUi
 
 from . import chain
-from ..base import bone
+from ..base import base, bone
+from ..constant import UI_DIR
 from ..utility.datatype import vector
+
+
+class ChainFKItem(base.BaseItem):
+    def __init__(self, name='chain-fk'):
+        super(ChainFKItem, self).__init__(name)
+        self.extra_ui = 'chain.ui'
+        self.init_extra()
+
+    def build_guide(self, *args, **kwargs):
+        """Override"""
+        self._obj = ChainFK(*args, **kwargs)
+        self._obj.build_guide()
+
+    def init_extra(self):
+        """Override"""
+        self.extra_widget = QtWidgets.QWidget()
+        _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
+
+    def parse_extra(self):
+        seg = self.widget.ui_seg_sbox.value()
+        length = self.widget.ui_len_sbox.value()
+        direction = self.widget.ui_dir_cbox.currentText()
+
+        return [seg, length, direction]
 
 
 class ChainFK(chain.Chain):

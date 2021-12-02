@@ -1,7 +1,17 @@
 from ...chain import chainFKIK
 from ...chain.limb import limbIK, limbFK
 from ...constant import Side
+from ...base import base
 from ...utility.datatype import vector
+
+
+class LimbFKIKItem(base.BaseItem):
+    def __init__(self, name='limb'):
+        super(LimbFKIKItem, self).__init__(name)
+
+    def build_guide(self, side, base_name):
+        self._obj = LimbFKIK(side, base_name)
+        self._obj.build_guide()
 
 
 class LimbFKIK(chainFKIK.ChainFKIK):
