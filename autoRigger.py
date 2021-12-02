@@ -2,7 +2,6 @@
 AutoRigger provides procedural approach for maya rigging
 """
 
-import logging
 import os
 
 import maya.cmds as cmds
@@ -10,26 +9,47 @@ from Qt import QtCore, QtGui, QtWidgets
 from Qt import _loadUi
 
 from . import util, constant
-from . import rigItem
 from .base import base
 from .chain import finger, tail, chainFK, chainIK, chainEP, chainFKIK
 from .chain.limb import limbFKIK
 from .chain.limb.arm import arm
 from .chain.limb.leg import leg, legBack, legFront
 from .chain.spine import spine, spineQuad
-from .constant import RigComponents, RigType, Side
+from .constant import RigType
 from .module import foot, hand
 from .template import biped, quadruped
 from .utility.common import setup
 
 TAB_RIG_MAPPING = {
     RigType.BIPED: [
-        rigItem.BaseItem,
-        rigItem.ChainFKItem
+        biped.BipedItem,
+        arm.ArmItem,
+        lambda: base.BaseItem('biped-head'),
+        leg.LegItem,
+        spine.SpineItem
+    ],
+
+    RigType.QUADRUPED: [
+        quadruped.QuadrupedItem,
+        legFront.LegFrontItem,
+        legBack.LegBackItem,
+        spineQuad.SpineQuadItem,
+        tail.TailItem
     ],
 
     RigType.CHAIN: [
-        rigItem.ChainFKItem
+        chainEP.ChainEPItem,
+        chainFK.ChainFKItem,
+        chainFKIK.ChainFKIKItem,
+        chainIK.ChainIKItem
+    ],
+
+    RigType.CUSTOM: [
+        base.BaseItem,
+        finger.FingerItem,
+        hand.HandItem,
+        foot.FootItem,
+        limbFKIK.LimbFKIKItem
     ]
 
 }
@@ -46,23 +66,19 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """
         super(AutoRiggerWindow, self).__init__(parent)
         _loadUi(os.path.join(constant.UI_DIR, 'autoRigger.ui'), self)
-
         self.setWindowFlags(QtCore.Qt.Window)
 
-        self.to_build = list()
-
         self.item = None
-
         # reset tab position and populate list
         self.connect_signals()
-        # self.refresh_items()
+        self.refresh_tab(0)
 
     def connect_signals(self):
         """
         Connect signals and slots
         """
         self.ui_tab_widget.currentChanged.connect(self.refresh_tab)
-        self.ui_list_widget.currentItemChanged.connect(self.update_current)
+        self.ui_list_widget.itemClicked.connect(self.update_current)
         self.ui_guide_btn.clicked.connect(self.create_guide)
         self.ui_build_btn.clicked.connect(self.create_rig)
         self.ui_clear_btn.clicked.connect(self.empty_scene)
@@ -90,12 +106,20 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
             item = func()
             self.ui_list_widget.addItem(item)
 
+        # clear item
+        self.item = None
+        self.initialize_field()
+
     def initialize_field(self):
         """
         Change the field format after clicking item
         """
+
         for i in reversed(range(self.ui_custom_layout.count())):
             self.ui_custom_layout.itemAt(i).widget().setParent(None)
+
+        if not self.item:
+            return
 
         self.ui_custom_layout.addWidget(self.item.base_widget)
         if self.item.extra_widget:
@@ -106,44 +130,27 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         Fetch all field info and build the rig guide
         """
         args = self.item.parse_base()
-
         if self.item.extra_widget:
             ex_args = self.item.parse_extra()
             args = args.extend(ex_args)
 
         self.item.build_guide(*args)
 
-        # self.to_build.append(obj)
-        # self.reset_field()
-
     def create_rig(self):
         """
         Build the Rig based on the to_build list and guide
         """
-        for item in self.to_build:
-            item.build_rig()
-        self.to_build = list()
-
-    def clear_items(self, widget):
-        """
-        This clears all items in the list widget without deleting them
-
-        :param widget: QListWidget
-        """
-        while widget.takeItem(0):
-            widget.takeItem(0)
+        self.item.build_rig()
 
     def empty_scene(self):
         """
         Delete all master groups
         """
-        self.to_build = list()
         for grp in [
             util.G_LOC_GRP,
             util.G_JNT_GRP,
             util.G_CTRL_GRP,
-            util.G_MESH_GRP
-        ]:
+            util.G_MESH_GRP]:
             try:
                 cmds.delete(grp)
             except:
