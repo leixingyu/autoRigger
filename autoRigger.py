@@ -20,6 +20,7 @@ from .module import foot, hand
 from .template import biped, quadruped
 from .utility.common import setup
 
+
 TAB_RIG_MAPPING = {
     RigType.BIPED: [
         biped.BipedItem,
@@ -96,7 +97,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """
         Clear and Re-generate Rig comp items in the list widget
         """
-
         while self.ui_list_widget.item(0):
             item = self.ui_list_widget.takeItem(0)
             del item
@@ -114,7 +114,6 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         """
         Change the field format after clicking item
         """
-
         for i in reversed(range(self.ui_custom_layout.count())):
             self.ui_custom_layout.itemAt(i).widget().setParent(None)
 
@@ -132,7 +131,7 @@ class AutoRiggerWindow(QtWidgets.QMainWindow):
         args = self.item.parse_base()
         if self.item.extra_widget:
             ex_args = self.item.parse_extra()
-            args = args.extend(ex_args)
+            args.extend(ex_args)
 
         self.item.build_guide(*args)
 
