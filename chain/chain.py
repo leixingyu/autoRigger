@@ -95,7 +95,7 @@ class Chain(base.Base):
         cmds.select(clear=1)
         for index in range(self.segment):
             cmds.joint(n=self.jnts[index])
-            transform.match_xform(self.jnts[index], self.locs[index])
+            transform.match_xform(self.jnts[index], self.locs[index], 1)
             util.uniform_scale(self.jnts[index], self._scale)
 
         cmds.parent(self.jnts[0], util.G_JNT_GRP)

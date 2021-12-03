@@ -27,12 +27,17 @@ class ChainEPItem(base.BaseItem):
         self.extra_widget = QtWidgets.QWidget()
         _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
 
+        self.extra_widget.ui_set_btn.clicked.connect(self.set_selection)
+
     def parse_extra(self):
         seg = self.extra_widget.ui_seg_sbox.value()
         cvs = self.extra_widget.ui_cvs_sbox.value()
         guide_curve = self.extra_widget.ui_gcurve_edit.text()
 
         return [seg, guide_curve, cvs]
+
+    def set_selection(self):
+        self.extra_widget.ui_gcurve_edit.setText(cmds.ls(selection=1)[0])
 
 
 class ChainEP(chain.Chain):
@@ -69,7 +74,7 @@ class ChainEP(chain.Chain):
             self.cvs.append(integer)
 
     @bone.update_base_name
-    def assign_secondary_naming(self):
+    def create_namespace(self):
         """
         Override: create segment based naming and guide curve name
         """

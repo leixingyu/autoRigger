@@ -10,7 +10,7 @@ months, maybe even years. who knows?
 - [x] directory organization
 - [x] variable naming change
 - [x] formatting (imports, line length, docstring etc)
-- [ ] data widget mapping
+- [x] data widget mapping
 - [ ] testing
 
 #### Future Status
