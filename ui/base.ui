@@ -80,6 +80,9 @@
          <family>Bahnschrift Light</family>
         </font>
        </property>
+       <property name="text">
+        <string>unknown</string>
+       </property>
       </widget>
      </item>
      <item row="2" column="0" colspan="2">

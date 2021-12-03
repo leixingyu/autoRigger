@@ -35,6 +35,9 @@
          <family>Bahnschrift Light</family>
         </font>
        </property>
+       <property name="value">
+        <number>5</number>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">
@@ -80,6 +83,9 @@
          <family>Bahnschrift Light</family>
         </font>
        </property>
+       <property name="value">
+        <number>10</number>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
@@ -92,7 +98,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="ui_set_btn">
        <property name="font">
         <font>
          <family>Bahnschrift Light</family>

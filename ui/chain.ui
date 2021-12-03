@@ -35,6 +35,9 @@
          <family>Bahnschrift Light</family>
         </font>
        </property>
+       <property name="value">
+        <number>5</number>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
@@ -64,6 +67,9 @@
         <font>
          <family>Bahnschrift</family>
         </font>
+       </property>
+       <property name="value">
+        <double>6.000000000000000</double>
        </property>
       </widget>
      </item>
