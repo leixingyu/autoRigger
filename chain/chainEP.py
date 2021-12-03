@@ -28,9 +28,9 @@ class ChainEPItem(base.BaseItem):
         _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
 
     def parse_extra(self):
-        seg = self.widget.ui_seg_sbox.value()
-        cvs = self.widget.ui_cvs_sbox.value()
-        guide_curve = self.widget.ui_gcurve_edit.text()
+        seg = self.extra_widget.ui_seg_sbox.value()
+        cvs = self.extra_widget.ui_cvs_sbox.value()
+        guide_curve = self.extra_widget.ui_gcurve_edit.text()
 
         return [seg, guide_curve, cvs]
 

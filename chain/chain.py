@@ -1,8 +1,38 @@
+import ast
+import os
+
 import maya.cmds as cmds
+from Qt import QtWidgets, QtGui, _loadUi
 
 from .. import util
 from ..base import base
+from ..constant import UI_DIR, Direction
 from ..utility.rigging import joint, transform
+
+
+class ChainItem(base.BaseItem):
+    def __init__(self, name='chain'):
+        super(ChainItem, self).__init__(name)
+        self.extra_ui = 'chain.ui'
+        self.init_extra()
+
+    def build_guide(self, *args, **kwargs):
+        pass
+
+    def init_extra(self):
+        """Override"""
+        self.extra_widget = QtWidgets.QWidget()
+        _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
+
+        for direction in Direction:
+            self.extra_widget.ui_dir_cbox.addItem(str(direction.value))
+
+    def parse_extra(self):
+        seg = self.extra_widget.ui_seg_sbox.value()
+        length = self.extra_widget.ui_len_sbox.value()
+        direction = ast.literal_eval(self.extra_widget.ui_dir_cbox.currentText())
+
+        return [seg, length, direction]
 
 
 class Chain(base.Base):
