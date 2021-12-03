@@ -1,13 +1,8 @@
-import ast
-import os
-
 import maya.cmds as cmds
-from Qt import QtWidgets, QtGui, _loadUi
 
 from . import chain, chainFK, chainIK
 from .. import util, shape
-from ..constant import UI_DIR, Direction
-from ..base import bone, base
+from ..base import bone
 from ..utility.datatype import vector
 from ..utility.rigging import joint, transform
 

@@ -3,9 +3,9 @@ import os
 import maya.cmds as cmds
 from Qt import QtWidgets, QtGui, _loadUi
 
-from ..constant import Side, UI_DIR
 from .. import util, shape
 from ..base import bone
+from ..constant import Side, UI_DIR
 from ..utility.rigging import transform
 
 

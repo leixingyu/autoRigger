@@ -1,6 +1,6 @@
+from ..base import base
 from ..chain import chainFK
 from ..constant import Side
-from ..base import base
 
 
 class FingerItem(base.BaseItem):

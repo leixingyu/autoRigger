@@ -1,5 +1,5 @@
-from ...chain import chainIK
 from ...base import base
+from ...chain import chainIK
 
 
 class SpineItem(base.BaseItem):

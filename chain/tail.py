@@ -1,5 +1,5 @@
-from ..chain import chainFKIK
 from ..base import base
+from ..chain import chainFKIK
 
 
 class TailItem(base.BaseItem):
