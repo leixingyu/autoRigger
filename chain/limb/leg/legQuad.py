@@ -2,18 +2,10 @@ import maya.cmds as cmds
 
 from .... import util, shape
 from ....base import bone
+from ....constant import ATTRS
 from ....utility.common import hierarchy
 from ....utility.datatype import vector
 from ....utility.rigging import joint, transform
-
-
-ATTRS = {
-    'flx': 'flex',
-    'swv': 'swivel',
-    'tap': 'tap',
-    'tip': 'tip',
-    'wr': 'wrist'
-}
 
 
 class LegQuad(bone.Bone):

@@ -6,13 +6,8 @@ from ..chain import tail
 from ..chain.limb.leg import legFront
 from ..chain.limb.leg import legBack
 from ..chain.spine import spineQuad
-from ..constant import Side
+from ..constant import Side, ATTRS
 from ..utility.common import hierarchy
-
-
-ATTRS = {
-    'sw': 'FK_IK'
-}
 
 
 class QuadrupedItem(base.BaseItem):

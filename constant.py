@@ -7,6 +7,21 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(PROJECT_ROOT, 'ui')
 ICON_DIR = os.path.join(UI_DIR, 'icon')
 
+# custom attribute short name long name mapping to be added on controllers
+ATTRS = {
+    # quad foot
+    'flx': 'flex',
+    'swv': 'swivel',
+    'tap': 'tap',
+    'tip': 'tip',
+    'wr': 'wrist',
+    # biped foot
+    'fr': 'foot_roll',
+    'fb': 'foot_bank',
+    # fk ik switch
+    'sw': 'FK_IK'
+}
+
 
 @unique
 class Side(Enum):

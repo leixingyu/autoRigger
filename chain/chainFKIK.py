@@ -3,13 +3,9 @@ import maya.cmds as cmds
 from . import chain, chainFK, chainIK
 from .. import util, shape
 from ..base import bone
+from ..constant import ATTRS
 from ..utility.datatype import vector
 from ..utility.rigging import joint, transform
-
-
-ATTRS = {
-    'sw': 'FK_IK'
-}
 
 
 class ChainFKIKItem(chain.ChainItem):

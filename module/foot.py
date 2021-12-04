@@ -2,15 +2,8 @@ import maya.cmds as cmds
 
 from .. import util, shape
 from ..base import bone, base
-from ..constant import Side
+from ..constant import Side, ATTRS
 from ..utility.common import hierarchy
-
-
-ATTRS = {
-    'fr': 'foot_roll',
-    'fb': 'foot_bank',
-    'sw': 'FK_IK'
-}
 
 
 cmds.sdk = cmds.setDrivenKeyframe
