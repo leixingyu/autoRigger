@@ -141,6 +141,26 @@ class Bone(object):
         self.ctrls = list()
         self.offsets = list()
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def side(self):
+        return self._side
+
+    @property
+    def type(self):
+        return self._rtype
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @property
+    def components(self):
+        return self._comps
+
     @update_base_name
     def create_namespace(self):
         """
