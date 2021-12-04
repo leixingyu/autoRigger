@@ -27,7 +27,7 @@ class ChainFKIK(chain.Chain):
     in which, the result joint chain is driven by both FK and IK chain
     """
 
-    def __init__(self, side, name, segment, length, direction, is_stretch=0):
+    def __init__(self, side, name, segment, length, direction, is_stretch=1):
         """
         Extend: create FK/IK and result three-chain system
         specify length and direction of the chain

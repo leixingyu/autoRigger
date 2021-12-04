@@ -19,7 +19,7 @@ class LimbFKIK(chainFKIK.ChainFKIK):
     Create a FK/IK control rig system for limb
     """
 
-    def __init__(self, side, name, length, ltype=None):
+    def __init__(self, side, name, length=5, ltype='arm'):
         """
         Extend: specify limb type and side determines direction
 
