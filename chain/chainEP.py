@@ -13,6 +13,7 @@ from ..utility.useful import algorithm
 
 class ChainEPItem(base.BaseItem):
     def __init__(self, name='chain-ep'):
+        """Override"""
         super(ChainEPItem, self).__init__(name)
         self.extra_ui = 'chainEP.ui'
         self.init_extra()
@@ -30,6 +31,7 @@ class ChainEPItem(base.BaseItem):
         self.extra_widget.ui_set_btn.clicked.connect(self.set_selection)
 
     def parse_extra(self):
+        """Override"""
         seg = self.extra_widget.ui_seg_sbox.value()
         cvs = self.extra_widget.ui_cvs_sbox.value()
         guide_curve = self.extra_widget.ui_gcurve_edit.text()
@@ -37,6 +39,7 @@ class ChainEPItem(base.BaseItem):
         return [seg, guide_curve, cvs]
 
     def set_selection(self):
+        """Override"""
         self.extra_widget.ui_gcurve_edit.setText(cmds.ls(selection=1)[0])
 
 

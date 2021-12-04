@@ -11,15 +11,18 @@ from ..utility.rigging import transform
 
 class BaseItem(bone.RigItem):
     def __init__(self, name='base'):
+        """Override"""
         super(BaseItem, self).__init__(name)
         self.base_ui = 'base.ui'
         self.init_base()
 
     def build_guide(self, side, base_name):
+        """Override"""
         self._obj = Base(side, base_name)
         self._obj.build_guide()
 
     def build_rig(self):
+        """Override"""
         self._obj.build_rig()
 
     def init_base(self):

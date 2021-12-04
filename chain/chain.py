@@ -12,12 +12,10 @@ from ..utility.rigging import joint, transform
 
 class ChainItem(base.BaseItem):
     def __init__(self, name='chain'):
+        """Override"""
         super(ChainItem, self).__init__(name)
         self.extra_ui = 'chain.ui'
         self.init_extra()
-
-    def build_guide(self, *args, **kwargs):
-        pass
 
     def init_extra(self):
         """Override"""
@@ -28,6 +26,7 @@ class ChainItem(base.BaseItem):
             self.extra_widget.ui_dir_cbox.addItem(str(direction.value))
 
     def parse_extra(self):
+        """Override"""
         seg = self.extra_widget.ui_seg_sbox.value()
         length = self.extra_widget.ui_len_sbox.value()
         direction = ast.literal_eval(self.extra_widget.ui_dir_cbox.currentText())

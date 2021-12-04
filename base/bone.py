@@ -36,6 +36,13 @@ class RigItem(QtWidgets.QListWidgetItem):
     """
 
     def __init__(self, name):
+        """
+        Initialize with setups to QListWidgetItem like names and icons, also
+        initializing base, extra widget object and ui files, also corresponding
+        rig component object to build
+
+        :param name: str. name for displaying and getting icon
+        """
         super(RigItem, self).__init__()
 
         self.icon = '{}.png'.format(name)
@@ -56,21 +63,41 @@ class RigItem(QtWidgets.QListWidgetItem):
         self._obj = None
 
     def init_base(self):
+        """
+        Initializing the base_widget attribute which is a QWidget object
+        for displaying shared property of the rig (e.g. name, side)
+        """
         pass
 
     def init_extra(self):
+        """
+        Initializing the extra_widget attribute which is a QWidget object
+        for displaying rig specific property (e.g. length, segment)
+        """
         pass
 
     def parse_extra(self):
+        """
+        Parse and return inputs in the base_widget as arguments
+        """
         pass
 
     def parse_base(self):
+        """
+        Parse and return inputs in the extra_widget as arguments
+        """
         pass
 
     def build_guide(self, *args, **kwargs):
+        """
+        Build the guide of the rig component
+        """
         pass
 
     def build_rig(self):
+        """
+        Build the controls and rigs of the rig component
+        """
         pass
 
 
