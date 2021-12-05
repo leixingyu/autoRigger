@@ -3,7 +3,8 @@
 ## Introduction
 
 AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well
-as pre-made template for biped, quadruped.
+as pre-made template for biped, quadruped rigging.
+<img align="right" src="https://i.imgur.com/9E5V0Rn.png" alt="autoRigger" height="180px"/>
 
 - [Quadruped Rigging Demo](https://youtu.be/GT15B_x8R9w)
 - [Biped Rigging Demo](https://vimeo.com/372001985)
@@ -31,6 +32,7 @@ individually and piece together to build the final rig; there are also
 pre-made template for standard characters like biped and quadruped.
 
 **Create Guide**
+<img align="right" src="https://i.imgur.com/Gi6GMUT.png" alt="interface" height="320px" style="margin: 40px 10px"/>
 
 - choose a rig object, and then enter specific properties on the right-side field, finally click guide.
 
@@ -43,14 +45,16 @@ target mesh.
 - when you are satisfied with the guide placement, click build. it will
 generate all the joints, controllers and constraints. 
 - The next step if for you to skin your character/creature using anything you
-prefer (note: autoRigger isn't a skinning tool)
+prefer 
+- note: autoRigger isn't a skinning tool
 
-![gugu](https://i.imgur.com/9E5V0Rn.png)
 
 ## Scripting API
 
-Every rig object and all of its components can be accessed through scripting 
-with ease. As each rig object is a class inheriting the abstract bone class.
+>Anything GUI can do, scripting can do better;
+
+the rig object and all of its components can be accessed through scripting 
+with ease, as each rig object is a class inheriting the abstract bone class.
 
 ### Example:
 To instantiate a rig object, build guide and rig
@@ -93,6 +97,9 @@ output: 1
 ```
 ```
 >>> test_chain.components
+
+# this is used mostly in template such as biped or quadruped
+# which will yield all rig sub-components
 output: []
 ```
 
@@ -104,15 +111,17 @@ jnts = test_chain.jnts
 root_jnt = jnts[0]
 top_jnt = jnts[-1]
 
-returns:
+"""
+subsequently:
 ['chain_l_rope0_jnt']
 ['chain_l_rope19_jnt']
+"""
 
 ctrls = test_chain.ctrls
 locators = test_chain.locs
 offset_group = test_chain.offsets
 
-# rig specific scene nodes
+# chain specific maya nodes
 test_chain.clusters
 test_chain.guide_curve
 test_chain.curve
@@ -182,7 +191,7 @@ test_chain.cvs
     </ul>
 </details>
 
-#### Future Status
+## Future Plans
 
 - [ ] implement facial rigging
 - [ ] bird template
