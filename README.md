@@ -1,20 +1,35 @@
-# AutoRigger 2.0 is here !!!
+<div align="center">
+<h1 align="center">AutoRigger 2.0</h1>
 
-## Introduction
+  <p align="center">
+    AutoRigger is an automated rig builder used in Maya. It currently supports procedural
+rigging based on modules as well as pre-made template for biped, quadruped and chain.
+    <br />
+    <a href="https://youtu.be/893BSzy3lCs">Chain Demo</a>
+    |
+    <a href="https://youtu.be/GT15B_x8R9w">Quadruped Demo</a>
+    |
+    <a href="https://youtu.be/tMrX3lT2Iy8">Biped Demo</a>
+  </p>
+</div>
 
-AutoRigger is a rig builder in Maya. It supports modular procedural rig building as well
-as pre-made template for biped, quadruped rigging.
-<img align="right" src="https://i.imgur.com/9E5V0Rn.png" alt="autoRigger" height="180px"/>
 
-- [Quadruped Rigging Demo](https://youtu.be/GT15B_x8R9w)
-- [Biped Rigging Demo](https://vimeo.com/372001985)
-- [Modular Rigging Demo](https://vimeo.com/367496504)
-- [Facial Rigging Demo](https://www.youtube.com/watch?v=Vnmq4ok0KUs)
+## About The Project
 
-## Installation
+<center>
+<img align="center" src="https://i.imgur.com/9E5V0Rn.png" alt="autoRigger" height="280px"/>
+</center>
+
+The AutoRigger tool started out as my practice for maya scripting back in late 2018. 
+But Little by little,
+I started to implement new rigging knowledge on to it. After years
+of expansion, it became my rigging tool kit which handles a lot of the automation
+in general rigging process.
+
+## Getting Started
 
 1. Unzip the **auto-rigger** package under
-`C:/Users/Username/Documents/maya/[current maya version]/scripts/`
+`%USERPROFILE%/Documents/maya/[current maya version]/scripts/`
 or a custom directory under `PYTHONPATH` env variable. 
 
 2. Rename the package to something like `autoRigger`
@@ -25,7 +40,7 @@ or a custom directory under `PYTHONPATH` env variable.
     autoRigger.show()
     ```
 
-## Basic Use
+## Usage
 
 The autoRigger is modular and very straight forward to use; Each item on the left is referred as a rig object, you create them in the scene
 individually and piece together to build the final rig; there are also
@@ -47,7 +62,6 @@ generate all the joints, controllers and constraints.
 - The next step if for you to skin your character/creature using anything you
 prefer 
 - note: autoRigger isn't a skinning tool
-
 
 ## Scripting API
 
@@ -128,18 +142,23 @@ test_chain.curve
 test_chain.cvs
 ```
 
-## Release Version
 
+## Roadmap
+
+- [ ] integrate facial rigging
+- [ ] bird template
+- [ ] vehicle template
+- [ ] refactor quadruped leg modules
+
+## Versions
 <details>
-  <summary>Update 2.0 (12/04/2021)</summary>
+  <summary>Update 2.0 (current)</summary>
     <ul>
       <li>rig object abstraction</li>
       <li>added chain modular rigging package</li>
       <li>added dynamic property widget</li>
     </ul>
 </details>
-
-## Past Updates
 
 <details>
   <summary>Update 1.2 (01/05/2021)</summary>
@@ -190,10 +209,3 @@ test_chain.cvs
       <li>included default skin binding</li>
     </ul>
 </details>
-
-## Future Plans
-
-- [ ] implement facial rigging
-- [ ] bird template
-- [ ] vehicle template
-- [ ] refactor quadruped leg modules
