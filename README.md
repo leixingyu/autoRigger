@@ -16,9 +16,9 @@ rigging based on modules as well as pre-made template for biped, quadruped and c
 
 ## About The Project
 
-<center>
-<img align="center" src="https://i.imgur.com/9E5V0Rn.png" alt="autoRigger" height="280px"/>
-</center>
+<div align="center">
+<img src="https://i.imgur.com/9E5V0Rn.png" alt="autoRigger" height="280px"/>
+</div>
 
 The AutoRigger tool started out as my practice for maya scripting back in late 2018. 
 But Little by little,
@@ -28,13 +28,20 @@ in general rigging process.
 
 ## Getting Started
 
+### Prerequisites
+
+- [enum34 package](https://pypi.org/project/enum34/) for Python 2.7
+
+  `pip install enum34`
+
+### Launch
 1. Unzip the **auto-rigger** package under
 `%USERPROFILE%/Documents/maya/[current maya version]/scripts/`
 or a custom directory under `PYTHONPATH` env variable. 
 
 2. Rename the package to something like `autoRigger`
 
-3. Launch through script editor:
+3. Run through script editor:
     ```python
     from autoRigger import autoRigger
     autoRigger.show()
@@ -46,9 +53,9 @@ The autoRigger is modular and very straight forward to use; Each item on the lef
 individually and piece together to build the final rig; there are also
 pre-made template for standard characters like biped and quadruped.
 
-**Create Guide**
-<img align="right" src="https://i.imgur.com/Gi6GMUT.png" alt="interface" height="320px" style="margin: 40px 10px"/>
+> note: autoRigger isn't a skinning tool
 
+**Create Guide**
 - choose a rig object, and then enter specific properties on the right-side field, finally click guide.
 
 - this creates a guided locators or the rough joint placement of the rig.
@@ -60,17 +67,16 @@ target mesh.
 - when you are satisfied with the guide placement, click build. it will
 generate all the joints, controllers and constraints. 
 - The next step if for you to skin your character/creature using anything you
-prefer 
-- note: autoRigger isn't a skinning tool
+prefer
 
-## Scripting API
+<img src="https://i.imgur.com/Gi6GMUT.png" alt="interface" height="320px" style="margin: 40px 10px"/>
 
->Anything GUI can do, scripting can do better;
+
+## Scripting Example
 
 the rig object and all of its components can be accessed through scripting 
 with ease, as each rig object is a class inheriting the abstract bone class.
 
-### Example:
 To instantiate a rig object, build guide and rig
 ```python
 from autoRigger.constant import Side
