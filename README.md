@@ -35,13 +35,11 @@ in general rigging process.
   `pip install enum34`
 
 ### Launch
-1. Unzip the **auto-rigger** package under
+1. Unzip the [autoRigger.zip package](https://github.com/leixingyu/autoRigger/releases/tag/v2.0.0) under
 `%USERPROFILE%/Documents/maya/[current maya version]/scripts/`
 or a custom directory under `PYTHONPATH` env variable. 
 
-2. Rename the package to something like `autoRigger`
-
-3. Run through script editor:
+2. Run through script editor:
     ```python
     from autoRigger import autoRigger
     autoRigger.show()
