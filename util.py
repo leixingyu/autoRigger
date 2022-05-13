@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-from utility.nurbs import util
+from .utility.nurbs import util
 
 
 G_LOC_GRP = '_Locators'

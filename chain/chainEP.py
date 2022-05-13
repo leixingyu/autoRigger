@@ -28,7 +28,8 @@ class ChainEPItem(base.BaseItem):
         self.extra_widget = QtWidgets.QWidget()
         _loadUi(os.path.join(UI_DIR, self.extra_ui), self.extra_widget)
 
-        self.extra_widget.ui_set_btn.clicked.connect(self.set_selection)
+        # PySide2 bug:https://stackoverflow.com/questions/68927598/
+        self.extra_widget.ui_set_btn.clicked.connect(lambda: self.set_selection())
 
     def parse_extra(self):
         """Override"""

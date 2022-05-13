@@ -1,1 +1,1 @@
-from utility import _vendor
+from .utility import _vendor
