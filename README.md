@@ -35,7 +35,7 @@ in general rigging process.
   `pip install enum34`
 
 ### Launch
-1. Unzip the [autoRigger.zip package](https://github.com/leixingyu/autoRigger/releases/tag/v2.0.0) under
+1. Unzip the [autoRigger.zip package](https://github.com/leixingyu/autoRigger/releases/tag/v2.0.1) under
 `%USERPROFILE%/Documents/maya/[current maya version]/scripts/`
 or a custom directory under `PYTHONPATH` env variable. 
 
